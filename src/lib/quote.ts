@@ -39,18 +39,18 @@ export function computeQuote(input: QuoteInput) {
     items.push({ key: "inspection", label: "유료 검수비 (¥1/개)", amountFen: RATES.inspectionFeeFenPerUnit * input.quantity });
   }
 
-  // 청구중량: 실중량 vs 부피중량(cm³/6000) 중 큰 값
-  const actualKg = input.weightGrams / 1000;
-  const volumetricKg = input.volumeCm3 / RATES.volumeDivisor;
-  const chargeableRaw = Math.max(actualKg, volumetricKg);
+  // 청구중량: 실중량 vs 부피중량(cm³/6000 kg = cm³/6 g) 중 큰 값 — 전부 정수(g) 연산
+  const volumetricGrams = Math.ceil(input.volumeCm3 / 6);
+  const chargeableGrams = Math.max(input.weightGrams, volumetricGrams);
 
   let intlFen: number;
   let chargeableWeightKg: number;
   if (input.shippingMethod === "SEA") {
-    chargeableWeightKg = Math.max(1, Math.ceil(chargeableRaw));      // kg 단위 올림, 최소 1kg
-    intlFen = RATES.sea.firstKgFen + (chargeableWeightKg - 1) * RATES.sea.additionalPerKgFen;
+    const kg = Math.max(1, Math.ceil(chargeableGrams / 1000));
+    chargeableWeightKg = kg;
+    intlFen = RATES.sea.firstKgFen + (kg - 1) * RATES.sea.additionalPerKgFen;
   } else {
-    const units100g = Math.max(1, Math.ceil((chargeableRaw * 1000) / 100)); // 100g 단위 올림
+    const units100g = Math.max(1, Math.ceil(chargeableGrams / 100));
     chargeableWeightKg = units100g / 10;
     intlFen = RATES.air.docFeeFen + units100g * RATES.air.per100gFen;
   }

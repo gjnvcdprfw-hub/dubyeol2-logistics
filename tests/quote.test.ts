@@ -38,6 +38,11 @@ describe("computeQuote — 00-customer-outcome QA 예시", () => {
     // 1250g → 13×100g 올림 → 3250 + 13×180 = 5590펀 (¥55.9)
     expect(q.items.find(i => i.key === "intlShipping")!.amountFen).toBe(5590);
   });
+  it("항공: 정확히 100g 배수 무게에서 과청구하지 않는다 (16100g → 161단위)", () => {
+    const q = computeQuote({ ...base, shippingMethod: "AIR", weightGrams: 16100, volumeCm3: 0 });
+    // 161단위 × 180 + 3250 = 32230펀
+    expect(q.items.find(i => i.key === "intlShipping")!.amountFen).toBe(32230);
+  });
   it("원화 환산은 환율×100 정수 연산으로 원 단위 반올림", () => {
     const q = computeQuote(base);
     // ¥2,330 = 233000펀 × 19000 / 100 / 100 = ₩442,700
