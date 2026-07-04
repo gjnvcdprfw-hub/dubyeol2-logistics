@@ -34,6 +34,14 @@ describe("createOrder", () => {
   });
 });
 
+describe("listOrdersBySeller — sellerId 가드", () => {
+  it("sellerId가 없으면 전체 반환 대신 오류를 던진다", async () => {
+    await createOrder(sellerA.id, { productUrl: "https://a.com", productName: "A상품", quantity: 1, serviceType: "PURCHASE", inspectionRequested: false });
+    await expect(listOrdersBySeller(undefined as unknown as string)).rejects.toThrow("로그인");
+    await expect(listOrdersBySeller("")).rejects.toThrow("로그인");
+  });
+});
+
 describe("listOrdersBySeller — 데이터 격리(절대 실패 금지)", () => {
   it("셀러 A는 자기 주문만 본다", async () => {
     await createOrder(sellerA.id, { productUrl: "https://a.com", productName: "A상품", quantity: 1, serviceType: "PURCHASE", inspectionRequested: false });

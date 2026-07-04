@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { getSession } from "@/lib/session";
 import { listOrdersBySeller } from "@/lib/orders";
 
@@ -6,7 +7,8 @@ const STATUS_LABEL: Record<string, string> = { REQUESTED: "접수됨" };
 
 export default async function OrdersPage() {
   const session = await getSession();
-  const orders = await listOrdersBySeller(session.userId!);
+  if (!session.userId) redirect("/auth/login");
+  const orders = await listOrdersBySeller(session.userId);
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">

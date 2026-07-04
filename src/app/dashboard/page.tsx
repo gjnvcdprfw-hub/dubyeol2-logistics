@@ -1,10 +1,12 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { getSession } from "@/lib/session";
 import { listOrdersBySeller } from "@/lib/orders";
 
 export default async function DashboardHome() {
   const session = await getSession();
-  const orders = await listOrdersBySeller(session.userId!);
+  if (!session.userId) redirect("/auth/login");
+  const orders = await listOrdersBySeller(session.userId);
   return (
     <div className="space-y-6">
       <h1 className="text-xl font-semibold text-heading">마이페이지</h1>
