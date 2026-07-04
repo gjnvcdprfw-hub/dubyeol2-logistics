@@ -27,13 +27,19 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
             ))}
           </div>
           <p className="text-sm text-body">외포장: {order.outerIssue ? <span className="text-danger">이상 있음{order.outerNote ? ` — ${order.outerNote}` : ""}</span> : "정상"}</p>
-          {order.inspectionRequested && order.inspCountActual !== null ? (
-            <div className="rounded-lg bg-success-tint p-4 text-sm space-y-1">
-              <p className="font-medium text-success">유료 검수 결과</p>
-              <p className="text-body">실입고 수량: {order.inspCountActual}/{order.quantity}</p>
-              <p className="text-body">외관: {order.inspAppearanceOk ? "정상" : "이상"} · 하자: {order.inspDefectCount ?? 0}건</p>
-              {order.inspNote && <p className="text-secondary">{order.inspNote}</p>}
-            </div>
+          {order.inspectionRequested ? (
+            order.inspCountActual !== null ? (
+              <div className="rounded-lg bg-success-tint p-4 text-sm space-y-1">
+                <p className="font-medium text-success">유료 검수 결과</p>
+                <p className="text-body">실입고 수량: {order.inspCountActual}/{order.quantity}</p>
+                <p className="text-body">외관: {order.inspAppearanceOk ? "정상" : "이상"} · 하자: {order.inspDefectCount ?? 0}건</p>
+                {order.inspNote && <p className="text-secondary">{order.inspNote}</p>}
+              </div>
+            ) : (
+              <div className="rounded-lg bg-surface-alt p-4 text-sm text-muted">
+                유료 검수 신청 건 — 검수 결과가 아직 기록되지 않았습니다. 기록되면 여기에 표시됩니다.
+              </div>
+            )
           ) : (
             <div className="rounded-lg bg-surface-alt p-4 text-sm text-muted">
               수량 미확인 — 유료 검수를 신청하지 않은 건입니다. 기본 제공은 입고 사진과 외포장 이상 안내입니다.
