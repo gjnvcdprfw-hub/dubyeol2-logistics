@@ -40,6 +40,13 @@ model Order {
   inspAppearanceOk    Boolean?
   inspDefectCount     Int?
   inspNote            String?
+  quoteUnitPriceFen     Int?      // 상품 단가 (펀=0.01¥). 배송대행 건은 0 허용
+  quoteCnShippingFen    Int?      // 중국 내 배송비 (펀)
+  quoteWeightGrams      Int?      // 실측 무게 (g)
+  quoteVolumeCm3        Int?      // 부피 (cm³) — CBM×1,000,000
+  quoteExchangeRateX100 Int?      // 적용 환율 ₩/¥ ×100 (예: 190.50 → 19050)
+  quoteShippingMethod   String?   // "SEA" | "AIR"
+  quotedAt              DateTime?
   photos              InboundPhoto[]
 }
 
