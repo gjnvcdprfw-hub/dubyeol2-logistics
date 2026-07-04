@@ -1,7 +1,11 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
+import { getSessionUser } from "@/lib/session";
 
 export default async function AdminInboundPage({ params }: { params: Promise<{ id: string }> }) {
+  const user = await getSessionUser();
+  if (!user || user.role !== "ADMIN") redirect("/dashboard");
+
   const { id } = await params;
   const order = await prisma.order.findUnique({ where: { id }, include: { seller: { select: { email: true } } } });
   if (!order || order.status !== "REQUESTED") notFound();

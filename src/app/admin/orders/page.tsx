@@ -1,9 +1,14 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
+import { getSessionUser } from "@/lib/session";
 
 const STATUS_LABEL: Record<string, string> = { REQUESTED: "접수됨", RECEIVED: "입고완료" };
 
 export default async function AdminOrdersPage() {
+  const user = await getSessionUser();
+  if (!user || user.role !== "ADMIN") redirect("/dashboard");
+
   const orders = await prisma.order.findMany({
     orderBy: { createdAt: "desc" },
     include: { seller: { select: { email: true } } },
