@@ -34,6 +34,24 @@ describe("createOrder", () => {
   });
 });
 
+describe("createOrder — 입력 화이트리스트", () => {
+  it("body로 status를 주입해도 무시되고 REQUESTED로 저장된다", async () => {
+    const o = await createOrder(sellerA.id, {
+      productUrl: "https://a.com", productName: "x", quantity: 1,
+      serviceType: "PURCHASE", inspectionRequested: false,
+      status: "DELIVERED", id: "hacked", createdAt: new Date(0),
+    } as never);
+    expect(o.status).toBe("REQUESTED");
+    expect(o.id).not.toBe("hacked");
+  });
+  it("serviceType이 PURCHASE/SHIPPING 외면 거부", async () => {
+    await expect(createOrder(sellerA.id, {
+      productUrl: "https://a.com", productName: "x", quantity: 1,
+      serviceType: "XYZ" as never, inspectionRequested: false,
+    })).rejects.toThrow("서비스 유형");
+  });
+});
+
 describe("listOrdersBySeller — sellerId 가드", () => {
   it("sellerId가 없으면 전체 반환 대신 오류를 던진다", async () => {
     await createOrder(sellerA.id, { productUrl: "https://a.com", productName: "A상품", quantity: 1, serviceType: "PURCHASE", inspectionRequested: false });
