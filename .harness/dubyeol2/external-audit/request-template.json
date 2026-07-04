@@ -1,0 +1,78 @@
+{
+  "schema": "dubyeol2.external_audit.request.v0",
+  "project": {
+    "name": "",
+    "root": "",
+    "dubyeol2_root": ".harness/dubyeol2"
+  },
+  "run": {
+    "id": "",
+    "phase_id": "",
+    "phase_index": null,
+    "phase_total": null
+  },
+  "phase_goal": {
+    "customer_goal": "",
+    "why_this_phase_matters": "",
+    "done_when_customer_can": ""
+  },
+  "feature_contract": {
+    "feature_md": ".harness/dubyeol2/feature.md",
+    "customer_promise": "",
+    "must_not_happen_when_paid": [],
+    "in_scope": [],
+    "out_of_scope": [],
+    "acceptance_example": {
+      "name": "",
+      "customer_input": "",
+      "customer_visible_result": "",
+      "pass_criteria": "",
+      "counterexample": ""
+    }
+  },
+  "phase_qa": {
+    "normal_flow": "",
+    "failure_flow": "",
+    "customer_harm_guardrail": "",
+    "next_phase_handoff_check": ""
+  },
+  "ui_qa": {
+    "has_ui": false,
+    "scenario_prepared": false,
+    "separate_live_ui_qa_required": false,
+    "summary": ""
+  },
+  "design_system": {
+    "design_system_md": ".harness/dubyeol2/design-system.md",
+    "relevant_rules": [],
+    "changed": false,
+    "change_summary": ""
+  },
+  "changes": {
+    "summary": "",
+    "files_changed": [],
+    "risk_notes": []
+  },
+  "machine_check": {
+    "status": "NOT_RUN",
+    "commands_or_checks": [],
+    "evidence_files": [],
+    "failures": []
+  },
+  "auditor_instruction": {
+    "auditor_engine": "codex",
+    "role": "external_auditor_only",
+    "do_not_modify_code": true,
+    "required_verdicts": [
+      "PASS",
+      "FAIL",
+      "BLOCKED"
+    ],
+    "judge_only": [
+      "whether_customer_promise_is_kept",
+      "whether_customer_harm_guardrails_are_preserved",
+      "whether_machine_check_evidence_supports_the_claim",
+      "whether_design_system_or_screen_flow_is_broken"
+    ]
+  }
+}

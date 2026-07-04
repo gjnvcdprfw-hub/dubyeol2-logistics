@@ -1,0 +1,44 @@
+{
+  "schema": "dubyeol2.external_audit.result.v0",
+  "project_name": "",
+  "run_id": "",
+  "phase_id": "",
+  "verdict": "BLOCKED",
+  "summary_for_owner": "",
+  "customer_promise_check": {
+    "status": "UNKNOWN",
+    "notes": ""
+  },
+  "customer_harm_guardrail_check": {
+    "status": "UNKNOWN",
+    "notes": ""
+  },
+  "machine_check_evidence_check": {
+    "status": "UNKNOWN",
+    "notes": ""
+  },
+  "design_system_check": {
+    "status": "NOT_APPLICABLE",
+    "notes": ""
+  },
+  "ui_flow_check": {
+    "status": "NOT_APPLICABLE",
+    "notes": ""
+  },
+  "findings": [
+    {
+      "severity": "BLOCKER",
+      "type": "customer_promise_gap",
+      "description": "",
+      "evidence": "",
+      "customer_harm": "",
+      "recheck_criteria": ""
+    }
+  ],
+  "question_for_pm_to_ask_owner": "",
+  "next_action_hint": {
+    "if_fail": "Claude Code Team Leader classifies with superpowers:receiving-code-review or superpowers:systematic-debugging, then assigns fix implementation to Builder subagents.",
+    "if_blocked": "Send one customer-language question to PM. PM asks Owner.",
+    "if_pass": "Send full phase completion report to PM before any merge approval request. PM asks Owner after the completion report."
+  }
+}

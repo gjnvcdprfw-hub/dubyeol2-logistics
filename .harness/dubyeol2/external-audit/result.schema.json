@@ -1,0 +1,34 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "dubyeol2.external_audit.result.v0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "verdict",
+    "summary_for_owner",
+    "findings",
+    "question_for_pm_to_ask_owner"
+  ],
+  "properties": {
+    "schema": { "type": "string" },
+    "verdict": { "type": "string", "enum": ["PASS", "FAIL", "BLOCKED"] },
+    "summary_for_owner": { "type": "string" },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["severity", "description", "evidence", "customer_harm", "recheck_criteria"],
+        "properties": {
+          "severity": { "type": "string", "enum": ["BLOCKER", "MAJOR", "MINOR"] },
+          "description": { "type": "string" },
+          "evidence": { "type": "string" },
+          "customer_harm": { "type": "string" },
+          "recheck_criteria": { "type": "string" }
+        }
+      }
+    },
+    "question_for_pm_to_ask_owner": { "type": "string" }
+  }
+}
