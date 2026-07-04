@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getSessionUser } from "@/lib/session";
+import { prisma } from "@/lib/db";
 import { ValidationError } from "@/lib/auth";
 import { saveInboundPhoto } from "@/lib/uploads";
 import { recordInbound } from "@/lib/inbound";
@@ -15,7 +16,9 @@ export async function POST(req: Request) {
     if (files.length < 1 || files.length > 2) throw new ValidationError("입고 사진은 1~2장이어야 합니다");
     const photoPaths: string[] = [];
     for (const f of files) photoPaths.push(await saveInboundPhoto(f));
-    const hasInsp = form.get("hasInspection") === "on";
+    const order = await prisma.order.findUnique({ where: { id: orderId }, select: { inspectionRequested: true } });
+    if (!order) throw new ValidationError("주문을 찾을 수 없습니다");
+    const hasInsp = order.inspectionRequested;
     const countActual = Number(form.get("countActual"));
     const defectCount = Number(form.get("defectCount") ?? 0);
     if (hasInsp) {

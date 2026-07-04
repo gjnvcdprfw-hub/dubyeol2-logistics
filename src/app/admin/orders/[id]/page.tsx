@@ -27,7 +27,7 @@ export default async function AdminInboundPage({ params }: { params: Promise<{ i
         </label>
         {order.inspectionRequested && (
           <fieldset className="rounded-lg bg-surface-alt p-4 space-y-3 text-sm">
-            <label className="block font-medium text-body"><input type="checkbox" name="hasInspection" defaultChecked /> 검수 결과 기록</label>
+            <p className="font-medium text-body">검수 결과 기록 (유료 검수 신청 건 — 필수)</p>
             <label className="block text-secondary">실입고 수량
               <input type="number" name="countActual" min={0} required className="mt-1 w-full border border-black/10 rounded-lg px-3 py-2" />
             </label>

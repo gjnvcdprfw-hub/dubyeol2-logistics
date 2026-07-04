@@ -33,6 +33,11 @@ describe("recordInbound", () => {
     });
     expect(o.inspCountActual).toBe(97);
   });
+  it("검수 신청 건에 검수 결과 없이 입고 기록하면 거부한다", async () => {
+    await expect(recordInbound(orderInsp.id, {
+      photoPaths: ["/uploads/a.jpg"], outerIssue: false,
+    })).rejects.toThrow("검수 결과를 함께 기록");
+  });
   it("검수 미신청 건에 검수 결과를 넣으면 거부한다", async () => {
     await expect(recordInbound(orderPlain.id, {
       photoPaths: ["/uploads/a.jpg"], outerIssue: false,
