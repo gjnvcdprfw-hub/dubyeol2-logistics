@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { registerSeller } from "@/lib/auth";
+import { registerSeller, ValidationError } from "@/lib/auth";
 import { getSession } from "@/lib/session";
 
 export async function POST(req: Request) {
@@ -11,6 +11,10 @@ export async function POST(req: Request) {
     await session.save();
     return NextResponse.json({ ok: true });
   } catch (e) {
-    return NextResponse.json({ ok: false, error: (e as Error).message }, { status: 400 });
+    if (e instanceof ValidationError) {
+      return NextResponse.json({ ok: false, error: e.message }, { status: 400 });
+    }
+    console.error("register error:", e);
+    return NextResponse.json({ ok: false, error: "가입 처리 중 오류가 발생했습니다" }, { status: 500 });
   }
 }

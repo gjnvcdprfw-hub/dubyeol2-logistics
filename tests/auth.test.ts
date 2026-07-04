@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { prisma } from "../src/lib/db";
-import { registerSeller, verifyLogin } from "../src/lib/auth";
+import { registerSeller, verifyLogin, ValidationError } from "../src/lib/auth";
 
 beforeEach(async () => {
   await prisma.order.deleteMany();
@@ -22,6 +22,14 @@ describe("registerSeller", () => {
   it("8자 미만 비밀번호는 거부한다", async () => {
     await expect(registerSeller({ email: "c@d.com", password: "short", contactName: "C" }))
       .rejects.toThrow("비밀번호는 8자 이상");
+  });
+  it("password가 없으면 한국어 검증 오류를 던진다", async () => {
+    await expect(registerSeller({ email: "e@e.com", contactName: "E" } as never))
+      .rejects.toThrow("입력값이 올바르지 않습니다");
+  });
+  it("검증 오류는 ValidationError 타입이다", async () => {
+    await expect(registerSeller({ email: "f@f.com", password: "short", contactName: "F" }))
+      .rejects.toBeInstanceOf(ValidationError);
   });
 });
 

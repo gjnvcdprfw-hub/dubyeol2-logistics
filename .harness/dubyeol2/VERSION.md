@@ -1,7 +1,8 @@
 # 두별2 Harness Version
 
-- 현재 버전: v2.21
+- 현재 버전: v2.22
 - 승격일: 2026-07-04
+- v2.22 적용 범위: 서브에이전트 동시 운영 상한 폐지 — "최대 3개"(2026-06-25, 빌더=Codex 시절 고정)를 삭제하고 동시 수는 Team Leader가 태스크 의존성·충돌 위험 보고 판단. 완료 즉시 닫기·시작 전 정리 확인은 유지(상한과 무관한 위생). 4곳(CLAUDE 9단계·AGENTS 팀리더 체크리스트)+white7 상태판 사본 1줄 정합. 원장·과거 산출물 불변. 관찰 조건: 과다 동시 실행 충돌 실측 시 재검토. 승인: 대표님 "동시운영에대한수 제한은 없애자, 그건 코덱스일때 필요했던거야".
 - v2.21 적용 범위: 외부감리 신뢰성 — ①감리 호출 명령에 격리 플래그(`--ephemeral --ignore-user-config -c approval_policy="never" -c model_reasoning_effort="high"`) 추가: 사람용 Codex 앱 설정(훅·플러그인·스킬·MCP)이 무인 감리에 끼어드는 것 차단(구독 인증·프로젝트 AGENTS.md 유지), ②감리 직전 프리플라이트 헬스체크(`"reply OK"` 60초 내, 실측 4초) 필수 — 실패는 FAIL 아님, "감리 불가/재시도", ③hang vs 느림 판별 세칙(result.json mtime 미변+0% CPU 10분+`SessionStart Failed` 3종 동시 = hang → 죽이고 재시도, "세션 로그 없음"만으로 판단 금지), ④훅 위생·app-server 클린, ⑤"approval never가 기본" 오류 문구 정정(실측 on-request). 계기: 대표님 실측 리포트(감리 hang, 근본 원인 session_start 훅 실패) + PM 통제 재현(구 명령 성공 2m43s / 격리 프리플라이트 4초·22k토큰 실측). v2.10 "오래 걸려도 죽이지 마라"는 유지, 정밀화만.
 - v2.20 적용 범위: design-system.md를 Google DESIGN.md 규격으로 전면 전환(4곳) — 위 YAML 토큰(기계가 읽는 정확한 값)+아래 산문(이유). 라이브 문서(twostarhub·white7)는 본문 무손실로 토큰층만 추가(확정값만, 범위·미확정은 산문 유지), 중앙 템플릿·물류는 골격 신설. UI phase Machine Check에 `npx @google/design.md lint` 검증(errors 0) 편입. 계기: AI slop 방지 + 디자인 항목의 기계 검증 수단 부재(Phase 35 디자인 FAIL은 사람 눈으로만 잡았음).
 - v2.19 적용 범위: Machine Check 확장 — ①보안 검토: 인증·결제·개인정보·권한·외부 연동·secret 터치 phase는 내장 `/security-review` 필수(심각 발견=Machine Check FAIL), ②실화면 QA: UI phase는 Playwright MCP(공식, user scope 등록·크로미움 실측 완료)로 로컬 앱 실구동 확인. 03-verification 템플릿에 3.1·3.2 칸 신설(비면 03 미완 → 기존 게이트 편승), Codex 감리 확인 목록에 2줄 추가. 계기: wshobson/agents가 드러낸 보안 게이트 공백 + Phase 46 "DOM 몰라 FAIL"(대표님이 실화면 확인 대행하던 실측). 담장: 브라우저는 로컬·개발 환경 한정, 외부 실서비스 조작 금지.
@@ -78,15 +79,17 @@
 | DESIGN.md 규격 v2.20 드라이런 (lint 실측 4파일) | PASS | `dry-runs/designmd-format-v2.20-dry-run-20260704.md` |
 | 외부감리 신뢰성 v2.21 (격리 호출·프리플라이트·hang 판별) | 정본 (중앙+twostarhub+white7+물류) | `revisions/audit-reliability-v2.21-20260704.md` |
 | 외부감리 신뢰성 v2.21 드라이런 (신 명령 실감리·병렬 실측) | PASS | `dry-runs/audit-reliability-v2.21-dry-run-20260704.md` |
+| 서브에이전트 상한 폐지 v2.22 | 정본 (중앙+twostarhub+white7+물류) | `revisions/subagent-cap-removal-v2.22-20260704.md` |
+| 서브에이전트 상한 폐지 v2.22 드라이런 (잔존 0건·시나리오) | PASS | `dry-runs/subagent-cap-removal-v2.22-dry-run-20260704.md` |
 
 ## 동기화 대상
 
 | 프로젝트 | 적용 버전 | 상태 | 검증 |
 |---|---|---|---|
-| 중앙 하네스 | v2.21 | 적용 | `AGENTS.md`, `CLAUDE.md`, `VERSION.md` 확인 |
-| twostarhub | v2.21 | 동기화 완료 (2026-07-04) | 감리 명령 블록·approval 문구·hang 세칙 동기화, 라이브 파일 보존 |
-| white7 | v2.21 | 동기화 완료 (2026-07-04) | 감리 명령 블록·approval 문구·hang 세칙 동기화, 라이브 파일 보존 |
-| 물류 | v2.21 | 동기화 완료 (2026-07-04) | 감리 명령 블록·approval 문구·hang 세칙 동기화. PM 정렬 대기, git 미초기화 |
+| 중앙 하네스 | v2.22 | 적용 | `AGENTS.md`, `CLAUDE.md`, `VERSION.md` 확인 |
+| twostarhub | v2.22 | 동기화 완료 (2026-07-04) | v2.21 감리 신뢰성 + v2.22 상한 폐지 동기화, 라이브 파일 보존 |
+| white7 | v2.22 | 동기화 완료 (2026-07-04) | v2.21+v2.22 동기화, 상태판 규칙 사본 1줄 정합 |
+| 물류 | v2.22 | 동기화 완료 (2026-07-04) | v2.21+v2.22 동기화. 디자인 정본 alpha(두리무역 실측), git 미초기화 |
 | 자비스 | — | **프로젝트 폐기 (2026-07-04, 대표님 지시)** | 동기화 대상 제외. 폴더는 보존(파일 삭제 금지선) |
 
 > v2.7~v2.10은 역할 스왑(PM·팀리더·빌더=Claude, 외부감리=Codex)과 그 교차 엔진 호출 배선·운영 규칙이라 설치 프로젝트 전파 시 각 프로젝트의 두 엔진 동작이 동시에 바뀐다. 또한 v2.9~v2.10의 `codex exec` 호출은 각 설치 환경에 codex(gpt-5.5) 설치·인증이 전제다. v2.11은 report-format.md line 34 한 줄 정정(중앙+twostarhub 적용, white7 이미 보유). 자비스는 2026-07-04 프로젝트 폐기로 동기화 대상에서 제외됐다(폴더는 보존).

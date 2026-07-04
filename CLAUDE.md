@@ -1,6 +1,6 @@
 # 두별2 Claude Code 포인터
 
-이 프로젝트는 두별2 v2.21 하네스를 따른다.
+이 프로젝트는 두별2 v2.22 하네스를 따른다.
 
 이 파일은 Claude Code가 두별2 프로젝트에서 먼저 읽는 실행 지침 정본이다. 새 프로젝트에 두별2를 적용할 때는 이 내용을 프로젝트 루트 `CLAUDE.md`에 최대한 보존하고, 프로젝트별 경로와 제품 맥락만 바꾼다.
 
@@ -183,8 +183,8 @@ Claude Code가 PM 역할로 정렬, 열린 질문, 기획, 구조 설계, 개선
 6. 범위 재조정: 너무 크면 PM에게 Phase 분리를 요청하고, 너무 작으면 같은 고객 약속 안에서 함께 묶을 인접 고객 결과를 PM에게 요청한다. 아무 일이나 추가하지 않는다.
 7. Phase 확정: PM은 고객 약속, 제외 범위, 업무 범위, 만족 기준이 바뀌지 않는 선에서 Phase 경계를 재조정한다. 그 기준이 바뀌면 대표님과 다시 정렬한다.
 8. Team Leader `superpowers:writing-plans`: Phase 경계가 적정하다고 확인된 뒤, Team Leader가 `superpowers:writing-plans`를 사용해 구현 계획을 별도로 남기고 `02-plan.md`에 연결한다.
-9. 서브에이전트 배정: Team Leader는 직접 Builder가 되지 않고 `superpowers:subagent-driven-development`로 Builder 서브에이전트에게 구현을 맡긴다. 동시 운영 서브에이전트 수는 최대 3개다. 완료된 서브에이전트도 열린 채로 있으면 슬롯을 계속 차지하므로, 결과 수집 즉시 닫아 슬롯을 회수한다.
-10. 슬롯 확인: 새 태스크나 다음 phase를 시작하기 전, 끝난 서브에이전트가 열려 있지 않은지 확인한다.
+9. 서브에이전트 배정: Team Leader는 직접 Builder가 되지 않고 `superpowers:subagent-driven-development`로 Builder 서브에이전트에게 구현을 맡긴다. 동시 운영 서브에이전트 수 상한은 두지 않는다 — 동시 수는 태스크 의존성과 충돌 위험을 보고 Team Leader가 판단한다(구 최대 3개 상한은 Codex 빌더 시절 규칙, v2.22 폐지). 완료된 서브에이전트는 열어두지 않고 결과 수집 즉시 닫는다.
+10. 정리 확인: 새 태스크나 다음 phase를 시작하기 전, 끝난 서브에이전트가 열려 있지 않은지 확인한다.
 11. Builder 구현: Builder 서브에이전트가 맡은 태스크 안에서 TDD를 사용해 고객 결과까지 완성하고 검증한다. TDD는 실행 방식이 아니라 태스크 내부 개발 방법이다. PM과 Team Leader는 구현하지 않는다.
 12. Machine Check 게이트: 별도 역할이 아니라 Team Leader가 Phase 종료 전 빌드, 테스트, 고객 예시, UI 깨짐, 콘솔 오류, 디자인 시스템 중 기계가 볼 수 있는 것을 먼저 확인하는 자동 검증 묶음이다. 결과는 `03-verification.md`에 남긴다. 인증·결제·개인정보·권한·외부 연동·secret을 건드린 phase는 `/security-review`를 함께 실행하고(심각 발견은 Machine Check FAIL), UI가 있는 phase는 Playwright MCP로 로컬 앱을 실제로 열어 QA 시나리오를 확인한다(로컬·개발 환경 한정, 외부 실서비스 조작 금지). 두 결과는 `03-verification.md`의 해당 칸에 남기고, 칸이 비면 03은 미완이다. `design-system.md`는 DESIGN.md 규격(위 YAML 토큰=정확한 값, 아래 산문=이유)으로 유지하며, UI phase의 Machine Check에서 `npx -y @google/design.md lint`로 검증한다(errors 0).
 13. Codex 외부감리: Machine Check 게이트가 통과한 뒤에만 외부감리를 한다. 호출 주체는 빌드 측(Team Leader, Claude Code)이다. 빌드 측이 `.harness/dubyeol2/external-audit/request.json`을 작성한 뒤, 먼저 프리플라이트 헬스체크(`codex exec --sandbox read-only --skip-git-repo-check --model gpt-5.5 --ephemeral --ignore-user-config "reply OK"`)가 60초 내 "OK"를 돌려주는지 확인한다. 실패하면 감리를 시작하지 않고 "감리 불가/재시도"로 표면화한다(FAIL/BLOCKED 아님. 조치: Codex 데스크톱 앱 완전 종료 후 재시도). 통과하면 아래 명령으로 Codex 외부감리를 무인 호출한다. 코드 수정 금지, 판정만.
