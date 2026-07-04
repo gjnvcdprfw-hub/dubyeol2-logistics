@@ -1,0 +1,126 @@
+{
+  "schema": "dubyeol2.external_audit.request.v0",
+  "project": {
+    "name": "물류 — 중국→한국 사업자 셀러 통합 물류 플랫폼 (벤치마크: 두리무역)",
+    "root": "/Users/twostars/Documents/물류",
+    "dubyeol2_root": ".harness/dubyeol2"
+  },
+  "run": {
+    "id": "phase-001-order-intake-20260704",
+    "phase_id": "phase-001",
+    "phase_index": 1,
+    "phase_total": 3
+  },
+  "phase_goal": {
+    "customer_goal": "셀러가 가입·로그인하고 주문(유료 검수 선택 포함)을 접수하고 내 주문 목록·상태를 본다",
+    "why_this_phase_matters": "'주문을 맡길 수 있다'가 모든 고객 약속의 입구. Feature 1(주문 접수→입고 증거→투명 견적)의 1/3 단계",
+    "done_when_customer_can": "가입→주문 접수(검수 선택)→내 주문 목록 확인을 화면에서 스스로 완결하고, 다른 셀러의 주문은 절대 보지 않는다"
+  },
+  "feature_contract": {
+    "feature_md": ".harness/dubyeol2/feature.md",
+    "customer_promise": "셀러가 주문을 맡기면 안전 입고 + 입고 증거(사진 1~2장·외포장 안내, 유료 신청 시 수량·외관·하자 검수) + 항목별 투명 견적 확인 (이번 Phase는 그중 '주문 접수' 구간)",
+    "must_not_happen_when_paid": [
+      "입고 확인·검수 결과가 실제와 다르게 표시",
+      "견적에 없던 비용의 사후 청구",
+      "셀러 사업자 정보·주문 데이터 노출, 타 셀러 주문 혼입",
+      "기본에 포함 안 되는 검수(수량·외관·하자)를 무료인 것처럼 오인시키는 표시"
+    ],
+    "in_scope": [
+      "셀러 가입·로그인·로그아웃 (이메일+비밀번호, bcrypt, iron-session 쿠키)",
+      "주문 접수: 상품 링크·상품명·옵션·수량·구분(구매/배송대행)·유료 검수 신청 체크·메모",
+      "내 주문 목록: 상태 칩(접수됨), 유료 검수 신청됨/수량 미확인(검수 미신청) 배지, 빈 상태",
+      "대시보드 셸(사이드바 221px, 준비 중 메뉴 비활성), 마이페이지 현황 카드",
+      "랜딩 페이지 (두리무역 외관 벤치마킹, design-system.md 토큰)",
+      "셀러 간 데이터 격리 (이중 방어: lib sellerId 가드 + 페이지 자체 인증 체크)"
+    ],
+    "out_of_scope": [
+      "입고·검수 기록 (Phase 2)",
+      "견적 (Phase 3)",
+      "소셜 로그인, 1688 연동, 예치금, 실결제, LCL·통관·추적"
+    ],
+    "acceptance_example": {
+      "name": "미니가전 셀러 A의 100개 소싱 건 — 주문 접수 구간",
+      "customer_input": "가입(이메일·비밀번호·담당자명) → 1688 상품 링크 + 수량 100 + 옵션 화이트 + 구매대행 + 유료 검수 신청 체크",
+      "customer_visible_result": "내 주문 목록에 '미니가전 보온병 × 100 · 구매대행 · 유료 검수 신청됨 · 접수됨' 표시. 접수 폼에 '기본 제공(무료): 입고 사진 1~2장 + 외포장 이상 안내. 수량·외관·하자 확인은 유료 검수를 신청한 건에만 제공됩니다' 문구",
+      "pass_criteria": "접수부터 목록 확인까지 화면에서 완결, 타 셀러에게 안 보임, 검수 미신청 건은 '수량 미확인 (검수 미신청)' 배지",
+      "counterexample": "화면 흐름은 되는데 검수 미신청 셀러가 수량 확인된 것으로 오인하는 표시가 있으면 통과해도 실패"
+    }
+  },
+  "phase_qa": {
+    "normal_flow": "가입 → 주문 접수(검수 선택) → 내 주문 목록 확인 (Playwright 실측 PASS, 03-verification §3.2)",
+    "failure_flow": "잘못된 링크·수량 0·미로그인 401·검증 오류 한국어 응답 (vitest 14케이스)",
+    "customer_harm_guardrail": "격리 이중 방어 + Playwright로 셀러 B에게 A 주문 안 보임 실측 + 검수 경계 문구·배지 실측",
+    "next_phase_handoff_check": "사이드바에 '입고 관리 (준비 중)'·'견적 (준비 중)' 자리만 표시 — 기능 없음"
+  },
+  "ui_qa": {
+    "has_ui": true,
+    "scenario_prepared": true,
+    "separate_live_ui_qa_required": false,
+    "summary": "Playwright MCP로 로컬 dev 실측 6개 시나리오 전부 PASS (가입 2회·접수 2건·격리·배지·콘솔 오류 0) — 03-verification.md §3.2"
+  },
+  "design_system": {
+    "design_system_md": ".harness/dubyeol2/design-system.md",
+    "relevant_rules": [
+      "색: bg #fafbfb, accent #f54a00(공개 CTA), brand #cc0000(대시보드), heading #101828",
+      "반경: 대시보드 카드 27px, CTA 12px, 필 18px",
+      "그림자: rgba(90,114,123,0.11) 0 7px 30px",
+      "사이드바 221px, DM Sans",
+      "금지 UI: 무료/유료 검수 경계 흐리기, 견적 합산만 표시, 타 셀러 혼입 리스트"
+    ],
+    "changed": false,
+    "change_summary": "design-system.md 자체는 이 Phase에서 변경 없음 (lint errors 0 재확인)"
+  },
+  "changes": {
+    "summary": "신규 프로젝트 첫 구현. Next.js 16(App Router·TS·Tailwind v4)+Prisma/SQLite(로컬)+iron-session. 커밋 main..phase-001 11개 (초기 커밋 25d21b1 → 최종 39feabe)",
+    "files_changed": [
+      "src/lib/{db,auth,session,orders}.ts",
+      "src/app/api/auth/{register,login,logout}/route.ts",
+      "src/app/api/orders/route.ts",
+      "src/app/auth/{login,register}/page.tsx",
+      "src/app/dashboard/{layout,page}.tsx",
+      "src/app/dashboard/orders/{page,new/page}.tsx",
+      "src/app/{layout,page,globals.css}",
+      "prisma/schema.prisma + migrations",
+      "tests/{auth,orders}.test.ts",
+      "vitest.config.mts"
+    ],
+    "risk_notes": [
+      "플랜 이탈 7건 전부 02-plan.md §2.1에 사유·승인 기록 (vitest ESM, alias, 인증 오류 처리 강화, 격리 이중 방어, 화이트리스트 등)",
+      "커밋 8d217a3에 별도 세션의 하네스 v2.22 승격 문서가 섞임 (정식 산출물, 코드 무관)",
+      "남은 위험: 로그아웃 JSON 착지(UX minor), 이메일 미정규화·열거(Low), 배포 전 체크리스트 6항목 (03-verification §5)"
+    ]
+  },
+  "machine_check": {
+    "status": "PASS",
+    "commands_or_checks": [
+      "npx vitest run → 14/14 PASS (auth 7 + orders 7, TDD RED→GREEN 로그 확보)",
+      "npm run build → 성공, 오류 0 (13페이지, 대시보드 동적 렌더)",
+      "npx -y @google/design.md lint .harness/dubyeol2/design-system.md → errors 0",
+      "Playwright 실화면 QA 6개 시나리오 PASS (격리·검수 경계 배지 실측)",
+      "보안 검토(전담 에이전트, /security-review 대체 — origin 부재로 내장 스킬 실행 불가): PASS, Critical·High 0, Medium 1건 즉시 수정(39feabe), npm audit high/critical 0"
+    ],
+    "evidence_files": [
+      ".harness/dubyeol2/phase-packets/phase-001/03-verification.md",
+      ".playwright-mcp/page-2026-07-04T11-30-23-210Z.yml",
+      ".playwright-mcp/page-2026-07-04T11-31-15-107Z.yml",
+      ".playwright-mcp/page-2026-07-04T11-31-48-357Z.yml"
+    ],
+    "failures": []
+  },
+  "auditor_instruction": {
+    "auditor_engine": "codex",
+    "role": "external_auditor_only",
+    "do_not_modify_code": true,
+    "required_verdicts": [
+      "PASS",
+      "FAIL",
+      "BLOCKED"
+    ],
+    "judge_only": [
+      "whether_customer_promise_is_kept",
+      "whether_customer_harm_guardrails_are_preserved",
+      "whether_machine_check_evidence_supports_the_claim",
+      "whether_design_system_or_screen_flow_is_broken"
+    ]
+  }
+}
