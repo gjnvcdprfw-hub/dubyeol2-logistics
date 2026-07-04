@@ -1,0 +1,18 @@
+import { prisma } from "./db";
+import { ValidationError } from "./auth";
+
+export type NewOrder = {
+  productUrl: string; productName: string; optionText?: string;
+  quantity: number; serviceType: "PURCHASE" | "SHIPPING";
+  inspectionRequested: boolean; memo?: string;
+};
+
+export async function createOrder(sellerId: string, input: NewOrder) {
+  if (!/^https?:\/\/.+/.test(input.productUrl)) throw new ValidationError("상품 링크 형식이 올바르지 않습니다");
+  if (!Number.isInteger(input.quantity) || input.quantity < 1) throw new ValidationError("수량은 1 이상이어야 합니다");
+  return prisma.order.create({ data: { ...input, sellerId } });
+}
+
+export async function listOrdersBySeller(sellerId: string) {
+  return prisma.order.findMany({ where: { sellerId }, orderBy: { createdAt: "desc" } });
+}
