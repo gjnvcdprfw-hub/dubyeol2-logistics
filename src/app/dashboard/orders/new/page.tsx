@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { RATES } from "@/lib/rates";
 
 export default function NewOrderPage() {
   const [form, setForm] = useState({ productUrl: "", productName: "", optionText: "", quantity: 1, serviceType: "PURCHASE", inspectionRequested: false, memo: "" });
@@ -35,7 +36,7 @@ export default function NewOrderPage() {
           </label>
         </div>
         <fieldset className="text-sm text-secondary space-x-4">
-          <label><input type="radio" checked={form.serviceType === "PURCHASE"} onChange={() => setForm({ ...form, serviceType: "PURCHASE" })} /> 구매대행 (수수료 5% + VAT)</label>
+          <label><input type="radio" checked={form.serviceType === "PURCHASE"} onChange={() => setForm({ ...form, serviceType: "PURCHASE" })} /> 구매대행 (수수료 {RATES.commissionRate * 100}% + VAT)</label>
           <label><input type="radio" checked={form.serviceType === "SHIPPING"} onChange={() => setForm({ ...form, serviceType: "SHIPPING" })} /> 배송대행 (수수료 0%)</label>
         </fieldset>
         <div className="rounded-lg bg-surface-alt p-4 text-sm">

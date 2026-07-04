@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { computeQuote } from "../src/lib/quote";
+import { RATES } from "../src/lib/rates";
 
 const base = {
   quantity: 100, serviceType: "PURCHASE" as const, inspectionRequested: true,
@@ -47,6 +48,12 @@ describe("computeQuote — 00-customer-outcome QA 예시", () => {
     const q = computeQuote(base);
     // ¥2,330 = 233000펀 × 19000 / 100 / 100 = ₩442,700
     expect(q.totalKrw).toBe(442700);
+  });
+  it("항목 라벨의 요율 숫자는 RATES에서 파생된다", () => {
+    const q = computeQuote(base);
+    expect(q.items.find(i => i.key === "commission")!.label).toBe(`구매대행 수수료 (${RATES.commissionRate * 100}%)`);
+    expect(q.items.find(i => i.key === "commissionVat")!.label).toBe(`수수료 부가세 (${RATES.commissionVatRate * 100}%)`);
+    expect(q.items.find(i => i.key === "inspection")!.label).toBe(`유료 검수비 (¥${RATES.inspectionFeeFenPerUnit / 100}/개)`);
   });
   it("무게·부피·환율이 0 이하면 거부", () => {
     expect(() => computeQuote({ ...base, weightGrams: 0 })).toThrow("무게");

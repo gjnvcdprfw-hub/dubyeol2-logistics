@@ -32,14 +32,14 @@ export function computeQuote(input: QuoteInput) {
     const vatFen = Math.round(commissionFen * RATES.commissionVatRate);
     items.push({ key: "product", label: "상품가", amountFen: productFen });
     items.push({ key: "cnShipping", label: "중국 내 배송비", amountFen: input.cnShippingFen });
-    items.push({ key: "commission", label: "구매대행 수수료 (5%)", amountFen: commissionFen });
-    items.push({ key: "commissionVat", label: "수수료 부가세 (10%)", amountFen: vatFen });
+    items.push({ key: "commission", label: `구매대행 수수료 (${RATES.commissionRate * 100}%)`, amountFen: commissionFen });
+    items.push({ key: "commissionVat", label: `수수료 부가세 (${RATES.commissionVatRate * 100}%)`, amountFen: vatFen });
   } else {
     items.push({ key: "cnShipping", label: "중국 내 배송비", amountFen: input.cnShippingFen });
   }
 
   if (input.inspectionRequested) {
-    items.push({ key: "inspection", label: "유료 검수비 (¥1/개)", amountFen: RATES.inspectionFeeFenPerUnit * input.quantity });
+    items.push({ key: "inspection", label: `유료 검수비 (¥${RATES.inspectionFeeFenPerUnit / 100}/개)`, amountFen: RATES.inspectionFeeFenPerUnit * input.quantity });
   }
 
   // 청구중량: 실중량 vs 부피중량(cm³/6000 kg = cm³/6 g) 중 큰 값 — 전부 정수(g) 연산
