@@ -23,4 +23,5 @@
 body {
   background: var(--color-bg);
   color: var(--color-body);
+  font-family: var(--font-dm-sans), Helvetica, Arial, sans-serif;
 }
