@@ -1,0 +1,27 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg: #fafbfb;
+  --color-surface: #ffffff;
+  --color-surface-alt: #f9fafb;
+  --color-heading: #101828;
+  --color-body: #11142d;
+  --color-secondary: #4a5565;
+  --color-muted: #777e89;
+  --color-accent: #f54a00;   /* 공개 영역 CTA */
+  --color-brand: #cc0000;    /* 대시보드·브랜드 */
+  --color-info: #0084d1;
+  --color-success: #009966;
+  --color-warning-tint: #fff2e4;
+  --color-success-tint: #ebf8f2;
+  --color-danger: #cc0000;
+  --radius-card: 27px;
+  --radius-cta: 12px;
+  --radius-pill: 18px;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-body);
+  font-family: var(--font-dm-sans), Helvetica, Arial, sans-serif;
+}
