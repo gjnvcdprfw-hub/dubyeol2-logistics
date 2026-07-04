@@ -52,4 +52,10 @@ describe("computeQuote — 00-customer-outcome QA 예시", () => {
     expect(() => computeQuote({ ...base, weightGrams: 0 })).toThrow("무게");
     expect(() => computeQuote({ ...base, exchangeRateX100: 0 })).toThrow("환율");
   });
+  it("NaN·비정수 quantity 입력을 거부한다", () => {
+    expect(() => computeQuote({ ...base, weightGrams: NaN })).toThrow();
+    expect(() => computeQuote({ ...base, exchangeRateX100: NaN })).toThrow();
+    expect(() => computeQuote({ ...base, quantity: 0 })).toThrow("수량");
+    expect(() => computeQuote({ ...base, quantity: 1.5 })).toThrow("수량");
+  });
 });

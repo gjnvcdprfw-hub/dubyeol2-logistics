@@ -16,6 +16,9 @@ export type QuoteInput = {
 export type QuoteItem = { key: string; label: string; amountFen: number };
 
 export function computeQuote(input: QuoteInput) {
+  const nums = [input.unitPriceFen, input.cnShippingFen, input.weightGrams, input.volumeCm3, input.exchangeRateX100];
+  if (!nums.every(Number.isFinite)) throw new ValidationError("입력값이 올바르지 않습니다");
+  if (!Number.isInteger(input.quantity) || input.quantity < 1) throw new ValidationError("수량이 올바르지 않습니다");
   if (input.weightGrams <= 0) throw new ValidationError("무게는 0보다 커야 합니다");
   if (input.exchangeRateX100 <= 0) throw new ValidationError("환율은 0보다 커야 합니다");
   if (input.volumeCm3 < 0 || input.cnShippingFen < 0 || input.unitPriceFen < 0)
@@ -40,7 +43,8 @@ export function computeQuote(input: QuoteInput) {
   }
 
   // 청구중량: 실중량 vs 부피중량(cm³/6000 kg = cm³/6 g) 중 큰 값 — 전부 정수(g) 연산
-  const volumetricGrams = Math.ceil(input.volumeCm3 / 6);
+  // 부피중량(g) = cm³ × 1000 ÷ volumeDivisor (kg 환산식 cm³/6000을 g 단위로)
+  const volumetricGrams = Math.ceil((input.volumeCm3 * 1000) / RATES.volumeDivisor);
   const chargeableGrams = Math.max(input.weightGrams, volumetricGrams);
 
   let intlFen: number;
