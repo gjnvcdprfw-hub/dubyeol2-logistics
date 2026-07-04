@@ -1,5 +1,6 @@
 import { getIronSession, SessionOptions } from "iron-session";
 import { cookies } from "next/headers";
+import { prisma } from "./db";
 
 export type SessionData = { userId?: string };
 
@@ -21,4 +22,10 @@ function getSessionOptions(): SessionOptions {
 
 export async function getSession() {
   return getIronSession<SessionData>(await cookies(), getSessionOptions());
+}
+
+export async function getSessionUser() {
+  const session = await getSession();
+  if (!session.userId) return null;
+  return prisma.user.findUnique({ where: { id: session.userId } });
 }
