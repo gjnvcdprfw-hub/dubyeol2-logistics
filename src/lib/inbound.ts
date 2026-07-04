@@ -18,20 +18,27 @@ export async function recordInbound(orderId: string, input: InboundInput) {
   if (input.inspection && !order.inspectionRequested)
     throw new ValidationError("검수를 신청하지 않은 주문에는 검수 결과를 기록할 수 없습니다");
   const insp = input.inspection;
-  const updated = await prisma.order.update({
-    where: { id: orderId },
-    data: {
-      status: "RECEIVED",
-      receivedAt: new Date(),
-      outerIssue: input.outerIssue,
-      outerNote: input.outerNote,
-      inspCountActual: insp?.countActual,
-      inspAppearanceOk: insp?.appearanceOk,
-      inspDefectCount: insp?.defectCount,
-      inspNote: insp?.note,
-      photos: { create: input.photoPaths.map((path) => ({ path })) },
-    },
-  });
+  let updated;
+  try {
+    updated = await prisma.order.update({
+      where: { id: orderId, status: "REQUESTED" },
+      data: {
+        status: "RECEIVED",
+        receivedAt: new Date(),
+        outerIssue: input.outerIssue,
+        outerNote: input.outerNote,
+        inspCountActual: insp?.countActual,
+        inspAppearanceOk: insp?.appearanceOk,
+        inspDefectCount: insp?.defectCount,
+        inspNote: insp?.note,
+        photos: { create: input.photoPaths.map((path) => ({ path })) },
+      },
+    });
+  } catch (e) {
+    if ((e as { code?: string }).code === "P2025")
+      throw new ValidationError("이미 입고 처리된 주문입니다");
+    throw e;
+  }
   return updated;
 }
 
