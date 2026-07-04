@@ -1,0 +1,18 @@
+import { redirect } from "next/navigation";
+import Link from "next/link";
+import { getSessionUser } from "@/lib/session";
+
+export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+  const user = await getSessionUser();
+  if (!user) redirect("/auth/login");
+  if (user.role !== "ADMIN") redirect("/dashboard");
+  return (
+    <div className="min-h-screen bg-bg">
+      <header className="bg-brand text-white px-6 h-14 flex items-center gap-6">
+        <span className="font-bold">물류 운영자</span>
+        <Link href="/admin/orders" className="text-sm">주문·입고</Link>
+      </header>
+      <main className="max-w-5xl mx-auto p-8">{children}</main>
+    </div>
+  );
+}

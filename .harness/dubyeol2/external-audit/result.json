@@ -1,1 +1,1 @@
-{"schema":"dubyeol2.external_audit.result.v0","verdict":"PASS","summary_for_owner":"Phase 1 고객 약속은 지켜졌습니다. 가입·로그인, 주문 접수, 내 주문 목록, 유료 검수/검수 미신청 표시, 셀러 간 주문 격리가 코드·테스트·Playwright 증거와 맞습니다. 기계검증 PASS 주장과 실제 파일 증거도 큰 모순 없이 확인됐습니다.","findings":[],"question_for_pm_to_ask_owner":""}
+{"schema":"dubyeol2.external_audit.result.v0","verdict":"PASS","summary_for_owner":"Phase 2 재감리 PASS입니다. 1차 FAIL 원인이던 유료 검수 신청 건의 검수 결과 누락 가능성은 서비스 계층, API, 운영자 화면, 단위 테스트, 실화면 QA 증거로 보완됐습니다. 셀러는 입고 사진·외포장 상태·유료 검수 결과를 확인하고, 검수 미신청 건은 '수량 미확인'으로 표시됩니다.","findings":[],"question_for_pm_to_ask_owner":""}

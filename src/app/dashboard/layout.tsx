@@ -21,6 +21,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
           </div>
           <div>
             <p className="text-[12px] font-bold uppercase text-muted mb-2">📦 배송대행</p>
+            <Link href="/dashboard/warehouse-address" className="block py-1.5 text-body">창고 주소</Link>
             <span className="block py-1.5 text-muted/50">입고 관리 (준비 중)</span>
             <span className="block py-1.5 text-muted/50">견적 (준비 중)</span>
           </div>

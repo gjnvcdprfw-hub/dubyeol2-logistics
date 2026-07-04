@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { getSession } from "@/lib/session";
 import { listOrdersBySeller } from "@/lib/orders";
 
-const STATUS_LABEL: Record<string, string> = { REQUESTED: "접수됨" };
+const STATUS_LABEL: Record<string, string> = { REQUESTED: "접수됨", RECEIVED: "입고완료" };
 
 export default async function OrdersPage() {
   const session = await getSession();
@@ -23,10 +23,10 @@ export default async function OrdersPage() {
         <ul className="space-y-3">
           {orders.map((o) => (
             <li key={o.id} className="bg-surface rounded-[16px] shadow-[0_7px_30px_rgba(90,114,123,0.11)] p-4 flex items-center justify-between">
-              <div>
+              <Link href={`/dashboard/orders/${o.id}`} className="block">
                 <p className="font-medium text-body">{o.productName} <span className="text-muted">× {o.quantity}</span></p>
                 <p className="text-sm text-muted">{o.serviceType === "PURCHASE" ? "구매대행" : "배송대행"} · {new Date(o.createdAt).toLocaleDateString("ko-KR")}</p>
-              </div>
+              </Link>
               <div className="flex items-center gap-2 text-xs">
                 {o.inspectionRequested
                   ? <span className="rounded-full bg-success-tint text-success px-2 py-1">유료 검수 신청됨</span>

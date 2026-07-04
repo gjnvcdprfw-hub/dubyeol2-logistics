@@ -14,21 +14,39 @@ model User {
   companyName  String?
   contactName  String
   phone        String?
+  role         String   @default("SELLER") // "SELLER" | "ADMIN"
+  inboundCode  String?  @unique // 회원별 입고ID (8자 대문자영숫자)
   createdAt    DateTime @default(now())
   orders       Order[]
 }
 
 model Order {
-  id                  String   @id @default(cuid())
-  seller              User     @relation(fields: [sellerId], references: [id])
+  id                  String    @id @default(cuid())
+  seller              User      @relation(fields: [sellerId], references: [id])
   sellerId            String
   productUrl          String
   productName         String
   optionText          String?
   quantity            Int
   serviceType         String // "PURCHASE"(구매대행) | "SHIPPING"(배송대행)
-  inspectionRequested Boolean  @default(false) // 유료 검수 신청 여부
+  inspectionRequested Boolean   @default(false) // 유료 검수 신청 여부
   memo                String?
-  status              String   @default("REQUESTED") // Phase1: REQUESTED(접수됨)만 사용
-  createdAt           DateTime @default(now())
+  status              String    @default("REQUESTED") // "REQUESTED"(접수됨) | "RECEIVED"(입고완료)
+  createdAt           DateTime  @default(now())
+  receivedAt          DateTime?
+  outerIssue          Boolean? // 외포장 이상 여부
+  outerNote           String?
+  inspCountActual     Int? // 이하 4개는 유료 검수 신청 건만 기록
+  inspAppearanceOk    Boolean?
+  inspDefectCount     Int?
+  inspNote            String?
+  photos              InboundPhoto[]
+}
+
+model InboundPhoto {
+  id        String   @id @default(cuid())
+  order     Order    @relation(fields: [orderId], references: [id])
+  orderId   String
+  path      String // "/uploads/<파일명>"
+  createdAt DateTime @default(now())
 }
