@@ -1,9 +1,13 @@
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { prisma } from "../src/lib/db";
 import { registerSeller } from "../src/lib/auth";
 import { createOrder } from "../src/lib/orders";
 import { recordInbound } from "../src/lib/inbound";
 import { getWalletSummary, recordWalletCredit, requestShipmentWithWallet } from "../src/lib/wallet";
+
+const execFileAsync = promisify(execFile);
 
 let sellerA: { id: string };
 let sellerB: { id: string };
@@ -42,6 +46,8 @@ beforeEach(async () => {
 });
 
 afterEach(() => {
+  vi.doUnmock("@/lib/session");
+  vi.resetModules();
   vi.restoreAllMocks();
 });
 
@@ -128,5 +134,75 @@ describe("wallet shipment request", () => {
     expect(summaryA.balanceKrw).toBe(300000);
     expect(summaryA.transactions).toHaveLength(1);
     expect(summaryA.transactions[0].sellerId).toBe(sellerA.id);
+  });
+});
+
+describe("shipment request endpoint and QA wallet seed", () => {
+  async function importShipmentRouteForSeller(sellerId: string) {
+    vi.resetModules();
+    vi.doMock("@/lib/session", () => ({
+      getSession: vi.fn(async () => ({ userId: sellerId })),
+    }));
+    return import("../src/app/api/shipments/request/route");
+  }
+
+  it("JSON 출고 요청은 로그인 셀러의 예치금을 차감하고 JSON으로 결과를 돌려준다", async () => {
+    const order = await createQuotedOrder(sellerA.id);
+    await recordWalletCredit(sellerA.id, 300000, "QA 예치금");
+    const { POST } = await importShipmentRouteForSeller(sellerA.id);
+
+    const response = await POST(
+      new Request("http://localhost/api/shipments/request", {
+        method: "POST",
+        headers: { "content-type": "application/json", accept: "application/json" },
+        body: JSON.stringify({ orderId: order.id }),
+      }),
+    );
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.ok).toBe(true);
+    expect(body.result.order.status).toBe("SHIPMENT_REQUESTED");
+    expect(body.result.transaction.type).toBe("SHIPMENT_DEBIT");
+    expect(body.result.transaction.orderId).toBe(order.id);
+  });
+
+  it("form 출고 요청은 처리 후 주문 상세로 303 redirect 한다", async () => {
+    const order = await createQuotedOrder(sellerA.id);
+    await recordWalletCredit(sellerA.id, 300000, "QA 예치금");
+    const form = new FormData();
+    form.set("orderId", order.id);
+    const { POST } = await importShipmentRouteForSeller(sellerA.id);
+
+    const response = await POST(
+      new Request("http://localhost/api/shipments/request", {
+        method: "POST",
+        body: form,
+      }),
+    );
+
+    expect(response.status).toBe(303);
+    expect(response.headers.get("location")).toBe(
+      `http://localhost/dashboard/orders/${order.id}?shipment=requested`,
+    );
+  });
+
+  it("seed-wallet 스크립트는 로컬 QA 예치금을 셀러 지갑에 기록한다", async () => {
+    const email = "wallet-seed@test.local";
+    const seller = await registerSeller({ email, password: "password1", contactName: "Seed" });
+
+    const { stdout } = await execFileAsync(
+      "npx",
+      ["--no-install", "tsx", "scripts/seed-wallet.ts", email, "50000"],
+      { cwd: process.cwd() },
+    );
+
+    const tx = await prisma.walletTransaction.findFirstOrThrow({
+      where: { sellerId: seller.id, type: "TEST_CREDIT" },
+    });
+    expect(tx.amountKrw).toBe(50000);
+    expect(tx.balanceAfterKrw).toBe(50000);
+    expect(tx.memo).toBe("로컬 QA 예치금");
+    expect(stdout).toContain("예치금 준비 완료");
   });
 });
