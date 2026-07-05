@@ -59,6 +59,9 @@ export default async function InboundPage({ searchParams }: { searchParams: Prom
                 </p>
               </Link>
               <div className="flex items-center gap-2 text-xs shrink-0">
+                {o.inspectionRequested
+                  ? <span className="rounded-full bg-success-tint text-success px-2 py-1">유료 검수 신청</span>
+                  : <span className="rounded-full bg-surface-alt text-muted px-2 py-1">수량 미확인</span>}
                 {o.outerIssue === true && (
                   <span className="rounded-full bg-warning-tint text-accent px-2 py-1">외포장 이상</span>
                 )}
