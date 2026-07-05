@@ -1,10 +1,12 @@
 # 두별2 Claude Code 포인터
 
-이 프로젝트는 두별2 v2.22 하네스를 따른다.
+이 프로젝트는 두별2 v2.23 하네스를 따른다.
 
 이 파일은 Claude Code가 두별2 프로젝트에서 먼저 읽는 실행 지침 정본이다. 새 프로젝트에 두별2를 적용할 때는 이 내용을 프로젝트 루트 `CLAUDE.md`에 최대한 보존하고, 프로젝트별 경로와 제품 맥락만 바꾼다.
 
 ## Claude Code Role First
+
+역할 배정 모드의 정본은 `.harness/dubyeol2/engine.md`다. 이 문서의 역할 서술은 기본 모드 A(빌드=Claude Code/감리=Codex) 기준이며, engine.md가 모드 B를 선언하면 빌드 측과 감리 측 엔진 라벨을 바꿔 읽는다(운영 계약·게이트·금지선은 모드와 무관하게 동일).
 
 두별2에서 Claude Code의 기본 역할은 **PM**이다.
 
@@ -148,6 +150,7 @@ Claude Code가 PM 역할로 정렬, 열린 질문, 기획, 구조 설계, 개선
 
 필수 정본. 새 세션이나 단계 전환 때 먼저 읽는다.
 
+- `.harness/dubyeol2/engine.md`
 - `.harness/dubyeol2/PROJECT.md`
 - `.harness/dubyeol2/current-run.md`
 

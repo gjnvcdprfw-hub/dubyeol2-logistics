@@ -36,18 +36,23 @@ type Tool = { href: string; name: string; desc: string; ready: boolean };
 
 const GROUPS: { title: string; tools: Tool[] }[] = [
   {
+    title: "HS코드 조회",
+    tools: [
+      { href: "/calculators/hs-code", name: "HS코드 조회", desc: "상품에 맞는 HS코드와 기본 관세율을 찾아봅니다.", ready: false },
+    ],
+  },
+  {
+    title: "세관 요건 확인",
+    tools: [
+      { href: "/calculators/customs-req", name: "세관 요건 확인", desc: "KC 인증 등 수입 요건 대상 여부를 확인합니다.", ready: false },
+    ],
+  },
+  {
     title: "배송 계산",
     tools: [
       { href: "/calculators/cbm", name: "CBM 계산기", desc: "박스 치수와 수량으로 화물 전체 부피(CBM)를 계산합니다.", ready: true },
       { href: "/calculators/volume-weight", name: "부피중량 계산기", desc: "부피중량과 실중량을 비교해 청구중량을 확인합니다.", ready: true },
       { href: "/calculators/shipping-cost", name: "배송비 계산기", desc: "공개 요율 기준 해운·항공 예상 운임을 비교합니다.", ready: true },
-    ],
-  },
-  {
-    title: "HS코드·관세",
-    tools: [
-      { href: "/calculators/hs-code", name: "HS코드 조회", desc: "상품에 맞는 HS코드와 기본 관세율을 찾아봅니다.", ready: false },
-      { href: "/calculators/fta", name: "FTA 관세율 비교", desc: "기본세율·WTO·한중 FTA 세율을 비교합니다.", ready: false },
     ],
   },
   {
@@ -58,15 +63,32 @@ const GROUPS: { title: string; tools: Tool[] }[] = [
     ],
   },
   {
+    title: "FTA 관세율 비교",
+    tools: [
+      { href: "/calculators/fta", name: "FTA 관세율 비교", desc: "기본세율·WTO·한중 FTA 세율을 비교합니다.", ready: false },
+    ],
+  },
+  {
     title: "통관 조회",
     tools: [
-      { href: "/calculators/customs-req", name: "세관 요건 확인", desc: "KC 인증 등 수입 요건 대상 여부를 확인합니다.", ready: false },
       { href: "/calculators/customs-track", name: "통관 진행 조회", desc: "화물관리번호·BL로 통관 진행 상태를 조회합니다.", ready: false },
     ],
   },
 ];
 
 const DETAILS: { name: string; body: string; href: string; ready: boolean }[] = [
+  {
+    name: "HS코드 조회",
+    href: "/calculators/hs-code",
+    ready: false,
+    body: "상품명으로 HS코드 후보와 기본 관세율을 조회하는 도구입니다. 최종 판단은 관세사·세관 기준이 우선합니다.",
+  },
+  {
+    name: "세관 요건 확인",
+    href: "/calculators/customs-req",
+    ready: false,
+    body: "KC 인증, 식품 검역 등 품목별 수입 요건 대상 여부를 미리 확인하는 도구입니다.",
+  },
   {
     name: "CBM 계산기",
     href: "/calculators/cbm",
@@ -86,18 +108,6 @@ const DETAILS: { name: string; body: string; href: string; ready: boolean }[] = 
     body: "무게와 치수를 입력하면 공개 요율 기준으로 해운·항공 예상 운임을 위안화·원화로 나란히 비교합니다. 요율은 요금 안내 페이지에 공개되어 있습니다.",
   },
   {
-    name: "HS코드 조회",
-    href: "/calculators/hs-code",
-    ready: false,
-    body: "상품명으로 HS코드 후보와 기본 관세율을 조회하는 도구입니다. 최종 판단은 관세사·세관 기준이 우선합니다.",
-  },
-  {
-    name: "FTA 관세율 비교",
-    href: "/calculators/fta",
-    ready: false,
-    body: "같은 HS코드에 대해 기본세율·WTO 협정세율·한중 FTA 세율을 비교해 가장 유리한 세율을 확인하는 도구입니다.",
-  },
-  {
     name: "수입비용 계산기",
     href: "/calculators/import-cost",
     ready: false,
@@ -110,10 +120,10 @@ const DETAILS: { name: string; body: string; href: string; ready: boolean }[] = 
     body: "USD·CNY·KRW 세 통화 금액을 서로 환산하는 도구입니다. 실제 정산은 결제일 환율 기준입니다.",
   },
   {
-    name: "세관 요건 확인",
-    href: "/calculators/customs-req",
+    name: "FTA 관세율 비교",
+    href: "/calculators/fta",
     ready: false,
-    body: "KC 인증, 식품 검역 등 품목별 수입 요건 대상 여부를 미리 확인하는 도구입니다.",
+    body: "같은 HS코드에 대해 기본세율·WTO 협정세율·한중 FTA 세율을 비교해 가장 유리한 세율을 확인하는 도구입니다.",
   },
   {
     name: "통관 진행 조회",
@@ -141,7 +151,11 @@ export default function CalculatorsHub() {
         <h1 className="text-4xl md:text-5xl font-semibold text-heading">무역 계산기</h1>
         <p className="mt-4 text-lg text-secondary max-w-2xl">
           부피 계산부터 운임 비교, 관세·통관 확인까지. 중국 수입에 필요한 계산을 한곳에서 해결하세요.
+          계산에 쓰이는 요율은 요금 안내에 전면 공개된 값과 동일하며, 회원가입 없이 누구나 사용할 수 있습니다.
           모든 결과는 참고용 안내이며 최종 금액이 아닙니다.
+        </p>
+        <p className="mt-3 text-sm text-muted">
+          HS코드, 세관 요건, 환율, 통관 진행처럼 외부 조회가 필요한 도구는 로컬 기준판에서 준비 중으로만 표시하며 실제 API를 호출하지 않습니다.
         </p>
       </section>
 

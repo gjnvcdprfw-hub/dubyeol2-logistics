@@ -44,7 +44,7 @@ export default async function InboundPage({ searchParams }: { searchParams: Prom
       </div>
       {orders.length === 0 ? (
         <div className="bg-surface rounded-[27px] shadow-card p-12 text-center text-muted">
-          해당 상태의 상품이 없습니다
+          이 상태에 해당하는 상품이 아직 없습니다
         </div>
       ) : (
         <ul className="space-y-3">

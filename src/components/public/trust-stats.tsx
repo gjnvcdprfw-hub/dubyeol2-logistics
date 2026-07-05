@@ -1,8 +1,8 @@
 const STATS = [
-  { title: "정식 오픈 준비 중", sub: "지금 가입하면 오픈 소식을 가장 먼저 받습니다" },
-  { title: "요율 전면 공개", sub: "수수료·운임·검수비를 공개 요율표로 확인" },
-  { title: "입고 사진 기본 제공", sub: "중국 창고 도착 시 사진 1~2장 무료" },
-  { title: "실시간 상담 (준비 중)", sub: "오픈 후 채팅 상담이 열립니다" },
+  { value: "오픈 전 확정", label: "누적 고객" },
+  { value: "오픈 전 확정", label: "거래 건수" },
+  { value: "오픈 전 확정", label: "검품·배송 흐름" },
+  { value: "오픈 전 확정", label: "상담 응답 기준" },
 ];
 
 export default function TrustStats() {
@@ -10,9 +10,9 @@ export default function TrustStats() {
     <section className="bg-surface-alt border-y border-black/5">
       <div className="max-w-6xl mx-auto px-6 py-12 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
         {STATS.map((s) => (
-          <div key={s.title}>
-            <p className="font-semibold text-heading">{s.title}</p>
-            <p className="mt-1 text-xs text-secondary">{s.sub}</p>
+          <div key={s.label} className="rounded-[16px] bg-surface border border-black/5 px-4 py-6">
+            <p className="font-semibold text-heading">{s.value}</p>
+            <p className="mt-2 text-xs text-secondary">{s.label}</p>
           </div>
         ))}
       </div>

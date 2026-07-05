@@ -2,23 +2,46 @@ import { notFound, redirect } from "next/navigation";
 import { getSession } from "@/lib/session";
 import { prisma } from "@/lib/db";
 import { computeQuote } from "@/lib/quote";
+import { getQuotedOrderTotalKrw, getWalletSummary } from "@/lib/wallet";
 
-const STATUS_LABEL: Record<string, string> = { REQUESTED: "접수됨", RECEIVED: "입고완료" };
+const STATUS_LABEL: Record<string, string> = {
+  REQUESTED: "접수됨",
+  RECEIVED: "입고완료",
+  SHIPMENT_REQUESTED: "출고 요청",
+};
 
-export default async function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
+function krw(value: number) {
+  return `₩${value.toLocaleString("ko-KR")}`;
+}
+
+export default async function OrderDetailPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const session = await getSession();
   if (!session.userId) redirect("/auth/login");
   const { id } = await params;
+  const query = searchParams ? await searchParams : {};
   const order = await prisma.order.findFirst({
     where: { id, sellerId: session.userId },  // 격리: sellerId 스코프 필수
     include: { photos: true },
   });
   if (!order) notFound();
+  const wallet = await getWalletSummary(session.userId);
+  const shipmentError = typeof query.shipmentError === "string" ? query.shipmentError : "";
+  const shipmentRequested = query.shipment === "requested";
+  const quoteTotalKrw = order.quotedAt && order.quoteShippingMethod ? getQuotedOrderTotalKrw(order) : null;
+  const canRequestShipment = order.status === "RECEIVED" && quoteTotalKrw !== null && wallet.balanceKrw >= quoteTotalKrw;
+  const hasInboundEvidence = order.status === "RECEIVED" || order.status === "SHIPMENT_REQUESTED";
+
   return (
     <div className="max-w-2xl space-y-6">
       <h1 className="text-xl font-semibold text-heading">{order.productName} × {order.quantity}</h1>
       <p className="text-sm text-muted">{order.serviceType === "PURCHASE" ? "구매대행" : "배송대행"} · 상태: {STATUS_LABEL[order.status] ?? order.status}</p>
-      {order.status === "RECEIVED" ? (
+      {hasInboundEvidence ? (
         <section className="bg-surface rounded-[27px] shadow-[0_7px_30px_rgba(90,114,123,0.11)] p-6 space-y-4">
           <h2 className="text-[14px] font-semibold text-heading">입고 증거</h2>
           <div className="flex gap-3">
@@ -84,6 +107,48 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
               </>
             );
           })()}
+        </section>
+      )}
+      {quoteTotalKrw !== null && (
+        <section className="bg-surface rounded-[27px] shadow-card p-6 space-y-4">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <h2 className="text-[14px] font-semibold text-heading">출고 요청</h2>
+              <p className="mt-1 text-sm text-secondary">
+                예치금으로 견적 금액을 차감하고 출고 요청 상태로 넘깁니다.
+              </p>
+            </div>
+            <span className="rounded-full bg-surface-alt text-muted text-xs px-3 py-1">로컬 테스트 원장</span>
+          </div>
+          {shipmentRequested && <p className="rounded-lg bg-success-tint text-success p-3 text-sm">출고 요청이 접수되었습니다.</p>}
+          {shipmentError && <p className="rounded-lg bg-danger/10 text-danger p-3 text-sm">{shipmentError}</p>}
+          <div className="grid sm:grid-cols-2 gap-3 text-sm">
+            <div className="rounded-lg bg-surface-alt p-4">
+              <p className="text-muted">차감 예정 금액</p>
+              <p className="mt-1 font-semibold text-heading">{krw(quoteTotalKrw)}</p>
+            </div>
+            <div className="rounded-lg bg-surface-alt p-4">
+              <p className="text-muted">사용 가능 예치금</p>
+              <p className="mt-1 font-semibold text-heading">{krw(wallet.balanceKrw)}</p>
+            </div>
+          </div>
+          {order.status === "SHIPMENT_REQUESTED" ? (
+            <p className="rounded-lg bg-info/10 text-info p-3 text-sm">이미 출고 요청된 주문입니다. 출고관리에서 상태를 확인하세요.</p>
+          ) : (
+            <form action="/api/shipments/request" method="post" className="flex flex-wrap items-center gap-3">
+              <input type="hidden" name="orderId" value={order.id} />
+              <button
+                type="submit"
+                disabled={!canRequestShipment}
+                className="rounded-[18px] bg-brand text-white text-sm font-semibold px-4 py-2 disabled:bg-surface-alt disabled:text-muted"
+              >
+                출고 요청하고 예치금 차감
+              </button>
+              {!canRequestShipment && (
+                <span className="text-sm text-danger">예치금 잔액이 부족하거나 견적 완료 상태가 아닙니다.</span>
+              )}
+            </form>
+          )}
         </section>
       )}
       {order.status === "RECEIVED" && !order.quotedAt && (

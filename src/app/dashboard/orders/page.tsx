@@ -12,12 +12,12 @@ export default async function OrdersPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-heading">내 주문</h1>
+        <h1 className="text-xl font-semibold text-heading">구매대행 관리</h1>
         <Link href="/dashboard/orders/new" className="bg-accent text-white text-sm font-semibold rounded-[12px] px-4 py-2">주문 접수</Link>
       </div>
       {orders.length === 0 ? (
         <div className="bg-surface rounded-[27px] shadow-[0_7px_30px_rgba(90,114,123,0.11)] p-12 text-center text-muted">
-          해당 상태의 주문이 없습니다. <Link href="/dashboard/orders/new" className="text-accent font-medium">첫 주문을 접수해 보세요</Link>
+          접수된 주문이 아직 없습니다. <Link href="/dashboard/orders/new" className="text-accent font-medium">첫 주문을 접수해 보세요</Link>
         </div>
       ) : (
         <ul className="space-y-3">

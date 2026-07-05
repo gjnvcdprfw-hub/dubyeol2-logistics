@@ -25,13 +25,14 @@
 
 | 날짜 | Phase | 변경 전 | 변경 후 | 이유 |
 |---|---|---|---|---|
-|  |  |  |  |  |
+| 2026-07-05 | Phase 6 | 문구 전용 밀착 재작성(기능 불변), Machine Check PASS 후 교차 감리 대기 | 두리무역 1:1 비공개 기준판. 로고·이미지·실주소·전화번호·계좌·사업자정보만 제외, 디자인·기능·구조·문구·아이콘/이모티콘 포함. 공개 영역 기준판 Machine Check PASS, Claude 교차감리 대기 | 대표님이 "정확하게 두리무역을 그대로 1:1로 복사"와 Chrome 직접 대조를 명시 |
 
 ## 4. feature.md 재정렬
 
 | 날짜 | 재정렬 사유 | 변경된 고객 약속 | 대표님 승인 여부 |
 |---|---|---|---|
-|  |  |  |  |
+| 2026-07-05 | PM이 제안한 "문장 단위 밀착 재작성"이 대표님 의도보다 좁았음 | 정식 운영 전 내부 기준판으로 두리무역을 1:1 복사하고, 우리 회사용 수정 후 운영 시작 | 승인: "a로해" / "응 그래 내 크롬으로 디버깅해서 하나하나 복사해" |
+| 2026-07-05 | 로그인 후 셀러 기능 전체가 너무 커서 첫 돈 흐름을 잘라야 했음 | 견적 완료 주문에서 출고 요청, 예치금 차감, 예치금 내역, 출고 상태 확인까지 먼저 구현. 실계좌·실입금·실결제·송장/통관/택배 추적은 제외 | 승인: "그래" |
 
 ## 5. 3회 실패 후 결정
 
@@ -44,3 +45,8 @@
 | 날짜 | 예외 상황 | 처리 | 근거 | 재발 방지 |
 |---|---|---|---|---|
 | 2026-07-04 | 의존성 추가: `tsx` (devDependency, Phase 2 시드 스크립트 실행용) | 유지 + 기록 | Phase 2 플랜(2026-07-04-phase-002-inbound-evidence.md Task 1)에 명시 + 대표님 포괄 승인("승인할게 두별2에 맞게 진행해") 범위 내. 외부감리 MINOR 지적으로 원장 기록 보완 | 이후 의존성 추가는 request.json files_changed에 package.json 포함 |
+| 2026-07-05 | Playwright MCP 프로필 락 | Chrome headless DevTools Protocol로 실화면 QA 대체 | `03-verification.md` §3.2. 동일 로컬 URL 23개를 실제 Chrome 엔진으로 열어 HTTP 200, H1, console error 0 확인 | 다음 세션에서 Playwright MCP 락이 풀리면 Playwright로 재검증 가능. 현재 PASS 근거는 Chrome QA |
+| 2026-07-05 | Phase 6 교차감리 대기 중 Feature 4 착수 | Phase 6 Feature 3 계약을 `phase-packets/phase-006/feature-contract-snapshot.md`로 보존하고, 외부감리 요청의 `feature_md`를 스냅샷으로 고정 | Mode B에서는 Phase 6 완료·main 머지는 교차감리 PASS 전 금지지만, 다음 Phase 준비·빌드는 가능 | 감리자는 Phase 6 스냅샷을 기준으로 보고, `feature.md`는 현재 Feature 4 기준으로 본다 |
+| 2026-07-05 | Phase 7 보안 검토 대체 | Codex Mode B 환경에 `/security-review` 슬래시 명령 실행 도구가 없어 정적 권한 검사, 지갑 테스트, live QA 교차 셀러 404로 대체 | Phase 7은 예치금·셀러 권한을 건드리므로 `phase-packets/phase-007/03-verification.md` §3.1에 증거와 한계를 명시 | Claude 교차감리에서 seller isolation과 wallet state를 별도 확인 |
+| 2026-07-06 | Phase 6 외부감리 MINOR | 전체 테스트 최초 1회 FK 제약 일시 실패 후 즉시 재실행 PASS. 고객 약속에는 영향 없음 | `external-audit/result-phase-006.json` | 테스트 DB 격리 개선 후보로 보관 |
+| 2026-07-06 | Phase 7 외부감리 MINOR 해소 | Task 3 화면 변경 커밋 추적성 지적 | 구현·증거 커밋 `776d1e8`로 화면 변경과 감리 증거를 커밋 | `04-completion.md` 작성 전 커밋 완료 |

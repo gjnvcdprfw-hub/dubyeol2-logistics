@@ -92,6 +92,23 @@ export default function PricingGuidePage() {
         </div>
       </section>
 
+      {/* 수수료 */}
+      <section className="max-w-6xl mx-auto px-6 py-8">
+        <SectionTitle>수수료</SectionTitle>
+        <PriceTable
+          head={["항목", "요율", "비고"]}
+          rows={[
+            ["구매대행 수수료", `상품가의 ${RATES.commissionRate * 100}%`, `수수료에 대한 부가세(수수료의 ${RATES.commissionVatRate * 100}%)가 더해집니다`],
+            ["배송대행 수수료", "구매 수수료 없음", "국제운임과 선택한 부가서비스 비용만 청구됩니다"],
+          ]}
+        />
+        <p className="mt-3 text-sm text-secondary">
+          예를 들어 상품가 {(100000).toLocaleString("ko-KR")}원이면 수수료는 {(100000 * RATES.commissionRate).toLocaleString("ko-KR")}원,
+          수수료 부가세는 {(100000 * RATES.commissionRate * RATES.commissionVatRate).toLocaleString("ko-KR")}원입니다.
+          견적서에는 상품가·수수료·부가세가 항목별로 나눠서 표시되므로, 어떤 금액이 왜 청구되는지 그대로 확인할 수 있습니다.
+        </p>
+      </section>
+
       {/* 국제 배송비 */}
       <section className="max-w-6xl mx-auto px-6 py-8">
         <SectionTitle>국제 배송비</SectionTitle>
@@ -104,7 +121,9 @@ export default function PricingGuidePage() {
           <ul className="list-disc pl-5 space-y-1">
             <li>부피중량 = 가로 × 세로 × 높이(cm³) ÷ {RATES.volumeDivisor.toLocaleString("ko-KR")}</li>
             <li>실중량과 부피중량 중 <span className="font-medium text-heading">큰 값</span>을 청구중량으로 과금합니다.</li>
+            <li>청구중량은 해운 kg 단위, 항공 100g 단위로 올림해 적용합니다.</li>
             <li>¥ 단가는 결제일 당일 환율로 원화 환산됩니다.</li>
+            <li>리드타임은 통관·물류 상황에 따라 달라질 수 있는 예상치입니다.</li>
           </ul>
           <p>
             예상 운임은{" "}
@@ -118,6 +137,9 @@ export default function PricingGuidePage() {
             head={["구간 (무게 또는 세변 합)", "추가비"]}
             rows={PRICING.domesticSurcharge.map((t) => [t.condition, won(t.won)])}
           />
+          <p className="mt-3 text-sm text-secondary">
+            ※ 표 구간을 초과하는 대형·중량 화물은 국내 구간이 착불 화물 운송으로 전환될 수 있습니다. 해당 시 접수 단계에서 미리 안내드립니다.
+          </p>
         </div>
       </section>
 
@@ -132,6 +154,9 @@ export default function PricingGuidePage() {
           ]}
         />
         <p className="mt-3 text-sm text-secondary">※ {PRICING.storage.disposalNotice}</p>
+        <p className="mt-2 text-sm text-secondary">
+          입고 후 {PRICING.storage.freeDays}일까지는 보관료가 없으므로, 여러 판매자의 상품을 모아 묶음 배송으로 출고하면 운임과 보관료를 함께 아낄 수 있습니다.
+        </p>
       </section>
 
       {/* 검수 */}
@@ -148,6 +173,7 @@ export default function PricingGuidePage() {
         />
         <p className="mt-3 text-sm text-secondary">
           ※ 기본 입고 확인은 전수·샘플링·기능·치수 검사가 아닙니다. 상세 검수는 유료 옵션으로 신청해 주세요.
+          공장 방문이 필요한 전문 검품은 <Link href="/services/inspection" className="text-accent font-medium hover:underline">검품감사</Link> 서비스에서 별도로 안내합니다.
         </p>
       </section>
 

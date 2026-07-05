@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-// 두리무역 벤치(benchmark-duly.md §1) 4그룹 12메뉴. 구매대행 관리·창고 주소는 기존 경로 재사용.
+// 공개 기준판의 메뉴 그룹을 대시보드에 맞게 재사용한다.
 const GROUPS: { label: string; items: { label: string; href: string }[] }[] = [
   {
     label: "🏠 마이페이지",

@@ -1,6 +1,6 @@
 # 두별2 Codex 포인터
 
-이 프로젝트는 두별2 v2.22 하네스를 따른다.
+이 프로젝트는 두별2 v2.23 하네스를 따른다.
 
 이 파일은 Codex가 두별2 프로젝트에서 먼저 읽는 실행 지침 정본이다. 새 프로젝트에 두별2를 적용할 때는 이 내용을 프로젝트 루트 `AGENTS.md`에 최대한 보존하고, 프로젝트별 경로와 제품 맥락만 바꾼다.
 
@@ -8,6 +8,7 @@
 
 필수 정본. 새 세션이나 단계 전환 때 먼저 읽는다.
 
+- `.harness/dubyeol2/engine.md`
 - `.harness/dubyeol2/PROJECT.md`
 - `.harness/dubyeol2/current-run.md`
 
@@ -119,7 +120,7 @@ PM 정렬은 Claude Code가 맡는다. Codex가 외부감리 판정에서 사고
 
 두별2의 목표는 대표님이 고객, 돈, 업무, 범위, 만족만 판단해도 실제 돈 받고 서비스 가능한 품질까지 제품을 완성하게 만드는 것이다.
 
-두별2는 기본적으로 아래 순서로 움직인다. PM은 Claude Code, 외부감리는 Codex, 그 외 빌드 역할(Team Leader, Builder)도 Claude Code가 맡는다.
+두별2는 기본적으로 아래 순서로 움직인다. PM은 Claude Code, 외부감리는 Codex, 그 외 빌드 역할(Team Leader, Builder)도 Claude Code가 맡는다. 역할 배정 모드의 정본은 `.harness/dubyeol2/engine.md`다 — 이 문서는 기본 모드 A 기준이며, engine.md가 모드 B(빌드=Codex/감리=Claude 복귀 후 큐 처리)를 선언하면 엔진 라벨만 바꿔 읽는다. 운영 순서·게이트·금지선은 모드와 무관하게 동일하다.
 
 1. PM 정렬: 현재 두별2 문서와 레포를 읽고, 고객이 끝내야 하는 일을 고객 언어로 닫는다.
 2. `feature.md` 승인: 고객 약속, 안 하는 것, 합격 예시, QA 시나리오를 적고 대표님 승인을 받는다.

@@ -1,0 +1,15 @@
+{
+  "schema": "dubyeol2.external_audit.result.v0",
+  "verdict": "PASS",
+  "summary_for_owner": "Phase 7(견적 완료 주문 출고 요청·예치금 차감)이 약속대로 동작합니다. 셀러 A가 견적 완료 주문에서 출고 요청을 누르면 예치금 300,000원에서 견적 62,890원이 차감되어 237,110원이 남고, 원장·주문상세·출고관리·대시보드가 모두 같은 상태(SHIPMENT_REQUESTED)를 보여줍니다. 잔액 부족, 중복 요청, 다른 셀러 주문 접근은 모두 차단되며 실계좌·실입금·실결제·실제 출고완료처럼 보이지 않도록 '로컬 테스트 원장', '오픈 전 확정' 표시가 되어 있습니다. 테스트 45개, 빌드를 직접 재실행해 확인했습니다.",
+  "findings": [
+    {
+      "severity": "MINOR",
+      "description": "주문상세·출고관리·예치금관리·대시보드 홈 4개 화면 파일(Task 3)이 커밋되지 않고 작업 트리에만 남아 있습니다. Phase 6 dirty 상태와 겹쳐 diff 리뷰로만 근거를 남겼다고 disclosure되어 있으나, 이 상태로는 04-completion 단계에서 로컬 main 머지 시 무엇이 Phase 7 변경인지 커밋 이력으로 추적할 수 없습니다.",
+      "evidence": "git diff --stat 결과 src/app/dashboard/orders/[id]/page.tsx, shipment/page.tsx, wallet/page.tsx, page.tsx 4개 파일이 unstaged 상태(170 insertions, 43 deletions). 최근 커밋은 5ca3d78(feat: add shipment request endpoint)까지만 있고 이 화면 변경은 포함되지 않음.",
+      "customer_harm": "고객에게 즉시 영향은 없음(화면 동작은 정상 확인됨). 다만 머지 후 이 변경이 어떤 커밋에 속하는지 추적 불가해 향후 회귀 원인 분석이나 롤백이 어려워질 수 있음.",
+      "recheck_criteria": "04-completion.md 작성 전에 Task 3의 4개 화면 변경을 Phase 7 범위로 명확히 표시된 커밋으로 남긴 뒤 로컬 main에 머지하면 해소."
+    }
+  ],
+  "question_for_pm_to_ask_owner": ""
+}

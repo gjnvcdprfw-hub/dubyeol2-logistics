@@ -76,22 +76,22 @@ export default function AdditionalServicesPage() {
   const groups = [
     {
       title: "원산지 표기",
-      desc: "수입 통관·판매에 필요한 원산지 표시 작업",
+      desc: "수입 통관·판매에 필요한 원산지 표시 작업. 상품 재질과 판매 방식에 따라 스티커·봉제 라벨·도장·행택 중 맞는 방식을 고르면 됩니다.",
       items: svc.origin.map((s) => ({ name: s.name, price: `${y(s.yuanPerUnit)}/개` })),
     },
     {
       title: "판매 표기",
-      desc: "국내 판매 요건에 맞춘 표기·라벨 작업",
+      desc: "국내 판매 요건에 맞춘 표기·라벨 작업. 바코드, KC, 식품검역, 연령 표기처럼 판매 채널·품목이 요구하는 표시를 창고에서 부착합니다.",
       items: svc.salesLabel.map((s) => ({ name: s.name, price: `${y(s.yuanPerUnit)}/개` })),
     },
     {
       title: "포장",
-      desc: "상품 보호·묶음 구성 등 포장 작업",
+      desc: "상품 보호·묶음 구성 등 포장 작업. 낱개 OPP 포장부터 세트 묶음, 불필요한 태그·포장 제거까지 판매 형태에 맞춰 처리합니다.",
       items: svc.packaging.map((s) => ({ name: s.name, price: `${y(s.yuanPerUnit)}/개` })),
     },
     {
       title: "검수",
-      desc: "수량·외관 확인과 기록 옵션",
+      desc: "수량·외관 확인과 기록 옵션. 기본 입고 확인은 무료이며, 상세 확인이 필요하면 유료 검수와 사진·동영상 기록을 추가할 수 있습니다.",
       items: [
         { name: "기본 입고 확인 (사진 1~2장)", price: "무료" },
         { name: "유료 검수", price: `¥${(RATES.inspectionFeeFenPerUnit / 100).toLocaleString("ko-KR")}/개` },
@@ -123,6 +123,9 @@ export default function AdditionalServicesPage() {
             한국 도착 후 따로 작업할 필요 없이, 창고에서 판매 가능한 상태로 만들어 출고합니다.
           </p>
           <p>비용은 개당 단가 × 수량으로 견적서에 항목별로 표시되며, ¥ 단가는 결제일 당일 환율이 적용됩니다.</p>
+          <p>
+            국내에서 같은 작업을 하려면 인건비와 재작업 시간이 더 들기 때문에, 대량 판매 준비일수록 중국 창고 단계에서 끝내는 것이 비용·일정 모두 유리합니다.
+          </p>
         </div>
       </section>
 
