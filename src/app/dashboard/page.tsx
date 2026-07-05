@@ -44,11 +44,12 @@ export default async function DashboardHome() {
       <h1 className="text-xl font-semibold text-heading">마이페이지</h1>
 
       <section className="rounded-[27px] bg-gradient-to-br from-brand to-[#8b0000] text-white p-6 shadow-card">
-        <p className="text-sm text-white/80">예치금 현황</p>
+        <p className="text-sm text-white/80">예치금 현황 <span className="ml-2 rounded-full bg-white/20 text-white text-xs px-2 py-0.5">준비 중</span></p>
         <p className="mt-1 text-2xl font-bold">사용 가능 잔액 ₩0</p>
+        <p className="text-xs text-white/70">예치금 충전·결제는 정식 오픈 시 열립니다.</p>
         <div className="mt-4 flex gap-3">
-          <Link href="/dashboard/wallet" className="rounded-[18px] bg-white text-brand text-sm font-semibold px-4 py-2">충전하기</Link>
-          <Link href="/dashboard/wallet" className="rounded-[18px] bg-white text-brand text-sm font-semibold px-4 py-2">내역보기</Link>
+          <Link href="/dashboard/wallet" className="rounded-[18px] bg-white text-brand text-sm font-semibold px-4 py-2">충전하기 (준비 중)</Link>
+          <Link href="/dashboard/wallet" className="rounded-[18px] bg-white text-brand text-sm font-semibold px-4 py-2">내역보기 (준비 중)</Link>
         </div>
       </section>
 
