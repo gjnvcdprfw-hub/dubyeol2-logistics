@@ -52,6 +52,62 @@ describe("createOrder — 입력 화이트리스트", () => {
   });
 });
 
+describe("createOrder — SKU 라인 구조", () => {
+  it("주문 묶음 1건에 상품 라인과 SKU 라인을 저장한다", async () => {
+    const order = await createOrder(sellerA.id, {
+      serviceType: "PURCHASE",
+      inspectionRequested: true,
+      memo: "묶음 주문",
+      items: [
+        {
+          productUrl: "https://detail.1688.com/offer/100.html",
+          productName: "상품 A",
+          skus: [
+            { optionText: "빨강", quantity: 50 },
+            { optionText: "파랑", quantity: 50 },
+          ],
+        },
+        {
+          productUrl: "https://detail.1688.com/offer/200.html",
+          productName: "상품 B",
+          skus: [{ optionText: "L", quantity: 30 }],
+        },
+      ],
+    });
+
+    const saved = await prisma.order.findUniqueOrThrow({
+      where: { id: order.id },
+      include: { productLines: { include: { skuLines: true }, orderBy: { sortOrder: "asc" } } },
+    });
+
+    expect(saved.quantity).toBe(130);
+    expect(saved.productLines).toHaveLength(2);
+    expect(saved.productLines[0].skuLines.map((sku) => sku.optionText)).toEqual(["빨강", "파랑"]);
+    expect(saved.productLines[1].skuLines[0].quantity).toBe(30);
+  });
+
+  it("기존 단건 주문 입력은 SKU 1개짜리 주문으로 호환 저장한다", async () => {
+    const order = await createOrder(sellerA.id, {
+      productUrl: "https://detail.1688.com/offer/123.html",
+      productName: "미니가전",
+      optionText: "화이트",
+      quantity: 100,
+      serviceType: "PURCHASE",
+      inspectionRequested: true,
+    });
+
+    const saved = await prisma.order.findUniqueOrThrow({
+      where: { id: order.id },
+      include: { productLines: { include: { skuLines: true } } },
+    });
+
+    expect(saved.productLines).toHaveLength(1);
+    expect(saved.productLines[0].skuLines).toHaveLength(1);
+    expect(saved.productLines[0].skuLines[0].optionText).toBe("화이트");
+    expect(saved.productLines[0].skuLines[0].quantity).toBe(100);
+  });
+});
+
 describe("listOrdersBySeller — sellerId 가드", () => {
   it("sellerId가 없으면 전체 반환 대신 오류를 던진다", async () => {
     await createOrder(sellerA.id, { productUrl: "https://a.com", productName: "A상품", quantity: 1, serviceType: "PURCHASE", inspectionRequested: false });

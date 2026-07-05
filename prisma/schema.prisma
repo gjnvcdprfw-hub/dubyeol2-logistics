@@ -50,8 +50,41 @@ model Order {
   quotedAt                   DateTime?
   shipmentRequestedAt        DateTime?
   shipmentRequestedAmountKrw Int?
+  productLines               OrderProductLine[]
   photos                     InboundPhoto[]
   walletTransactions         WalletTransaction[]
+}
+
+model OrderProductLine {
+  id          String         @id @default(cuid())
+  order       Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId     String
+  productUrl  String
+  productName String
+  sortOrder   Int
+  createdAt   DateTime       @default(now())
+  skuLines    OrderSkuLine[]
+
+  @@index([orderId])
+}
+
+model OrderSkuLine {
+  id                 String           @id @default(cuid())
+  productLine        OrderProductLine @relation(fields: [productLineId], references: [id], onDelete: Cascade)
+  productLineId      String
+  optionText         String
+  quantity           Int
+  inboundQuantity    Int?
+  missingQuantity    Int?
+  defectCount        Int?
+  inspectionPassed   Boolean?
+  inspectionNote     String?
+  quoteUnitPriceFen  Int?
+  quoteCnShippingFen Int?
+  sortOrder          Int
+  createdAt          DateTime         @default(now())
+
+  @@index([productLineId])
 }
 
 model InboundPhoto {
