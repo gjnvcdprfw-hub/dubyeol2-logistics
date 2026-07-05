@@ -2,6 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import { getSession } from "@/lib/session";
 import { prisma } from "@/lib/db";
 import { computeQuote } from "@/lib/quote";
+import { computeSkuSettlement } from "@/lib/sku-quote";
 import { getQuotedOrderTotalKrw, getWalletSummary } from "@/lib/wallet";
 
 const STATUS_LABEL: Record<string, string> = {
@@ -27,7 +28,13 @@ export default async function OrderDetailPage({
   const query = searchParams ? await searchParams : {};
   const order = await prisma.order.findFirst({
     where: { id, sellerId: session.userId },  // 격리: sellerId 스코프 필수
-    include: { photos: true },
+    include: {
+      photos: true,
+      productLines: {
+        include: { skuLines: { orderBy: { sortOrder: "asc" } } },
+        orderBy: { sortOrder: "asc" },
+      },
+    },
   });
   if (!order) notFound();
   const wallet = await getWalletSummary(session.userId);
@@ -36,6 +43,30 @@ export default async function OrderDetailPage({
   const quoteTotalKrw = order.quotedAt && order.quoteShippingMethod ? getQuotedOrderTotalKrw(order) : null;
   const canRequestShipment = order.status === "RECEIVED" && quoteTotalKrw !== null && wallet.balanceKrw >= quoteTotalKrw;
   const hasInboundEvidence = order.status === "RECEIVED" || order.status === "SHIPMENT_REQUESTED";
+  const quotedSkuRows = order.productLines.flatMap((line) =>
+    line.skuLines.map((sku) => ({
+      label: `${line.productName} / ${sku.optionText}`,
+      quantity: sku.quantity,
+      unitPriceFen: sku.quoteUnitPriceFen,
+      cnShippingFen: sku.quoteCnShippingFen,
+    })),
+  );
+  const skuSettlement =
+    order.quotedAt &&
+    order.quoteExchangeRateX100 &&
+    quotedSkuRows.length > 0 &&
+    quotedSkuRows.every((sku) => sku.unitPriceFen !== null && sku.cnShippingFen !== null)
+      ? computeSkuSettlement({
+          inspectionRequested: order.inspectionRequested,
+          exchangeRateX100: order.quoteExchangeRateX100,
+          skus: quotedSkuRows.map((sku) => ({
+            label: sku.label,
+            quantity: sku.quantity,
+            unitPriceFen: sku.unitPriceFen ?? 0,
+            cnShippingFen: sku.cnShippingFen ?? 0,
+          })),
+        })
+      : null;
 
   return (
     <div className="max-w-2xl space-y-6">
@@ -75,6 +106,34 @@ export default async function OrderDetailPage({
           아직 중국 창고에 입고되지 않았습니다. 입고되면 사진과 함께 표시됩니다.
         </div>
       )}
+      {order.productLines.length > 0 && (
+        <section className="bg-surface rounded-[27px] shadow-[0_7px_30px_rgba(90,114,123,0.11)] p-6 space-y-4">
+          <div className="space-y-1">
+            <h2 className="text-[14px] font-semibold text-heading">SKU별 작업 현황</h2>
+            <p className="text-xs text-muted">포장단위는 출고요청 때 배정됩니다.</p>
+          </div>
+          <div className="space-y-4">
+            {order.productLines.map((line) => (
+              <section key={line.id} className="rounded-lg border border-black/5 bg-surface-alt p-4 space-y-3">
+                <h3 className="text-sm font-semibold text-body">{line.productName}</h3>
+                <div className="space-y-2">
+                  {line.skuLines.map((sku) => (
+                    <div key={sku.id} className="rounded-lg bg-white px-4 py-3 text-sm">
+                      <p className="font-medium text-body">{sku.optionText}</p>
+                      <div className="mt-1 grid gap-1 text-secondary sm:grid-cols-2">
+                        <span>주문 {sku.quantity}개</span>
+                        <span>입고 {sku.inboundQuantity ?? "-"}개</span>
+                        <span>부족 {sku.missingQuantity ?? 0}개</span>
+                        <span>하자 {sku.defectCount ?? 0}개</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            ))}
+          </div>
+        </section>
+      )}
       {order.quotedAt && order.quoteShippingMethod && (
         <section className="bg-surface rounded-[27px] shadow-[0_7px_30px_rgba(90,114,123,0.11)] p-6 space-y-3">
           <h2 className="text-[14px] font-semibold text-heading">항목별 견적</h2>
@@ -91,6 +150,34 @@ export default async function OrderDetailPage({
             const krw = (w: number) => `₩${w.toLocaleString("ko-KR")}`;
             return (
               <>
+                {skuSettlement && (
+                  <div className="rounded-lg border border-black/5 bg-surface-alt p-4 space-y-3">
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="text-sm font-medium text-body">SKU별 견적 근거</p>
+                      <span className="text-xs text-muted">상품가 + 중국배송비 + 검수비</span>
+                    </div>
+                    <div className="space-y-3">
+                      {skuSettlement.lines.map((line) => (
+                        <div key={line.label} className="rounded-lg bg-white px-4 py-3 text-sm space-y-1.5">
+                          <div className="flex justify-between gap-3">
+                            <span className="font-medium text-body">{line.label}</span>
+                            <span className="text-body">{yuan(line.totalFen)} <span className="text-muted">({krw(line.totalKrw)})</span></span>
+                          </div>
+                          <div className="grid gap-1 text-secondary sm:grid-cols-2">
+                            <span>상품가 {yuan(line.productFen)}</span>
+                            <span>중국배송비 {yuan(line.cnShippingFen)}</span>
+                            <span>검수비 {yuan(line.inspectionFen)}</span>
+                            <span>주문 {line.quantity}개</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="flex justify-between text-sm font-semibold">
+                      <span className="text-heading">SKU 합계</span>
+                      <span className="text-heading">{yuan(skuSettlement.totalFen)} <span className="text-brand">({krw(skuSettlement.totalKrw)})</span></span>
+                    </div>
+                  </div>
+                )}
                 <ul className="text-sm space-y-1.5">
                   {q.itemsKrw.map((i) => (
                     <li key={i.key} className="flex justify-between">

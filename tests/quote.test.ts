@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { computeQuote } from "../src/lib/quote";
+import { computeSkuSettlement } from "../src/lib/sku-quote";
 import { RATES } from "../src/lib/rates";
 
 const base = {
@@ -64,5 +65,24 @@ describe("computeQuote — 00-customer-outcome QA 예시", () => {
     expect(() => computeQuote({ ...base, exchangeRateX100: NaN })).toThrow();
     expect(() => computeQuote({ ...base, quantity: 0 })).toThrow("수량");
     expect(() => computeQuote({ ...base, quantity: 1.5 })).toThrow("수량");
+  });
+});
+
+describe("computeSkuSettlement", () => {
+  it("SKU별 상품가·검수비·중국배송비와 주문 묶음 합계를 계산한다", () => {
+    const result = computeSkuSettlement({
+      inspectionRequested: true,
+      exchangeRateX100: 19000,
+      skus: [
+        { label: "상품 A / 빨강", quantity: 50, unitPriceFen: 1000, cnShippingFen: 2000 },
+        { label: "상품 A / 파랑", quantity: 45, unitPriceFen: 1200, cnShippingFen: 3000 },
+      ],
+    });
+
+    expect(result.lines).toHaveLength(2);
+    expect(result.lines[0].productFen).toBe(50000);
+    expect(result.lines[1].productFen).toBe(54000);
+    expect(result.totalFen).toBeGreaterThan(104000);
+    expect(result.totalKrw).toBe(Math.round((result.totalFen * 19000) / 10000));
   });
 });
