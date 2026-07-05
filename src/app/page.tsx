@@ -1,9 +1,15 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import SiteHeader from "@/components/public/site-header";
 import SiteFooter from "@/components/public/site-footer";
 import TrustStats from "@/components/public/trust-stats";
 import SectionCta from "@/components/public/section-cta";
 import { RATES } from "@/lib/rates";
+
+export const metadata: Metadata = {
+  title: "물류 — 중국 소싱 물류 플랫폼",
+  description: "1688 구매대행, 배송대행, 검품, 스마트오더까지. 주문 접수부터 입고 확인, 항목별 견적까지 사업자 셀러를 위한 중국→한국 통합 물류 플랫폼입니다.",
+};
 
 const FAQ = [
   {

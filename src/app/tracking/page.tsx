@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import SiteHeader from "@/components/public/site-header";
 import SiteFooter from "@/components/public/site-footer";
@@ -5,6 +6,11 @@ import TrustStats from "@/components/public/trust-stats";
 import SectionCta from "@/components/public/section-cta";
 import ComingSoon from "@/components/public/coming-soon";
 import { RATES } from "@/lib/rates";
+
+export const metadata: Metadata = {
+  title: "배송조회 | 물류",
+  description: "운송장 번호로 중국 창고 입고부터 한국 도착까지 단계별 위치를 확인할 수 있습니다. 배송조회 기능은 준비 중입니다.",
+};
 
 const CARD = "rounded-[16px] bg-surface shadow-[0_7px_30px_rgba(90,114,123,0.11)]";
 

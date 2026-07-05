@@ -1,9 +1,15 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import SiteHeader from "@/components/public/site-header";
 import SiteFooter from "@/components/public/site-footer";
 import TrustStats from "@/components/public/trust-stats";
 import SectionCta from "@/components/public/section-cta";
 import { RATES } from "@/lib/rates";
+
+export const metadata: Metadata = {
+  title: "검품 | 물류",
+  description: "전문 검품원이 중국 공장·생산 현장을 직접 방문해 품질·수량·포장을 확인하고 사진이 담긴 보고서로 알려드립니다.",
+};
 
 const CARD = "rounded-[16px] bg-surface shadow-[0_7px_30px_rgba(90,114,123,0.11)]";
 const BADGE = "text-xs font-semibold rounded-full bg-warning-tint text-heading px-3 py-1";

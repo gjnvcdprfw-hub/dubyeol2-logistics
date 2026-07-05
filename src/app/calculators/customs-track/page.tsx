@@ -1,7 +1,13 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import SiteHeader from "@/components/public/site-header";
 import SiteFooter from "@/components/public/site-footer";
 import ComingSoon from "@/components/public/coming-soon";
+
+export const metadata: Metadata = {
+  title: "통관 진행 조회 | 물류",
+  description: "화물관리번호 또는 BL 번호로 세관 통관 진행 상태를 단계별로 조회하는 도구를 준비하고 있습니다.",
+};
 
 export default function CustomsTrackPage() {
   return (

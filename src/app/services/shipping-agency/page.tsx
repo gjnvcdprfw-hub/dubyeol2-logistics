@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import SiteHeader from "@/components/public/site-header";
 import SiteFooter from "@/components/public/site-footer";
@@ -5,7 +6,13 @@ import TrustStats from "@/components/public/trust-stats";
 import SectionCta from "@/components/public/section-cta";
 import { RATES } from "@/lib/rates";
 
-const CARD = "rounded-[16px] bg-surface shadow-[0_7px_30px_rgba(90,114,123,0.11)]";
+export const metadata: Metadata = {
+  title: "배송대행 | 물류",
+  description: "중국 창고 주소로 보내주시면 입고 확인부터 통관, 국내 배송까지 처리합니다. 구매 수수료 없이 공개 운임 요율로 안내드립니다.",
+};
+
+const CARD_BASE = "rounded-[16px] shadow-[0_7px_30px_rgba(90,114,123,0.11)]";
+const CARD = `${CARD_BASE} bg-surface`;
 const BADGE = "text-xs font-semibold rounded-full bg-warning-tint text-heading px-3 py-1";
 
 const GOOD_FIT = [
@@ -84,13 +91,13 @@ export default function ShippingAgencyPage() {
         <div className="max-w-6xl mx-auto px-6 py-16">
           <h2 className="text-3xl font-semibold text-heading">이런 분께 맞습니다</h2>
           <div className="mt-8 grid md:grid-cols-2 gap-6">
-            <div className={`${CARD} p-6 bg-success-tint`}>
+            <div className={`${CARD_BASE} p-6 bg-success-tint`}>
               <h3 className="font-semibold text-heading">적합한 고객</h3>
               <ul className="mt-4 space-y-3 text-sm text-secondary">
                 {GOOD_FIT.map((t) => <li key={t}>✓ {t}</li>)}
               </ul>
             </div>
-            <div className={`${CARD} p-6 bg-warning-tint`}>
+            <div className={`${CARD_BASE} p-6 bg-warning-tint`}>
               <h3 className="font-semibold text-heading">적합하지 않은 경우</h3>
               <ul className="mt-4 space-y-3 text-sm text-secondary">
                 {BAD_FIT.map((t) => <li key={t}>· {t}</li>)}

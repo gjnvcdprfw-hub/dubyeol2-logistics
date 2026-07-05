@@ -1,9 +1,15 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import SiteHeader from "@/components/public/site-header";
 import SiteFooter from "@/components/public/site-footer";
 import TrustStats from "@/components/public/trust-stats";
 import SectionCta from "@/components/public/section-cta";
 import { RATES } from "@/lib/rates";
+
+export const metadata: Metadata = {
+  title: "구매대행 | 물류",
+  description: "상품 링크와 수량만 입력하면 1688 구매·결제·중국 내 배송을 대신 처리합니다. 수수료와 부가세까지 항목별 견적으로 투명하게 안내합니다.",
+};
 
 const CARD = "rounded-[16px] bg-surface shadow-[0_7px_30px_rgba(90,114,123,0.11)]";
 

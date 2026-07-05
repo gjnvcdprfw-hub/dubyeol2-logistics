@@ -1,7 +1,13 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import SiteHeader from "@/components/public/site-header";
 import SiteFooter from "@/components/public/site-footer";
 import ComingSoon from "@/components/public/coming-soon";
+
+export const metadata: Metadata = {
+  title: "세관 요건 확인 | 물류",
+  description: "품목별 수입 요건과 KC 인증, 검역 등 필요한 절차를 주문 전에 미리 확인하는 도구를 준비하고 있습니다.",
+};
 
 export default function CustomsReqPage() {
   return (

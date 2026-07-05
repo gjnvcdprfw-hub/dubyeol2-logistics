@@ -1,7 +1,13 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import SiteHeader from "@/components/public/site-header";
 import SiteFooter from "@/components/public/site-footer";
 import ComingSoon from "@/components/public/coming-soon";
+
+export const metadata: Metadata = {
+  title: "HS코드 조회 | 물류",
+  description: "상품명을 입력하면 HS코드 후보와 기본 관세율을 찾아주는 도구를 준비하고 있습니다.",
+};
 
 export default function HsCodePage() {
   return (

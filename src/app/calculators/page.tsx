@@ -1,8 +1,14 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import SiteHeader from "@/components/public/site-header";
 import SiteFooter from "@/components/public/site-footer";
 import SectionCta from "@/components/public/section-cta";
 import { RATES } from "@/lib/rates";
+
+export const metadata: Metadata = {
+  title: "무역 계산기 | 물류",
+  description: "CBM·부피중량·배송비 계산기로 수입 원가를 미리 확인하세요. HS코드 조회, 수입비용 계산 등 통관 도구도 준비 중입니다.",
+};
 
 const FAQ = [
   {

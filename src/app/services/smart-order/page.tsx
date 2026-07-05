@@ -1,9 +1,15 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import SiteHeader from "@/components/public/site-header";
 import SiteFooter from "@/components/public/site-footer";
 import TrustStats from "@/components/public/trust-stats";
 import SectionCta from "@/components/public/section-cta";
 import { RATES } from "@/lib/rates";
+
+export const metadata: Metadata = {
+  title: "스마트오더 | 물류",
+  description: "플랫폼 주문 엑셀을 올리면 1688 매칭부터 구매, 입출고 추적, 국내 운송장 회신까지 하나의 흐름으로 처리합니다.",
+};
 
 const CARD = "rounded-[16px] bg-surface shadow-[0_7px_30px_rgba(90,114,123,0.11)]";
 

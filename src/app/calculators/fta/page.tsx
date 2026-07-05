@@ -1,7 +1,13 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import SiteHeader from "@/components/public/site-header";
 import SiteFooter from "@/components/public/site-footer";
 import ComingSoon from "@/components/public/coming-soon";
+
+export const metadata: Metadata = {
+  title: "FTA 관세율 비교 | 물류",
+  description: "HS코드를 입력하면 기본세율, WTO 협정세율, 한중 FTA 세율을 나란히 비교하는 도구를 준비하고 있습니다.",
+};
 
 export default function FtaPage() {
   return (

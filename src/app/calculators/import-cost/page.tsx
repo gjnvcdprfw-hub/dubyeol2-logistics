@@ -1,7 +1,13 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import SiteHeader from "@/components/public/site-header";
 import SiteFooter from "@/components/public/site-footer";
 import ComingSoon from "@/components/public/coming-soon";
+
+export const metadata: Metadata = {
+  title: "수입비용 계산기 | 물류",
+  description: "상품가와 HS코드를 입력하면 운임, 관세, 부가세까지 총 수입비용을 한 번에 추정하는 도구를 준비하고 있습니다.",
+};
 
 export default function ImportCostPage() {
   return (

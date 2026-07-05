@@ -1,8 +1,14 @@
+import type { Metadata } from "next";
 import SiteHeader from "@/components/public/site-header";
 import SiteFooter from "@/components/public/site-footer";
 import TrustStats from "@/components/public/trust-stats";
 import SectionCta from "@/components/public/section-cta";
 import ComingSoon from "@/components/public/coming-soon";
+
+export const metadata: Metadata = {
+  title: "1688 상품 검색 | 물류",
+  description: "한국어 키워드로 1688 상품을 찾고, 마음에 드는 상품은 그대로 견적을 요청하세요. 검색 기능은 준비 중입니다.",
+};
 
 const CATEGORIES = [
   "전체", "의류", "잡화·액세서리", "생활용품", "주방", "뷰티",
