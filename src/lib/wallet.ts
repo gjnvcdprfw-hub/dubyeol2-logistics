@@ -1,0 +1,135 @@
+import type { Order, WalletTransaction } from "@prisma/client";
+import { ValidationError } from "./auth";
+import { prisma } from "./db";
+import { computeQuote } from "./quote";
+
+export type WalletSummary = {
+  balanceKrw: number;
+  totalCreditKrw: number;
+  totalDebitKrw: number;
+  transactions: WalletTransaction[];
+};
+
+type OrderLike = Pick<
+  Order,
+  | "quantity"
+  | "serviceType"
+  | "inspectionRequested"
+  | "quoteUnitPriceFen"
+  | "quoteCnShippingFen"
+  | "quoteWeightGrams"
+  | "quoteVolumeCm3"
+  | "quoteExchangeRateX100"
+  | "quoteShippingMethod"
+  | "quotedAt"
+>;
+
+export type ShipmentRequestResult = {
+  order: Order;
+  transaction: WalletTransaction;
+  balanceKrw: number;
+};
+
+export function getQuotedOrderTotalKrw(order: OrderLike) {
+  if (!order.quotedAt || !order.quoteShippingMethod) {
+    throw new ValidationError("견적 완료된 주문만 출고 요청할 수 있습니다");
+  }
+
+  return computeQuote({
+    quantity: order.quantity,
+    serviceType: order.serviceType as "PURCHASE" | "SHIPPING",
+    inspectionRequested: order.inspectionRequested,
+    unitPriceFen: order.quoteUnitPriceFen ?? 0,
+    cnShippingFen: order.quoteCnShippingFen ?? 0,
+    weightGrams: order.quoteWeightGrams ?? 0,
+    volumeCm3: order.quoteVolumeCm3 ?? 0,
+    exchangeRateX100: order.quoteExchangeRateX100 ?? 0,
+    shippingMethod: order.quoteShippingMethod as "SEA" | "AIR",
+  }).totalKrw;
+}
+
+export async function getWalletSummary(sellerId: string): Promise<WalletSummary> {
+  if (!sellerId) throw new ValidationError("로그인이 필요합니다");
+
+  const transactions = await prisma.walletTransaction.findMany({
+    where: { sellerId },
+    orderBy: { createdAt: "desc" },
+  });
+  const balanceKrw = transactions.reduce((sum, tx) => sum + tx.amountKrw, 0);
+  const totalCreditKrw = transactions
+    .filter((tx) => tx.amountKrw > 0)
+    .reduce((sum, tx) => sum + tx.amountKrw, 0);
+  const totalDebitKrw = transactions
+    .filter((tx) => tx.amountKrw < 0)
+    .reduce((sum, tx) => sum + Math.abs(tx.amountKrw), 0);
+
+  return { balanceKrw, totalCreditKrw, totalDebitKrw, transactions };
+}
+
+export async function recordWalletCredit(sellerId: string, amountKrw: number, memo: string) {
+  if (!sellerId) throw new ValidationError("로그인이 필요합니다");
+  if (!Number.isInteger(amountKrw) || amountKrw <= 0) {
+    throw new ValidationError("예치금 금액이 올바르지 않습니다");
+  }
+
+  const summary = await getWalletSummary(sellerId);
+  return prisma.walletTransaction.create({
+    data: {
+      sellerId,
+      type: "TEST_CREDIT",
+      amountKrw,
+      balanceAfterKrw: summary.balanceKrw + amountKrw,
+      memo,
+    },
+  });
+}
+
+export async function requestShipmentWithWallet(
+  sellerId: string,
+  orderId: string,
+): Promise<ShipmentRequestResult> {
+  if (!sellerId) throw new ValidationError("로그인이 필요합니다");
+  if (!orderId) throw new ValidationError("주문을 선택해 주세요");
+
+  return prisma.$transaction(async (tx) => {
+    const order = await tx.order.findFirst({ where: { id: orderId, sellerId } });
+    if (!order) throw new ValidationError("주문을 찾을 수 없습니다");
+    if (order.status === "SHIPMENT_REQUESTED") {
+      throw new ValidationError("이미 출고 요청된 주문입니다");
+    }
+    if (order.status !== "RECEIVED") {
+      throw new ValidationError("입고·견적 완료된 주문만 출고 요청할 수 있습니다");
+    }
+
+    const amountKrw = getQuotedOrderTotalKrw(order);
+    const currentTransactions = await tx.walletTransaction.findMany({ where: { sellerId } });
+    const balanceKrw = currentTransactions.reduce((sum, item) => sum + item.amountKrw, 0);
+    if (balanceKrw < amountKrw) throw new ValidationError("예치금 잔액이 부족합니다");
+
+    const updateResult = await tx.order.updateMany({
+      where: { id: order.id, sellerId, status: "RECEIVED" },
+      data: {
+        status: "SHIPMENT_REQUESTED",
+        shipmentRequestedAt: new Date(),
+        shipmentRequestedAmountKrw: amountKrw,
+      },
+    });
+    if (updateResult.count !== 1) {
+      throw new ValidationError("이미 출고 요청된 주문입니다");
+    }
+
+    const updatedOrder = await tx.order.findFirstOrThrow({ where: { id: order.id, sellerId } });
+    const transaction = await tx.walletTransaction.create({
+      data: {
+        sellerId,
+        orderId: order.id,
+        type: "SHIPMENT_DEBIT",
+        amountKrw: -amountKrw,
+        balanceAfterKrw: balanceKrw - amountKrw,
+        memo: `출고 요청 차감: ${order.productName}`,
+      },
+    });
+
+    return { order: updatedOrder, transaction, balanceKrw: balanceKrw - amountKrw };
+  });
+}

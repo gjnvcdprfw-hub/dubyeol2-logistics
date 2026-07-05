@@ -8,46 +8,50 @@ datasource db {
 }
 
 model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
-  passwordHash String
-  companyName  String?
-  contactName  String
-  phone        String?
-  role         String   @default("SELLER") // "SELLER" | "ADMIN"
-  inboundCode  String?  @unique // 회원별 입고ID (8자 대문자영숫자)
-  createdAt    DateTime @default(now())
-  orders       Order[]
+  id                 String              @id @default(cuid())
+  email              String              @unique
+  passwordHash       String
+  companyName        String?
+  contactName        String
+  phone              String?
+  role               String              @default("SELLER") // "SELLER" | "ADMIN"
+  inboundCode        String?             @unique // 회원별 입고ID (8자 대문자영숫자)
+  createdAt          DateTime            @default(now())
+  orders             Order[]
+  walletTransactions WalletTransaction[]
 }
 
 model Order {
-  id                  String    @id @default(cuid())
-  seller              User      @relation(fields: [sellerId], references: [id])
-  sellerId            String
-  productUrl          String
-  productName         String
-  optionText          String?
-  quantity            Int
-  serviceType         String // "PURCHASE"(구매대행) | "SHIPPING"(배송대행)
-  inspectionRequested Boolean   @default(false) // 유료 검수 신청 여부
-  memo                String?
-  status              String    @default("REQUESTED") // "REQUESTED"(접수됨) | "RECEIVED"(입고완료)
-  createdAt           DateTime  @default(now())
-  receivedAt          DateTime?
-  outerIssue          Boolean? // 외포장 이상 여부
-  outerNote           String?
-  inspCountActual     Int? // 이하 4개는 유료 검수 신청 건만 기록
-  inspAppearanceOk    Boolean?
-  inspDefectCount     Int?
-  inspNote            String?
-  quoteUnitPriceFen     Int?      // 상품 단가 (펀=0.01¥). 배송대행 건은 0 허용
-  quoteCnShippingFen    Int?      // 중국 내 배송비 (펀)
-  quoteWeightGrams      Int?      // 실측 무게 (g)
-  quoteVolumeCm3        Int?      // 부피 (cm³) — CBM×1,000,000
-  quoteExchangeRateX100 Int?      // 적용 환율 ₩/¥ ×100 (예: 190.50 → 19050)
-  quoteShippingMethod   String?   // "SEA" | "AIR"
-  quotedAt              DateTime?
-  photos              InboundPhoto[]
+  id                         String              @id @default(cuid())
+  seller                     User                @relation(fields: [sellerId], references: [id])
+  sellerId                   String
+  productUrl                 String
+  productName                String
+  optionText                 String?
+  quantity                   Int
+  serviceType                String // "PURCHASE"(구매대행) | "SHIPPING"(배송대행)
+  inspectionRequested        Boolean             @default(false) // 유료 검수 신청 여부
+  memo                       String?
+  status                     String              @default("REQUESTED") // "REQUESTED" | "RECEIVED" | "SHIPMENT_REQUESTED"
+  createdAt                  DateTime            @default(now())
+  receivedAt                 DateTime?
+  outerIssue                 Boolean? // 외포장 이상 여부
+  outerNote                  String?
+  inspCountActual            Int? // 이하 4개는 유료 검수 신청 건만 기록
+  inspAppearanceOk           Boolean?
+  inspDefectCount            Int?
+  inspNote                   String?
+  quoteUnitPriceFen          Int? // 상품 단가 (펀=0.01¥). 배송대행 건은 0 허용
+  quoteCnShippingFen         Int? // 중국 내 배송비 (펀)
+  quoteWeightGrams           Int? // 실측 무게 (g)
+  quoteVolumeCm3             Int? // 부피 (cm³) — CBM×1,000,000
+  quoteExchangeRateX100      Int? // 적용 환율 ₩/¥ ×100 (예: 190.50 → 19050)
+  quoteShippingMethod        String? // "SEA" | "AIR"
+  quotedAt                   DateTime?
+  shipmentRequestedAt        DateTime?
+  shipmentRequestedAmountKrw Int?
+  photos                     InboundPhoto[]
+  walletTransactions         WalletTransaction[]
 }
 
 model InboundPhoto {
@@ -56,4 +60,17 @@ model InboundPhoto {
   orderId   String
   path      String // "/uploads/<파일명>"
   createdAt DateTime @default(now())
+}
+
+model WalletTransaction {
+  id              String   @id @default(cuid())
+  seller          User     @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  sellerId        String
+  order           Order?   @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  orderId         String?
+  type            String // "TEST_CREDIT" | "SHIPMENT_DEBIT"
+  amountKrw       Int // credit positive, debit negative
+  balanceAfterKrw Int
+  memo            String
+  createdAt       DateTime @default(now())
 }
