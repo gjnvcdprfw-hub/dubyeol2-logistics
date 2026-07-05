@@ -9,23 +9,23 @@
 ## 1. 현재 위치
 
 - 프로젝트: 물류 — 사업자(쿠팡·11번가·1688 셀러) 대상 중국→한국 통합 물류 플랫폼. 벤치마크: 두리무역(duly.co.kr)
-- 두별2 적용 상태: 빌드 트랙 — **Phase 1 완료·로컬 main 머지 (2026-07-04, 머지 커밋 545eec6)**
-- 현재 Phase: Phase 2 (입고 증거 확인) — Feature 1의 2/3
-- 현재 단계: 단계 15→3/16 — Phase 1 외부감리 PASS(findings 0)·04-completion 작성·자동 머지 완료. PM이 phase-002 00-customer-outcome 작성 중
-- 진행자: PM (Claude Code, Team Leader에서 복귀)
+- 두별2 적용 상태: 빌드 트랙 — **Phase 1·2 완료·로컬 main 머지** (Phase 1: 545eec6 / Phase 2: de26c06, 1차 감리 FAIL→수정→재감리 PASS)
+- 현재 Phase: Phase 3 (항목별 견적) — Feature 1의 3/3, 마지막
+- 현재 단계: 단계 3/16 — PM이 phase-003 00-customer-outcome 작성 중
+- 진행자: PM (Claude Code)
 - 진행상태: 진행 중
 - 연결된 기능 약속(첫 출시): 주문 접수 → 중국창고 입고·기본검수(수량+포장외관) → 항목별 투명 견적
 - 연결된 고객 흐름: 사업자 셀러가 중국 소싱 → 우리에게 맡김 → 중국창고 입고·검수 → 견적 확인 → (다음 Phase) LCL·통관·한국배송
 - 연결된 메뉴탭 / 화면 영역: 셀러 주문 접수 · 셀러 대시보드(입고·검수·견적)
-- 현재 packet: `phase-packets/phase-001/` **완결(00~04)**. phase-002 생성 중
-- 다음에 필요한 파일: `phase-packets/phase-002/00-customer-outcome.md`
+- 현재 packet: `phase-packets/phase-001/`·`phase-002/` **완결(00~04)**. phase-003 생성 중
+- 다음에 필요한 파일: `phase-packets/phase-003/00-customer-outcome.md`
 - 막힌 것: 없음
 
 ## 2. 다음 행동
 
-1. PM: phase-002(입고 증거 확인 — 운영자 입고 기록 + 셀러 대시보드 입고 증거, 창고주소/입고ID 포함) 00-customer-outcome 작성 → TL 전환 → 같은 사이클(intake→plan→Builder→Machine Check→외부감리→머지)
-2. Phase 3(항목별 견적) 후 Feature 1 완료 → PM 기능 단위 대표님 보고 (16단계 — 이 보고 전에 다음 기능 정렬 금지)
-3. 빌드 기준: 기능·요율 `benchmark-duly.md`, UI 토큰 `design-system.md`. Phase 1 이월: 로그아웃 JSON 착지(UX), 이메일 미정규화, mass assignment는 해소됨(39feabe)
+1. PM: phase-003(항목별 견적 — 두리무역 요율 초기값으로 상품가·수수료·검수비·예상 국제운임 항목별 표시) 00-customer-outcome 작성 → TL 전환 → 같은 사이클
+2. Phase 3 완료 시 **Feature 1 완료 → PM 기능 단위 대표님 보고** (16단계 — 이 보고 전에 다음 기능 정렬 금지)
+3. 빌드 기준: 요율 `benchmark-duly.md` §3, UI 토큰 `design-system.md`. 이월: 로그아웃 JSON 착지(UX), 이메일 미정규화, 창고 실주소 자리표시(대표님 확정 대기)
 
 ## 3. 현재 단계 게이트
 
@@ -42,7 +42,7 @@
 | 구분 | 현재 횟수 | 최대 | 다음 행동 |
 |---|---:|---:|---|
 | Machine Check 게이트 실패 | 0 | 제한 없음 | Codex 외부감리 호출 전 Claude Code Team Leader가 분류하고 Builder 서브에이전트가 수정 |
-| Codex 외부감리 FAIL | 1 (Phase 2, 2026-07-04 — 수정 중) | 3 | Claude Code Team Leader가 분류하고 Builder 서브에이전트가 수정 후 재감리 |
+| Codex 외부감리 FAIL | Phase 2: 1회(해소) · Phase 3: 1회(해소) | 3/phase | Claude Code Team Leader가 분류하고 Builder 서브에이전트가 수정 후 재감리 |
 | Codex 외부감리 BLOCKED | 0 | 1 | PM이 대표님에게 고객 언어 질문 하나만 보고 |
 
 ## 5. 알림 상태

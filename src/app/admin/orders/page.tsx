@@ -28,9 +28,16 @@ export default async function AdminOrdersPage() {
               <td className="p-3">{o.quantity}</td>
               <td className="p-3">{o.inspectionRequested ? "유료 검수" : "-"}</td>
               <td className="p-3">{STATUS_LABEL[o.status] ?? o.status}</td>
-              <td className="p-3">{o.status === "REQUESTED" && (
-                <Link href={`/admin/orders/${o.id}`} className="text-brand font-medium">입고 기록</Link>
-              )}</td>
+              <td className="p-3">
+                {o.status === "REQUESTED" && (
+                  <Link href={`/admin/orders/${o.id}`} className="text-brand font-medium">입고 기록</Link>
+                )}
+                {o.status === "RECEIVED" && (o.quotedAt ? (
+                  <span className="text-muted">견적 완료</span>
+                ) : (
+                  <Link href={`/admin/orders/${o.id}/quote`} className="text-brand font-medium">견적 입력</Link>
+                ))}
+              </td>
             </tr>
           ))}
           {orders.length === 0 && <tr><td colSpan={6} className="p-8 text-center text-muted">주문이 없습니다</td></tr>}

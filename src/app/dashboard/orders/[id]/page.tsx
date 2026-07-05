@@ -1,6 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import { getSession } from "@/lib/session";
 import { prisma } from "@/lib/db";
+import { computeQuote } from "@/lib/quote";
 
 const STATUS_LABEL: Record<string, string> = { REQUESTED: "접수됨", RECEIVED: "입고완료" };
 
@@ -49,6 +50,45 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
       ) : (
         <div className="bg-surface rounded-[27px] shadow-[0_7px_30px_rgba(90,114,123,0.11)] p-8 text-muted text-sm">
           아직 중국 창고에 입고되지 않았습니다. 입고되면 사진과 함께 표시됩니다.
+        </div>
+      )}
+      {order.quotedAt && order.quoteShippingMethod && (
+        <section className="bg-surface rounded-[27px] shadow-[0_7px_30px_rgba(90,114,123,0.11)] p-6 space-y-3">
+          <h2 className="text-[14px] font-semibold text-heading">항목별 견적</h2>
+          {(() => {
+            const q = computeQuote({
+              quantity: order.quantity,
+              serviceType: order.serviceType as "PURCHASE" | "SHIPPING",
+              inspectionRequested: order.inspectionRequested,
+              unitPriceFen: order.quoteUnitPriceFen!, cnShippingFen: order.quoteCnShippingFen!,
+              weightGrams: order.quoteWeightGrams!, volumeCm3: order.quoteVolumeCm3!,
+              exchangeRateX100: order.quoteExchangeRateX100!, shippingMethod: order.quoteShippingMethod as "SEA" | "AIR",
+            });
+            const yuan = (fen: number) => `¥${(fen / 100).toLocaleString("ko-KR", { minimumFractionDigits: 2 })}`;
+            const krw = (w: number) => `₩${w.toLocaleString("ko-KR")}`;
+            return (
+              <>
+                <ul className="text-sm space-y-1.5">
+                  {q.itemsKrw.map((i) => (
+                    <li key={i.key} className="flex justify-between">
+                      <span className="text-secondary">{i.label}</span>
+                      <span className="text-body">{yuan(i.amountFen)} <span className="text-muted">({krw(i.amountKrw)})</span></span>
+                    </li>
+                  ))}
+                </ul>
+                <div className="border-t border-black/5 pt-2 flex justify-between text-sm font-semibold">
+                  <span className="text-heading">합계</span>
+                  <span className="text-heading">{yuan(q.totalFen)} <span className="text-brand">({krw(q.totalKrw)})</span></span>
+                </div>
+                <p className="text-xs text-muted">청구중량 {q.chargeableWeightKg}kg 기준 · 적용 환율 ₩{(order.quoteExchangeRateX100! / 100).toFixed(2)}/¥ · 국제운임은 예상 금액이며 관세·부가세는 통관 시 별도입니다. 표시 금액은 참고용 안내입니다.</p>
+              </>
+            );
+          })()}
+        </section>
+      )}
+      {order.status === "RECEIVED" && !order.quotedAt && (
+        <div className="bg-surface rounded-[27px] shadow-[0_7px_30px_rgba(90,114,123,0.11)] p-6 text-sm text-muted">
+          견적 산정 중입니다. 완료되면 항목별로 표시됩니다.
         </div>
       )}
     </div>

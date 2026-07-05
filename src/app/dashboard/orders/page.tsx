@@ -31,6 +31,7 @@ export default async function OrdersPage() {
                 {o.inspectionRequested
                   ? <span className="rounded-full bg-success-tint text-success px-2 py-1">유료 검수 신청됨</span>
                   : <span className="rounded-full bg-surface-alt text-muted px-2 py-1">수량 미확인 (검수 미신청)</span>}
+                {o.quotedAt && <span className="rounded-full bg-info/10 text-info px-2 py-1">견적 완료</span>}
                 <span className="rounded-full bg-warning-tint text-accent px-2 py-1">{STATUS_LABEL[o.status] ?? o.status}</span>
               </div>
             </li>

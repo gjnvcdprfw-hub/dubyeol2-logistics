@@ -6,55 +6,58 @@
     "dubyeol2_root": ".harness/dubyeol2"
   },
   "run": {
-    "id": "phase-002-inbound-evidence-20260704-r2",
-    "phase_id": "phase-002",
-    "phase_index": 2,
+    "id": "phase-003-itemized-quote-20260704-r2",
+    "phase_id": "phase-003",
+    "phase_index": 3,
     "phase_total": 3
   },
   "phase_goal": {
-    "customer_goal": "셀러가 맡긴 물건이 중국 창고에 들어왔는지 입고 증거(사진 1~2장·외포장 이상 안내, 유료 검수 신청 건은 수량·외관·하자)로 확인한다",
-    "why_this_phase_matters": "'내 물건을 증거로 확인한다' — 신뢰의 핵심. Feature 1의 2/3",
-    "done_when_customer_can": "운영자가 입고를 기록하면 셀러 대시보드에서 해당 주문이 입고완료+증거로 보이고, 검수 미신청 건은 '수량 미확인'임이 명확하다"
+    "customer_goal": "셀러가 주문의 총비용을 항목별(상품가·중국내배송·수수료·VAT·검수비·예상 국제운임, ¥·₩ 병기)로 확인하고 국제배송을 결정한다",
+    "why_this_phase_matters": "숨은비용 불신 해소 — Feature 1(주문 접수→입고 증거→투명 견적)의 마지막 3/3",
+    "done_when_customer_can": "입고 완료 건에 운영자가 견적을 입력하면 셀러 상세에 항목별 견적 카드가 뜨고, 합계=항목 합이며 계산이 요율표와 일치한다"
   },
   "feature_contract": {
     "feature_md": ".harness/dubyeol2/feature.md",
-    "customer_promise": "안전 입고 + 입고 증거 + (Phase 3) 투명 견적. 검수 정책 두리무역식: 기본 무료=입고사진 1~2장+외포장 안내, 수량·외관·하자=유료 옵션",
+    "customer_promise": "항목별 투명 견적 — 요율은 두리무역 공개 요율 초기값(rates.ts 단일 정의, 대표님 추후 컷팅), 검수 미신청 건은 검수비 항목 자체가 없음",
     "must_not_happen_when_paid": [
-      "입고 증거가 실제 기록과 다르게 표시",
-      "타 셀러 주문에 입고 기록 오귀속·타 셀러 데이터 노출",
-      "셀러가 운영자 기능 접근",
-      "검수 미신청 건이 수량 확인된 것처럼 오인되는 표시"
+      "합계가 항목 합과 불일치",
+      "계산이 요율표와 불일치 (과청구 포함)",
+      "검수 미신청 건에 검수비 표시",
+      "타 셀러 견적 노출",
+      "면책 문구(예상·관세/부가세 별도·참고용) 누락"
     ],
     "in_scope": [
-      "운영자(ADMIN 역할, 시드 생성) 입고 기록 화면: 사진 1~2장 업로드(로컬 저장)·외포장 이상·유료 검수 결과(신청 건만)",
-      "셀러 주문 상세: 입고 증거 3분기 표시(검수 결과/신청·미기록/미신청 '수량 미확인')",
-      "창고 주소+회원별 입고ID(8자) 발급·복사 — 실주소는 '오픈 전 확정' 자리표시(대표님 결정)",
-      "주문 상태 REQUESTED→RECEIVED (compare-and-set으로 이중 기록 차단)"
+      "요율 단일 정의 src/lib/rates.ts (수수료 5%+VAT 10%, 해운 첫 1kg ¥25+kg당 ¥5 올림, 항공 ¥32.5+100g당 ¥1.8 올림, 부피계수 6000, 검수 ¥1/개)",
+      "computeQuote 순수 함수 — 전부 정수 연산(펀·g·환율×100), NaN·수량 가드, TDD 12케이스",
+      "운영자 견적 입력(RECEIVED 건, 저장 전 computeQuote 검증, 입력값만 저장)",
+      "셀러 항목별 견적 카드(¥·₩ 병기, 합계, 청구중량·환율·면책 문구) + 목록 '견적 완료' 배지"
     ],
     "out_of_scope": [
-      "견적(Phase 3)",
-      "출고·배송·알림·바코드/WMS",
-      "외부 스토리지"
+      "결제·예치금·실청구",
+      "환율 자동 연동(유료 API 금지선)",
+      "관세 계산",
+      "LCL 요율",
+      "견적 상태 전이·이력"
     ],
     "acceptance_example": {
-      "name": "보온병 ×100 (유료 검수 신청) + 케이스 ×50 (미신청)",
-      "customer_input": "운영자가 신청 건에 사진 2장+수량 100 기록, 미신청 건에 사진 1장+외포장 이상 기록",
-      "customer_visible_result": "셀러 상세: 신청 건=사진 2장·외포장 정상·유료 검수 결과 100/100·하자 0 / 미신청 건=사진 1장·'이상 있음—박스 모서리 찌그러짐'·'수량 미확인' 안내",
-      "pass_criteria": "증거-기록 일치, 검수 경계 오인 없음, 셀러의 /admin 접근 차단",
-      "counterexample": "검수 미신청(또는 미기록) 건에 검수 결과가 보이거나, 신청 건이 '신청하지 않은 건'으로 표시되면 실패"
+      "name": "보온텐블러 ×30 (검수 신청, 입고완료) 견적",
+      "customer_input": "운영자: 단가 ¥20·중국배송 ¥30·12kg·0.08CBM·환율 190·해운",
+      "customer_visible_result": "상품가 ¥600(₩114,000)+중국배송 ¥30+수수료 ¥30+VAT ¥3+검수비 ¥30+운임 ¥90(청구중량 14kg) = 합계 ¥783(₩148,770) + 면책 문구",
+      "pass_criteria": "전 항목이 요율표 손검산과 일치, 합계=항목 합",
+      "counterexample": "화면 흐름은 되는데 금액이 요율표와 다르거나 합계가 어긋나면 실패"
     }
   },
   "phase_qa": {
-    "normal_flow": "운영자 기록→셀러 확인 (Playwright 실측 PASS)",
-    "failure_flow": "외포장 이상 표시, 검수 미신청 건 검수 기록 거부(서비스 계층), 이중 제출 CAS 차단 (vitest)",
-    "customer_harm_guardrail": "권한 4중 가드(layout+페이지 2+API), 격리 findFirst, 검수 경계 3분기 문구",
-    "next_phase_handoff_check": "사이드바 '견적 (준비 중)' 자리만"
+    "normal_flow": "운영자 견적 입력→셀러 카드 (Playwright 실측: 6항목 전부 손검산 일치)",
+    "failure_flow": "NaN·음수·수량 0·비RECEIVED 거부 (vitest), 비ADMIN 403",
+    "customer_harm_guardrail": "합계=reduce 구조 보장, 요율 단일 파일, 검수 미신청 항목 부재(테스트), 격리 findFirst",
+    "next_phase_handoff_check": "Feature 1 완료 — 다음 기능(LCL)은 새 feature 정렬"
   },
   "ui_qa": {
     "has_ui": true,
     "scenario_prepared": true,
     "separate_live_ui_qa_required": false,
-    "summary": "Playwright 실측 7시나리오 PASS: 권한 분리(셀러→/admin 리다이렉트), 창고주소/입고ID, 사진 업로드 2건, 검수 섹션 조건부 렌더, 셀러 증거 표시 2분기, 콘솔 0 — 03-verification.md §3.2"
+    "summary": "Playwright 실측 7시나리오 PASS: 견적 카드 6항목 손검산 일치(합계 ¥783=₩148,770), 면책 문구, 입고 증거와 병렬 표시(Feature 1 흐름 완결), 콘솔 0 — 03-verification.md §3.2"
   },
   "design_system": {
     "design_system_md": ".harness/dubyeol2/design-system.md",
@@ -66,39 +69,33 @@
     "change_summary": "변경 없음 (lint errors 0)"
   },
   "changes": {
-    "summary": "Phase 2 증분 + 외부감리 FAIL 수정: 유료 검수 신청 건은 검수 결과 필수(3계층: recordInbound ValidationError, API 서버측 inspectionRequested 판정, 폼 필수 고정). 커밋 main..phase-002 9개 (922f25a→2001265)",
+    "summary": "Phase 3 증분 + 1차 감리 FAIL 수정: 고객 노출 요율 라벨 전부 rates.ts에서 파생(quote.ts 3곳 + 접수 폼 라디오 라벨, TDD 라벨 파생 테스트 추가, grep으로 잔존 0건 확인). 커밋 main..phase-003 7개 (a35338e→7267d40)",
     "files_changed": [
-      "prisma/schema.prisma + migrations/20260704115225_inbound",
-      "scripts/seed-admin.ts",
-      "src/lib/{inbound,uploads,session}.ts",
-      "src/app/api/admin/inbound/route.ts",
-      "src/app/admin/{layout,orders/page,orders/[id]/page}.tsx",
-      "src/app/dashboard/{orders/[id]/page,warehouse-address/*,orders/page,layout}.tsx",
-      "tests/inbound.test.ts",
-      "package.json + package-lock.json (tsx devDependency — 플랜 명시+대표님 포괄 승인, changes.md §6 기록)"
+      "prisma/schema.prisma + migrations/20260704130836_quote",
+      "src/lib/rates.ts, src/lib/quote.ts, tests/quote.test.ts",
+      "src/app/api/admin/quote/route.ts",
+      "src/app/admin/orders/[id]/quote/page.tsx, src/app/admin/orders/page.tsx",
+      "src/app/dashboard/orders/[id]/page.tsx, src/app/dashboard/orders/page.tsx"
     ],
     "risk_notes": [
-      "1차 감리 FAIL 3건 전부 반영: MAJOR=검수 필수화(TDD 신규 케이스+실화면 재QA 29/30 케이스), MINOR=콘솔 로그 사유 명시(03 §3.2-7), tsx 의존성 근거 기록(changes.md §6)",
-      "플랜 이탈 6건 전부 02-plan.md §2.1 기록",
-      "남은 위험: 창고 실주소 자리표시(대표님 확정 대기), 배포 전 체크리스트(03 §3.1)"
+      "1차 감리 MAJOR 반영: 라벨 요율 숫자 하드코딩 제거 — RATES 템플릿 파생, 컷팅 시 계산·설명 동시 갱신 (커밋 7267d40)",
+      "플랜 이탈 2건 02-plan.md §2.1 기록 (청구중량 정수 연산 — 100g 배수 ¥1.8 과청구 엣지 제거 / volumeDivisor 단일 참조+NaN·수량 가드)",
+      "남은 위험(03 §5): 재견적 무이력 덮어쓰기, PURCHASE 단가 0 허용, rates.ts 변경 시 기견적 소급 변동(스냅샷 아님 — 배포 전 결정), 환율 수동 입력"
     ]
   },
   "machine_check": {
     "status": "PASS",
     "commands_or_checks": [
-      "npx vitest run → 22/22 PASS (inbound 8케이스 TDD, 검수 필수 케이스 포함)",
+      "npx vitest run → 32/32 PASS (라벨 파생 테스트 포함)",
       "npm run build → 성공, 오류 0",
       "npx -y @google/design.md lint → errors 0",
-      "Playwright 실화면 QA 7시나리오 PASS (권한 분리·업로드·검수 경계·외포장 이상 실측)",
-      "보안 검토(전담 에이전트, /security-review 대체): PASS — C/H/M 0, Low 4·Info 3 로컬 수용, npm audit H/C 0",
-      "재감리 실화면 QA: 신청 건 폼 검수 섹션 필수 고정 확인 + 수량 불일치(29/30) 기록→셀러 표시 실측"
+      "Playwright 실화면 QA 7시나리오 PASS — 견적 6항목 손검산 일치, 면책 문구, 콘솔 0",
+      "보안 검토(전담 에이전트): PASS — C/H 0, 권한 3중 가드·IDOR 없음·요율 서버 상수, npm audit H/C 0",
+      "grep 검증: rates.ts 밖 고객 노출 요율 숫자 0건 (배송대행 '수수료 0%'는 요율표 밖 정책 문구로 유지)"
     ],
     "evidence_files": [
-      ".harness/dubyeol2/phase-packets/phase-002/03-verification.md",
-      ".playwright-mcp/page-2026-07-04T12-36-16-256Z.yml",
-      ".playwright-mcp/page-2026-07-04T12-36-36-600Z.yml",
-      ".playwright-mcp/page-2026-07-04T12-30-49-744Z.yml",
-      ".playwright-mcp/page-2026-07-04T12-52-00-059Z.yml"
+      ".harness/dubyeol2/phase-packets/phase-003/03-verification.md",
+      ".playwright-mcp/page-2026-07-04T13-43-57-819Z.yml"
     ],
     "failures": []
   },
