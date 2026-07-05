@@ -1,6 +1,6 @@
 # Phase 7 Verification
 
-상태: **Machine Check PASS — Claude 교차 외부감리 대기** (2026-07-05)
+상태: **Machine Check PASS — Claude 교차 외부감리 PASS** (2026-07-06)
 
 ## 1. Builder 결과
 
@@ -79,7 +79,7 @@
 - Codex 자가감리 금지.
 - Phase 7 Claude 교차감리 완료.
 - 결과: **PASS** — `external-audit/result-phase-007.json`.
-- findings: MINOR 1건. Task 3 화면 변경이 아직 커밋되지 않아 04-completion 전 Phase 7 범위 커밋으로 남기라는 지적. 본 문서 갱신 뒤 별도 구현·증거 커밋으로 해소한다.
+- findings: MINOR 1건. Task 3 화면 변경이 아직 커밋되지 않아 04-completion 전 Phase 7 범위 커밋으로 남기라는 지적은 구현·증거 커밋 `776d1e8`로 해소.
 - Phase 7 감리 요청은 `external-audit/request.json`과 `external-audit/request-phase-007.json`에 보존한다.
 - Phase 6 감리 요청은 `external-audit/request-phase-006.json`에 보존되어 있으며, Phase 6 완료·main 머지는 Claude 교차감리 PASS 전 금지다.
 - Phase 7도 `04-completion.md` 전 다음 Phase 완료 전환 금지.
@@ -87,8 +87,8 @@
 ## 5. PM 완료 보고 판정
 
 - Phase 7은 Machine Check와 Claude 교차 외부감리까지 PASS했다.
-- 남은 단계: Task 3 화면 변경을 커밋으로 남김 → `04-completion.md` 작성 → 로컬 main 머지.
+- 남은 단계: `04-completion.md` 작성 → 로컬 main 머지.
 - 남은 위험:
   - 실계좌·실입금·실결제는 아직 없고, 로컬 테스트 원장이다.
   - 송장, 통관, 국내 배송 추적, 실제 창고 출고 처리는 후속 Phase다.
-  - Task 3 변경은 Phase 6 dirty dashboard 파일과 겹쳐 커밋 단위가 아니라 task-only diff 리뷰 근거로 남아 있다.
+  - Task 3 변경은 구현·증거 커밋 `776d1e8`로 커밋 추적성을 보강했다.

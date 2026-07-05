@@ -10,25 +10,24 @@
 
 - 프로젝트: 물류 — 사업자(쿠팡·11번가·1688 셀러) 대상 중국→한국 통합 물류 플랫폼. 벤치마크: 두리무역(duly.co.kr)
 - 실행 엔진 모드: **B — 빌드=Codex** (2026-07-05 대표님 선언, engine.md 참조. Claude 복귀 시 "모드 A로 복귀" 선언 → 감리 대기 큐 일괄 처리)
-- 두별2 적용 상태: Feature 1 완료·머지 → Feature 2 완료·머지 → Feature 3 Phase 6 Machine Check PASS·Claude 교차감리 대기 → **Feature 4 Phase 7 Machine Check PASS·Claude 교차감리 대기**
-- 현재 Phase: **Phase 7 (견적 후 출고 요청·예치금 차감)**
-- 현재 단계: 단계 12/16 — Machine Check PASS → Claude 교차 외부감리 대기
-- 진행자: Team Leader (Codex)
-- 진행상태: Machine Check PASS / 외부감리 대기
-- 연결된 기능 약속: Feature 4 — 로그인 후 셀러 출고 요청·예치금 흐름
-- 연결된 고객 흐름: 셀러가 견적 완료 주문을 출고 요청하고 예치금 차감·상태를 확인
-- 연결된 메뉴탭 / 화면 영역: 셀러 주문 상세 · 출고관리 · 예치금 관리 · 대시보드 홈
-- 현재 packet: phase-001~005 완결 / phase-006 Machine Check PASS·감리 대기 / **phase-007 Machine Check PASS·감리 대기**
-- 다음에 필요한 파일: Claude 외부감리 결과, `phase-007/04-completion.md` (PASS 후)
-- 막힌 것: 없음. 단, Phase 6 완료·main 머지는 Claude 교차감리 PASS 전 금지
+- 두별2 적용 상태: Feature 1 완료·머지 → Feature 2 완료·머지 → **Feature 3 Phase 6 완료·로컬 main 머지 완료** → **Feature 4 Phase 7 완료·로컬 main 머지 완료**
+- 현재 Phase: **Phase 6~7 closeout**
+- 현재 단계: 단계 16/16 — Feature 3·4 완료 보고
+- 진행자: PM (Codex)
+- 진행상태: Feature 완료 보고
+- 연결된 기능 약속: Feature 3 — 두리무역 1:1 비공개 기준판 / Feature 4 — 로그인 후 셀러 출고 요청·예치금 흐름
+- 연결된 고객 흐름: 전체 기준판 확인 / 셀러 견적 후 출고 요청·예치금 차감
+- 연결된 메뉴탭 / 화면 영역: 공개 전체 · 셀러 주문 상세 · 출고관리 · 예치금 관리 · 대시보드 홈
+- 현재 packet: phase-001~007 완결
+- 다음에 필요한 파일: 다음 기능 정렬 시 새 `feature.md` 또는 후속 Phase packet
+- 막힌 것: 없음
 
 ## 2. 다음 행동
 
-1. Claude 복귀 시 교차감리 큐 처리: Phase 6 `external-audit/request-phase-006.json`, Phase 7 `external-audit/request-phase-007.json` (`request.json`은 현재 Phase 7)
-2. Phase 7 외부감리 PASS 시 `phase-007/04-completion.md` 작성 후 로컬 main 머지. FAIL이면 Team Leader가 분류하고 Builder 수정
-3. Phase 6 외부감리 PASS 시 `phase-006/04-completion.md` 작성 후 로컬 main 머지. FAIL이면 Team Leader가 분류하고 Builder 수정
-4. 대표님 확정 대기 값: 창고 실주소, 요율 컷팅(rates.ts — 기견적 소급 변동 주의), 외관 추가 편집, 약관 본문(오픈 전 필수), 실제 계좌/입금/결제 방식
-5. 이월 개선 후보: 로그아웃 JSON 착지, 이메일 미정규화, 재견적 무이력, 그림자 토큰화(Phase 5), 배포 전 체크리스트
+1. Feature 3·Feature 4 완료 보고
+2. 다음 기능 정렬 또는 Phase 8 후보 선택
+3. 대표님 확정 대기 값: 창고 실주소, 요율 컷팅(rates.ts — 기견적 소급 변동 주의), 외관 추가 편집, 약관 본문(오픈 전 필수), 실제 계좌/입금/결제 방식
+4. 이월 개선 후보: 로그아웃 JSON 착지, 이메일 미정규화, 재견적 무이력, 테스트 DB 격리, 그림자 토큰화(Phase 5), 배포 전 체크리스트
 
 ## 3. 현재 단계 게이트
 
@@ -40,7 +39,7 @@
 | Team Leader 범위 판단 | `01-teamleader-intake.md` | **완료** (`superpowers:brainstorming`, Phase 7 적정) | `superpowers:writing-plans` |
 | Team Leader plan | `02-plan.md` | **완료** (`superpowers:writing-plans`) | Builder 실행 |
 | 검증 | `03-verification.md` | **완료** (Machine Check PASS) | 교차 감리 |
-| 완료 기록 | `04-completion.md` | 대기 | 외부감리 PASS 후 작성·main 머지 |
+| 완료 기록 | `04-completion.md` | **완료** | Feature 완료 보고 |
 
 ## 4. 실패 횟수
 

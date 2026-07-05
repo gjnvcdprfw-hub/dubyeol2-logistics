@@ -48,3 +48,5 @@
 | 2026-07-05 | Playwright MCP 프로필 락 | Chrome headless DevTools Protocol로 실화면 QA 대체 | `03-verification.md` §3.2. 동일 로컬 URL 23개를 실제 Chrome 엔진으로 열어 HTTP 200, H1, console error 0 확인 | 다음 세션에서 Playwright MCP 락이 풀리면 Playwright로 재검증 가능. 현재 PASS 근거는 Chrome QA |
 | 2026-07-05 | Phase 6 교차감리 대기 중 Feature 4 착수 | Phase 6 Feature 3 계약을 `phase-packets/phase-006/feature-contract-snapshot.md`로 보존하고, 외부감리 요청의 `feature_md`를 스냅샷으로 고정 | Mode B에서는 Phase 6 완료·main 머지는 교차감리 PASS 전 금지지만, 다음 Phase 준비·빌드는 가능 | 감리자는 Phase 6 스냅샷을 기준으로 보고, `feature.md`는 현재 Feature 4 기준으로 본다 |
 | 2026-07-05 | Phase 7 보안 검토 대체 | Codex Mode B 환경에 `/security-review` 슬래시 명령 실행 도구가 없어 정적 권한 검사, 지갑 테스트, live QA 교차 셀러 404로 대체 | Phase 7은 예치금·셀러 권한을 건드리므로 `phase-packets/phase-007/03-verification.md` §3.1에 증거와 한계를 명시 | Claude 교차감리에서 seller isolation과 wallet state를 별도 확인 |
+| 2026-07-06 | Phase 6 외부감리 MINOR | 전체 테스트 최초 1회 FK 제약 일시 실패 후 즉시 재실행 PASS. 고객 약속에는 영향 없음 | `external-audit/result-phase-006.json` | 테스트 DB 격리 개선 후보로 보관 |
+| 2026-07-06 | Phase 7 외부감리 MINOR 해소 | Task 3 화면 변경 커밋 추적성 지적 | 구현·증거 커밋 `776d1e8`로 화면 변경과 감리 증거를 커밋 | `04-completion.md` 작성 전 커밋 완료 |

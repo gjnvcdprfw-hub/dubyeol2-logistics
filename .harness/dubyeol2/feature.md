@@ -1,6 +1,6 @@
 # feature.md
 
-상태: 대표님 승인 (2026-07-05) — Feature 4 정렬
+상태: 완료 (2026-07-06) — Feature 4 Phase 7 감리 PASS·로컬 main 머지
 
 > Feature 3(두리무역 1:1 비공개 기준판)은 Phase 6 Machine Check PASS, Claude 교차감리 대기. Phase 6 감리 기준은 `phase-packets/phase-006/feature-contract-snapshot.md`에 보존한다. 이 문서는 **Feature 4: 로그인 후 셀러 출고 요청·예치금 흐름**을 닫는다.
 
@@ -52,3 +52,4 @@
 
 - 승인 상태: **승인** / 승인일: 2026-07-05 / 승인한 사람: 대표님
 - 승인 문장: "그래" — 범위 잠금 / "그래" — 합격 기준 잠금
+- 완료 상태: Phase 7 Machine Check PASS, Claude 교차감리 PASS, `04-completion.md` 작성 완료, 로컬 main 자동 머지 완료.

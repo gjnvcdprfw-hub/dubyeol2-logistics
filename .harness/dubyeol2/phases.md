@@ -1,6 +1,6 @@
 # phases.md
 
-상태: PM 작성 (2026-07-05, Phase 7 Machine Check PASS)
+상태: PM 작성 (2026-07-06, Phase 6~7 외부감리 PASS·로컬 main 머지 완료)
 
 이 문서는 `feature.md`의 고객 약속을 달성하기 위한 phase 계획이다. 대표님 승인 대상은 아니다. 한 기능에도 여러 phase가 나올 수 있다.
 
@@ -18,8 +18,8 @@ Team Leader는 Superpowers 공식 workflow를 따르고, 구현은 `superpowers:
 
 ## 1. 연결된 feature
 
-- 현재 feature: **Feature 4 — 로그인 후 셀러 출고 요청·예치금 흐름** (승인 2026-07-05, Phase 7 Machine Check PASS)
-- 직전 진행 중 feature: Feature 3 — 두리무역 1:1 비공개 기준판 (Phase 6 Machine Check PASS, Claude 교차감리 대기)
+- 현재 feature: **Feature 4 — 로그인 후 셀러 출고 요청·예치금 흐름** (승인 2026-07-05, Phase 7 외부감리 PASS·로컬 main 머지 완료)
+- 직전 feature: Feature 3 — 두리무역 1:1 비공개 기준판 (Phase 6 외부감리 PASS·로컬 main 머지 완료)
 - 직전: Feature 2 — 두리무역 전체 화면 (완료, Phase 4~5)
 - 직전 feature: Feature 1 — 주문 접수 → 입고 확인 → 투명 견적 (완료 2026-07-05, Phase 1~3)
 - feature 승인 상태: Feature 4 승인
@@ -37,8 +37,8 @@ Team Leader는 Superpowers 공식 workflow를 따르고, 구현은 `superpowers:
 | 3 | 항목별 견적(두리무역 요율 초기값) 확인 → Feature 1 합격 예시 전체 통과 | 대시보드(견적) | "총비용을 알고 보낼지 결정한다" | **완료·머지** (감리 r2 PASS) | 완결 — Feature 1 종료 |
 | 4 | (Feature 2) 두리무역 공개 영역 전체 화면 — 랜딩 풀·9메뉴·소개 4종·계산기·정보 페이지 | 공개 사이트 전체 | "완성된 서비스로 보인다" | **완료·머지** (감리 r4 PASS) | 완결 |
 | 5 | (Feature 2) 대시보드 12메뉴 전면 개편 — 예치금 배너·현황 카드·전 메뉴 셸 | 셀러 대시보드 | 이후 기능이 들어갈 자리 | **완료·머지** (감리 r2 PASS) | 완결 — Feature 2 종료 |
-| 6 | (Feature 3) 두리무역 1:1 비공개 기준판 — 제외 6종만 자리표시 | 전체 | 대표님이 원본과 나란히 보고 우리 회사용 수정 기준을 잡는다 | Machine Check PASS, Claude 교차감리 대기 | `external-audit/request-phase-006.json` |
-| 7 | (Feature 4) 견적 후 출고 요청·예치금 차감·출고 상태 확인 | 셀러 주문 상세 · 출고관리 · 예치금 관리 · 대시보드 홈 | 견적 확인 뒤 고객이 "보내달라" 결정을 끝낸다 | Machine Check PASS, Claude 교차감리 대기 | `external-audit/request-phase-007.json` |
+| 6 | (Feature 3) 두리무역 1:1 비공개 기준판 — 제외 6종만 자리표시 | 전체 | 대표님이 원본과 나란히 보고 우리 회사용 수정 기준을 잡는다 | **완료·머지** (Claude 감리 PASS) | 완결 |
+| 7 | (Feature 4) 견적 후 출고 요청·예치금 차감·출고 상태 확인 | 셀러 주문 상세 · 출고관리 · 예치금 관리 · 대시보드 홈 | 견적 확인 뒤 고객이 "보내달라" 결정을 끝낸다 | **완료·머지** (Claude 감리 PASS) | 완결 — Feature 4 종료 |
 | 8 후보 | (Feature 3 후속) 우리 회사용 수정·정식 운영 전환 | 전체 | 복사 기준판을 고객에게 보여도 되는 우리 회사 서비스로 바꾼다 | 준비 전 | Phase 6 완료 후 재정렬 |
 
 ## 3. Phase 상세
