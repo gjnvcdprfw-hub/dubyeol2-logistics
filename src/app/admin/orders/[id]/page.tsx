@@ -38,7 +38,7 @@ export default async function AdminInboundPage({ params }: { params: Promise<{ i
         <label className="block text-sm text-secondary">외포장 메모
           <input name="outerNote" className="mt-1 w-full border border-black/10 rounded-lg px-3 py-2" />
         </label>
-        {hasSkuLines ? (
+        {hasSkuLines && order.inspectionRequested ? (
           <fieldset className="rounded-lg bg-surface-alt p-4 space-y-4 text-sm">
             <p className="font-medium text-body">SKU별 입고·검수 결과</p>
             <div className="space-y-4">
@@ -82,7 +82,7 @@ export default async function AdminInboundPage({ params }: { params: Promise<{ i
               ))}
             </div>
           </fieldset>
-        ) : order.inspectionRequested && (
+        ) : order.inspectionRequested ? (
           <fieldset className="rounded-lg bg-surface-alt p-4 space-y-3 text-sm">
             <p className="font-medium text-body">검수 결과 기록 (유료 검수 신청 건 — 필수)</p>
             <label className="block text-secondary">실입고 수량
@@ -96,6 +96,10 @@ export default async function AdminInboundPage({ params }: { params: Promise<{ i
               <input name="inspNote" className="mt-1 w-full border border-black/10 rounded-lg px-3 py-2" />
             </label>
           </fieldset>
+        ) : (
+          <div className="rounded-lg border border-black/10 bg-surface-alt p-4 text-sm text-secondary">
+            유료 검수를 신청하지 않은 주문이라 사진과 외포장 상태만 기록합니다.
+          </div>
         )}
         <button type="submit" className="bg-brand text-white font-semibold rounded-[12px] px-6 py-3">입고 완료 처리</button>
       </form>

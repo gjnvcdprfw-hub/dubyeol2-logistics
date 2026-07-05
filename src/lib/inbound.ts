@@ -30,10 +30,17 @@ export async function recordInbound(orderId: string, input: InboundInput) {
   const useAggregateInspection = order.inspectionRequested && !hasSkuResults;
   if (input.inspection && !order.inspectionRequested)
     throw new ValidationError("검수를 신청하지 않은 주문에는 검수 결과를 기록할 수 없습니다");
+  if (hasSkuResults && !order.inspectionRequested)
+    throw new ValidationError("검수를 신청하지 않은 주문에는 검수 결과를 기록할 수 없습니다");
   if (useAggregateInspection && !input.inspection)
     throw new ValidationError("유료 검수 신청 건은 검수 결과를 함께 기록해야 합니다");
   if (hasSkuResults) {
     const skuById = new Map(skuLines.map((sku) => [sku.id, sku]));
+    const submittedSkuIds = input.skuResults!.map((result) => result.skuLineId);
+    const submittedSkuIdSet = new Set(submittedSkuIds);
+    if (submittedSkuIdSet.size !== submittedSkuIds.length) {
+      throw new ValidationError("유료 검수 신청 건은 모든 SKU의 검수 결과를 함께 기록해야 합니다");
+    }
     for (const result of input.skuResults ?? []) {
       const sku = skuById.get(result.skuLineId);
       if (!sku) throw new ValidationError("SKU 정보를 찾을 수 없습니다");
@@ -52,7 +59,10 @@ export async function recordInbound(orderId: string, input: InboundInput) {
         throw new ValidationError("SKU 하자 수량이 올바르지 않습니다");
       }
     }
-    if (order.inspectionRequested && input.skuResults!.length !== skuLines.length) {
+    if (
+      order.inspectionRequested &&
+      (input.skuResults!.length !== skuLines.length || skuLines.some((sku) => !submittedSkuIdSet.has(sku.id)))
+    ) {
       throw new ValidationError("유료 검수 신청 건은 모든 SKU의 검수 결과를 함께 기록해야 합니다");
     }
   }

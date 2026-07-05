@@ -82,6 +82,69 @@ describe("recordInbound", () => {
       inspection: { countActual: 50, appearanceOk: true, defectCount: 0 },
     })).rejects.toThrow("검수를 신청하지 않은");
   });
+  it("검수 미신청 SKU 주문에 SKU 검수 결과를 넣으면 거부한다", async () => {
+    const order = await createOrder(seller.id, {
+      serviceType: "SHIPPING",
+      inspectionRequested: false,
+      items: [{
+        productUrl: "https://c.com",
+        productName: "SKU 일반품",
+        skus: [
+          { optionText: "빨강", quantity: 3 },
+          { optionText: "파랑", quantity: 2 },
+        ],
+      }],
+    });
+    const saved = await prisma.order.findUniqueOrThrow({
+      where: { id: order.id },
+      include: { productLines: { include: { skuLines: true }, orderBy: { sortOrder: "asc" } } },
+    });
+    const [red, blue] = saved.productLines[0].skuLines;
+
+    await expect(recordInbound(order.id, {
+      photoPaths: ["/uploads/a.jpg"],
+      outerIssue: false,
+      skuResults: [
+        { skuLineId: red.id, inboundQuantity: 3, defectCount: 0, inspectionPassed: true, inspectionNote: "정상" },
+        { skuLineId: blue.id, inboundQuantity: 2, defectCount: 0, inspectionPassed: true, inspectionNote: "정상" },
+      ],
+    })).rejects.toThrow("검수를 신청하지 않은");
+  });
+  it("유료 검수 SKU 주문에 중복 SKU ID를 넣으면 거부한다", async () => {
+    const order = await createOrder(seller.id, {
+      serviceType: "PURCHASE",
+      inspectionRequested: true,
+      items: [{
+        productUrl: "https://d.com",
+        productName: "SKU 검수품",
+        skus: [
+          { optionText: "빨강", quantity: 5 },
+          { optionText: "파랑", quantity: 7 },
+        ],
+      }],
+    });
+    const saved = await prisma.order.findUniqueOrThrow({
+      where: { id: order.id },
+      include: { productLines: { include: { skuLines: true }, orderBy: { sortOrder: "asc" } } },
+    });
+    const [red, blue] = saved.productLines[0].skuLines;
+
+    await expect(recordInbound(order.id, {
+      photoPaths: ["/uploads/a.jpg"],
+      outerIssue: false,
+      skuResults: [
+        { skuLineId: red.id, inboundQuantity: 5, defectCount: 0, inspectionPassed: true, inspectionNote: "정상" },
+        { skuLineId: red.id, inboundQuantity: 5, defectCount: 0, inspectionPassed: true, inspectionNote: "중복" },
+      ],
+    })).rejects.toThrow("모든 SKU의 검수 결과를 함께 기록");
+
+    await expect(
+      prisma.orderSkuLine.findMany({ where: { productLine: { orderId: order.id } }, orderBy: { sortOrder: "asc" } }),
+    ).resolves.toMatchObject([
+      { id: red.id, inboundQuantity: null, missingQuantity: null, defectCount: null, inspectionPassed: null, inspectionNote: null },
+      { id: blue.id, inboundQuantity: null, missingQuantity: null, defectCount: null, inspectionPassed: null, inspectionNote: null },
+    ]);
+  });
   it("사진이 0장 또는 3장 이상이면 거부한다", async () => {
     await expect(recordInbound(orderPlain.id, { photoPaths: [], outerIssue: false }))
       .rejects.toThrow("사진");
