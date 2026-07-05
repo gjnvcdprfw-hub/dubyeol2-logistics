@@ -106,6 +106,37 @@ describe("createOrder — SKU 라인 구조", () => {
     expect(saved.productLines[0].skuLines[0].optionText).toBe("화이트");
     expect(saved.productLines[0].skuLines[0].quantity).toBe(100);
   });
+
+  it("items가 빈 배열이면 레거시 fallback 대신 거부한다", async () => {
+    await expect(
+      createOrder(sellerA.id, {
+        serviceType: "PURCHASE",
+        inspectionRequested: true,
+        items: [],
+      }),
+    ).rejects.toThrow("상품을 1개 이상 입력해 주세요");
+  });
+
+  it("SKU 옵션명이 공백뿐이면 기본값으로 저장한다", async () => {
+    const order = await createOrder(sellerA.id, {
+      serviceType: "PURCHASE",
+      inspectionRequested: true,
+      items: [
+        {
+          productUrl: "https://detail.1688.com/offer/300.html",
+          productName: "상품 C",
+          skus: [{ optionText: "   ", quantity: 5 }],
+        },
+      ],
+    });
+
+    const saved = await prisma.order.findUniqueOrThrow({
+      where: { id: order.id },
+      include: { productLines: { include: { skuLines: true } } },
+    });
+
+    expect(saved.productLines[0].skuLines[0].optionText).toBe("기본");
+  });
 });
 
 describe("listOrdersBySeller — sellerId 가드", () => {

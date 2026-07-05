@@ -25,15 +25,15 @@ export function normalizeOrderLines(input: {
   quantity?: number;
   items?: NewOrderProductLine[];
 }) {
-  const items = input.items?.length
-    ? input.items
-    : [
-        {
-          productUrl: input.productUrl ?? "",
-          productName: input.productName ?? "",
-          skus: [{ optionText: input.optionText ?? "기본", quantity: Number(input.quantity) }],
-        },
-      ];
+  const items =
+    input.items ??
+    [
+      {
+        productUrl: input.productUrl ?? "",
+        productName: input.productName ?? "",
+        skus: [{ optionText: input.optionText ?? "기본", quantity: Number(input.quantity) }],
+      },
+    ];
 
   if (items.length < 1) throw new ValidationError("상품을 1개 이상 입력해 주세요");
 
@@ -51,8 +51,10 @@ export function normalizeOrderLines(input: {
           throw new ValidationError("수량은 1 이상이어야 합니다");
         }
 
+        const optionText = sku.optionText?.trim() || "기본";
+
         return {
-          optionText: (sku.optionText || "기본").trim(),
+          optionText,
           quantity: sku.quantity,
           sortOrder: skuIndex,
         };
