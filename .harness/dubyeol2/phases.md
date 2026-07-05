@@ -18,11 +18,10 @@ Team Leader는 Superpowers 공식 workflow를 따르고, 구현은 `superpowers:
 
 ## 1. 연결된 feature
 
-- feature 이름: Feature 1 — 주문 접수 → 중국창고 입고·기본 입고확인 → 항목별 투명 견적
-- 연결된 고객 흐름: 흐름 1 (주문을 맡기고 입고·검수·견적을 확인)
-- 연결된 메뉴탭 / 화면 영역: 셀러 주문 접수 · 셀러 대시보드(입고·검수·견적)
-- feature 승인 상태: 승인
-- feature 승인일: 2026-07-04
+- 현재 feature: **Feature 2 — 두리무역 전체 화면 구현** (승인 2026-07-05, Phase 4~5)
+- 직전 feature: Feature 1 — 주문 접수 → 입고 확인 → 투명 견적 (완료 2026-07-05, Phase 1~3)
+- feature 승인 상태: Feature 2 승인
+- feature 승인일: 2026-07-05
 - feature 문서: `.harness/dubyeol2/feature.md`
 
 ## 2. 전체 phase 요약
@@ -34,6 +33,8 @@ Team Leader는 Superpowers 공식 workflow를 따르고, 구현은 `superpowers:
 | 1 | 가입·로그인 → 주문 접수(유료 검수 선택) → 내 주문 목록 확인 | 주문 접수 · 대시보드(주문 목록) | "주문을 맡길 수 있다"가 모든 것의 입구 | **완료·머지** (감리 PASS) | 완결 |
 | 2 | 운영자 입고·확인 기록 → 셀러가 입고 증거(사진·외포장·유료 검수 결과) 확인 | 대시보드(입고 관리) | "내 물건을 증거로 확인한다" | **완료·머지** (감리 r2 PASS) | 완결 |
 | 3 | 항목별 견적(두리무역 요율 초기값) 확인 → Feature 1 합격 예시 전체 통과 | 대시보드(견적) | "총비용을 알고 보낼지 결정한다" | **완료·머지** (감리 r2 PASS) | 완결 — Feature 1 종료 |
+| 4 | (Feature 2) 두리무역 공개 영역 전체 화면 — 랜딩 풀·9메뉴·소개 4종·계산기·정보 페이지 | 공개 사이트 전체 | "완성된 서비스로 보인다" | Machine Check PASS·재감리 중 | `phase-packets/phase-004/04-completion.md` |
+| 5 | (Feature 2) 대시보드 12메뉴 전면 개편 — 예치금 배너·현황 카드·전 메뉴 셸 | 셀러 대시보드 | 이후 기능이 들어갈 자리 | 준비 전 | `phase-packets/phase-005/00-customer-outcome.md` |
 
 ## 3. Phase 상세
 
