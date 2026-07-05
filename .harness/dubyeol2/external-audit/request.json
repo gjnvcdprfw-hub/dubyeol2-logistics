@@ -6,58 +6,57 @@
     "dubyeol2_root": ".harness/dubyeol2"
   },
   "run": {
-    "id": "phase-004-public-site-20260705-r4",
-    "phase_id": "phase-004",
-    "phase_index": 4,
+    "id": "phase-005-dashboard-20260705-r2",
+    "phase_id": "phase-005",
+    "phase_index": 5,
     "phase_total": 5
   },
   "phase_goal": {
-    "customer_goal": "비로그인 방문자가 두리무역과 같은 구조·밀도의 공개 사이트를 탐색한다 (랜딩 풀+9메뉴+소개 4종+계산기 10+정보 5)",
-    "why_this_phase_matters": "'두리의 모든 화면' 대표님 지시 — 완성된 서비스로 보이는 외관·구조. Feature 2의 1/2 (Phase 5=대시보드)",
-    "done_when_customer_can": "상단 9메뉴 전부 진입 가능, 계산기 3종 실계산이 요율표와 일치, 미구현은 '준비 중' 명확"
+    "customer_goal": "셀러 대시보드가 두리무역 구조(4그룹 12메뉴·예치금 배너·현황 카드 5종)가 된다",
+    "why_this_phase_matters": "Feature 2(두리의 모든 화면)의 마지막 절반 — 이후 기능이 들어갈 자리 완성",
+    "done_when_customer_can": "12메뉴 전부 진입 가능, 기존 실동작(주문·입고 증거·견적) 회귀 0, 미구현은 준비 중 명확"
   },
   "feature_contract": {
     "feature_md": ".harness/dubyeol2/feature.md",
-    "customer_promise": "두리무역 구조·밀도 벤치의 공개 사이트 — 문구는 우리 것, 거짓 기능 없음, 요율·설명은 rates.ts/PRICING 단일 정본 파생",
+    "customer_promise": "두리무역 구조의 대시보드 — 기존 Feature 1 실동작 유지, 거짓 기능 0, 격리 유지",
     "must_not_happen_when_paid": [
-      "미구현 기능이 되는 것처럼 보임 (거짓 기능)",
-      "두리무역 카피 원문·실주소/연락처/상호/실적 숫자 복제",
-      "Feature 1 기존 동작(주문·입고·견적) 회귀",
-      "요율 숫자가 정본(rates.ts/PRICING) 밖에 하드코딩"
+      "Feature 1 회귀 (주문·입고·견적)",
+      "타 셀러 데이터 노출 (집계·목록)",
+      "민감정보(passwordHash 등) 노출",
+      "거짓 기능",
+      "두리 카피 복제"
     ],
     "in_scope": [
-      "공용 셸: 9메뉴 헤더·4열 푸터·중립 신뢰배너·CTA·준비중 컴포넌트",
-      "랜딩 풀 구성 (benchmark §5 순서: 히어로+검색창 UI→서비스 4섹션→신뢰배너→FAQ→CTA→풀 푸터)",
-      "서비스 소개 4종(구매대행 비교표 8행·배송대행 경계 명시·스마트오더 준비중 고정배너·검품 가격 자리표시)+1688 검색·배송조회(disabled+준비중)",
-      "계산기 허브+실계산 3종(CBM·부피중량·배송비 — calculators.ts lib, quote.ts와 운임 로직 공유)+준비중 6종",
-      "회사소개(실정보 자리표시)·가이드 허브·요금 안내(RATES 파생 표)·부가서비스(PRICING — 두리 공개 요율 초기값, 승인된 정책)",
-      "per-page metadata 17페이지"
+      "사이드바 4그룹 12메뉴 (기존 경로 orders·warehouse-address 재사용 — 이동·삭제 0)",
+      "마이페이지 홈: 예치금 배너(₩0, 준비 중)+현황 카드 5종(주문·입고 실집계 sellerId 스코프)",
+      "입고 관리(실데이터 목록+탭 전환), 프로필(기본 정보 실표시)",
+      "장바구니·내상품·스마트오더·출고·반품·출장검품·예치금 — 두리무역 구조+준비 중",
+      "--shadow-card 토큰 신설 (신규 파일 적용)"
     ],
     "out_of_scope": [
-      "외부 연동 일체(1688·추적·관세청·환율)",
-      "대시보드 개편(Phase 5)",
-      "모바일 최적화",
-      "약관 본문"
+      "예치금 실충전·장바구니·출고/반품 실처리",
+      "운영자 개편",
+      "기존 파일 그림자 일괄 치환"
     ],
     "acceptance_example": {
-      "name": "방문자 전 메뉴 순회 + 배송비 계산",
-      "customer_input": "상단 9메뉴 클릭 순회 + 배송비 계산기에 12kg/40×40×50cm/환율 190",
-      "customer_visible_result": "23개 경로 전부 200·페이지별 title, 계산 결과 해운 14kg ¥90 ₩17,100 / 항공 13.4kg ¥273.7 ₩52,003",
-      "pass_criteria": "404·빈 화면 0, 계산이 요율표 손검산과 일치, 준비 중 표기 명확",
-      "counterexample": "빈 버튼이 조용히 실패하거나 두리 카피가 발견되면 실패"
+      "name": "데모 셀러 대시보드 순회",
+      "customer_input": "로그인 → 홈 → 입고 관리 탭 전환 → 프로필 → 주문 상세(회귀)",
+      "customer_visible_result": "홈 실집계(접수 1·견적 1·입고 1), 입고 목록 검수 뱃지, 프로필 4필드, 주문 상세 견적 ¥2,330=₩442,700 그대로",
+      "pass_criteria": "12메뉴 404 0, 회귀 0, 격리·민감정보 검증",
+      "counterexample": "기존 견적 흐름이 깨지거나 준비 중 메뉴가 되는 척하면 실패"
     }
   },
   "phase_qa": {
-    "normal_flow": "23경로 curl 전수(200+title) + Playwright 실측(틴트·계산기·회귀)",
-    "failure_flow": "미구현 기능은 disabled 입력+준비중 안내",
-    "customer_harm_guardrail": "두리/duly/실적숫자 grep 0(JSX), 요율 리터럴 grep 0, Feature 1 테스트 36/36",
-    "next_phase_handoff_check": "Phase 5(대시보드 12메뉴)가 같은 셸·토큰 사용"
+    "normal_flow": "12메뉴 curl 전수(307)+Playwright 실측 6시나리오",
+    "failure_flow": "미구현 disabled+준비 중, ?tab= 화이트리스트 폴백",
+    "customer_harm_guardrail": "sellerId 스코프(코드+검토 실증), 민감 필드 렌더 0, 기존 경로 무변경(diff)",
+    "next_phase_handoff_check": "Feature 2 완료 — 다음 feature(LCL 등)는 대표님과 신규 정렬"
   },
   "ui_qa": {
     "has_ui": true,
     "scenario_prepared": true,
     "separate_live_ui_qa_required": false,
-    "summary": "curl 23경로 전수 200+title / Playwright: 틴트 카드 렌더 색 실측(I-1 수정 검증), 배송비 계산기 손검산 일치, 가입→대시보드 회귀, 콘솔 0 — 03-verification §3.2"
+    "summary": "curl 12메뉴 전수 307 + Playwright: 홈 실집계 일치·입고 탭 전환·검수 뱃지·프로필 실데이터·Feature 1 회귀(견적 금액 그대로)·콘솔 0 — 03 §3.2"
   },
   "design_system": {
     "design_system_md": ".harness/dubyeol2/design-system.md",
@@ -66,39 +65,37 @@
       "금지 UI: 검수 경계 흐리기"
     ],
     "changed": false,
-    "change_summary": "변경 없음 (lint errors 0). 그림자 리터럴 산재는 Phase 5에서 토큰화 예정(03 §5)"
+    "change_summary": "--shadow-card 토큰 추가 (globals.css @theme — design-system.md 값과 동일). lint errors 0"
   },
   "changes": {
-    "summary": "Phase 4: 공개 영역 전체 — 공용 셸 5컴포넌트+랜딩 풀+calculators lib(quote 운임 추출)+화면 20장+pricing-data. 커밋 main..phase-004 5개 (3d620b3→c6f402a). 병렬 Builder 3+검토 병렬 (v2.22 첫 적용)",
+    "summary": "Phase 5: 대시보드 12메뉴 — 셸·홈(BT15)+9화면(BT16~18 병렬)+검수 뱃지 수정. 커밋 main..phase-005 5개 (5a4877b→d825f7e). 신설 API 0·스키마 무변경",
     "files_changed": [
-      "src/components/public/* (5종)",
-      "src/lib/calculators.ts + tests/calculators.test.ts, src/lib/quote.ts(운임 추출), src/lib/pricing-data.ts",
-      "src/app/page.tsx(랜딩 풀), services/* 4종, search, tracking",
-      "src/app/calculators/* 10종(+client 3종 layout.tsx), about, guide/* 3종"
+      "src/components/dashboard/{sidebar,status-tile,prep-notice}.tsx",
+      "src/app/dashboard/{layout,page}.tsx (가드 무변경, 사이드바·홈 개편)",
+      "src/app/dashboard/{cart,my-products,smart-order,inbound,shipment,returns,inspection,profile,wallet}/page.tsx (신규 9)",
+      "src/app/globals.css (--shadow-card)"
     ],
     "risk_notes": [
-      "r3 MAJOR 반영: 랜딩 FAQ 부피계수를 RATES.volumeDivisor 파생으로 교체(커밋 1077353) + 고객 노출 요율 숫자 전수 grep(6000·¥25·¥5·¥32.5·¥1.8·5%·10%·¥1/개·¥35, RATES/PRICING 참조 제외) → 잔존 0건, vitest 36/36·build 성공",
-      "r2 MAJOR 반영: current-run.md §3 게이트 표를 Phase 4 기준(00~03 완료·감리 재진행·04 대기)으로 갱신, §4 실패 횟수도 Phase 4 반영",
-      "1차 감리 MAJOR 2건 반영: 정본 3문서(PROJECT.md §7~8·current-run.md §1~2·phases.md §1~2)를 Feature 2/Phase 4 상태로 정합화, 03-verification §2 Superpowers 전체 14스킬 개별 행 전개(각 증거/사유 포함)",
-      "플랜 이탈 3건 02-plan §2.1 기록(플랜 형식·grep 게이트 정밀화·품질 검토 통합 1회)",
-      "품질 검토 I-1(틴트 CSS 충돌)·I-2(metadata) 수정 완료(c6f402a) — Playwright 실측 검증",
-      "보안 검토 해당없음 사유: 신설 API 0·스키마 무변경·정적 화면+클라이언트 로컬 계산만 (03 §3.1)",
-      "남은 위험: 약관 본문 없음(오픈 전 필수), 그림자 리터럴 산재(Phase 5 토큰화)"
+      "r1 MAJOR 반영: 홈 예치금 배너에 '준비 중' 배지+안내 문구+버튼 라벨 '(준비 중)' 추가(커밋 501b24f). Playwright 홈 재스냅샷(.playwright-mcp/page-2026-07-05T08-42-28-318Z.yml)에서 '예치금 현황 준비 중'·'예치금 충전·결제는 정식 오픈 시 열립니다.'·'충전하기 (준비 중)' 확인. 실집계 증거는 기존 스냅샷(08-32-04, 접수 1·견적 1·입고 1 — 이후 테스트 실행이 dev DB를 비워 최신 스냅샷은 0 표시, 코드 무관)",
+      "검토 발견 I-1(입고 목록 검수 뱃지 누락 — 플랜 명세) 수정 완료 d825f7e, 실화면 실측",
+      "보안 검토 PASS (C/H 0): 격리·민감정보·admin 무영향·read-only 확인",
+      "남은 위험: getSessionUser select 프로젝션(Low·배포 전), 테스트-dev DB 공유 flake(장기)"
     ]
   },
   "machine_check": {
     "status": "PASS",
     "commands_or_checks": [
-      "npx vitest run → 36/36 PASS (calculators 4 신규 + 기존 32, quote 운임 추출 회귀 0)",
-      "npm run build → 성공 (37페이지)",
-      "npx -y @google/design.md lint → errors 0",
-      "curl 23경로 전수 → 전부 200 + per-page title",
-      "Playwright 실측: 틴트 렌더 색·배송비 계산기 손검산 일치·가입 회귀·콘솔 0",
-      "grep: 두리/duly/이춘옥/371-19 → src/ 고객 노출 0건"
+      "npx vitest run → 36/36 (기존 테스트 회귀 0 — 이 phase는 read-only 화면이라 신규 TDD 대상 없음, 03 §2 사유)",
+      "npm run build → 성공 (대시보드 12라우트 dynamic)",
+      "design lint → errors 0",
+      "curl 12메뉴 전수 → 307 (404 0)",
+      "Playwright: 홈 실집계·입고 탭·검수 뱃지·프로필·Feature 1 회귀(¥2,330 그대로)·콘솔 0",
+      "보안 검토 PASS (개인정보 표시 phase — 조건부 필수 수행)"
     ],
     "evidence_files": [
-      ".harness/dubyeol2/phase-packets/phase-004/03-verification.md",
-      ".playwright-mcp/page-2026-07-05T02-44-32-891Z.yml"
+      ".harness/dubyeol2/phase-packets/phase-005/03-verification.md",
+      ".playwright-mcp/page-2026-07-05T08-32-38-191Z.yml",
+      ".playwright-mcp/page-2026-07-05T08-42-28-318Z.yml"
     ],
     "failures": []
   },
