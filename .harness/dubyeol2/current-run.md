@@ -10,41 +10,41 @@
 
 - 프로젝트: 물류 — 사업자(쿠팡·11번가·1688 셀러) 대상 중국→한국 통합 물류 플랫폼. 벤치마크: 두리무역(duly.co.kr)
 - 두별2 적용 상태: Feature 1 완료·머지 → **Feature 2(두리무역 전체 화면) 승인·진행 중** (2026-07-05 "우선 두리의 모든 화면을 구현해")
-- 현재 Phase: **Phase 4 (공개 영역 전체)** — Feature 2의 1/2
-- 현재 단계: 단계 13/16 — Machine Check PASS, 외부감리 1차 FAIL(문서 정합 2건) 수정 후 재감리
+- 현재 Phase: **Phase 5 (대시보드 12메뉴)** — Feature 2의 2/2, 마지막
+- 현재 단계: 단계 13/16 — Machine Check PASS, 외부감리 진행
 - 진행자: Team Leader (Claude Code)
-- 진행상태: 재감리 진행 중
+- 진행상태: 진행 중
 - 연결된 기능 약속(첫 출시): 주문 접수 → 중국창고 입고·기본검수(수량+포장외관) → 항목별 투명 견적
 - 연결된 고객 흐름: 사업자 셀러가 중국 소싱 → 우리에게 맡김 → 중국창고 입고·검수 → 견적 확인 → (다음 Phase) LCL·통관·한국배송
 - 연결된 메뉴탭 / 화면 영역: 셀러 주문 접수 · 셀러 대시보드(입고·검수·견적)
-- 현재 packet: phase-001~003 완결 / **phase-004 진행 중(00~03 작성, 04 대기)**
-- 다음에 필요한 파일: phase-004 재감리 PASS → 04-completion → 머지 → phase-005/00-customer-outcome.md
+- 현재 packet: phase-001~004 **완결** (Phase 4: 감리 r4 PASS·머지 a17dbaa) / **phase-005 진행 중(00~02 작성)**
+- 다음에 필요한 파일: phase-005/04-completion.md (감리 PASS 후)
 - 막힌 것: 없음
 
 ## 2. 다음 행동
 
-1. Phase 4 재감리 → PASS 시 04-completion·머지 → **Phase 5(대시보드 12메뉴 전면 개편)** 자동 진행 → Feature 2 완료 보고
+1. Phase 5 Builder(셸→병렬 3) → 검토 → Machine Check(12메뉴 순회+회귀) → 외부감리 → 머지 → **Feature 2 완료 보고**
 2. 대표님 확정 대기 값: 창고 실주소, 요율 컷팅(rates.ts — 기견적 소급 변동 주의), 외관 추가 편집, 약관 본문(오픈 전 필수)
 3. 이월 개선 후보: 로그아웃 JSON 착지, 이메일 미정규화, 재견적 무이력, 그림자 토큰화(Phase 5), 배포 전 체크리스트
 
 ## 3. 현재 단계 게이트
 
-현재 Phase 4 (`phase-packets/phase-004/`) 기준:
+현재 Phase 5 (`phase-packets/phase-005/`) 기준:
 
 | 단계 | 필요한 파일 | 상태 | 다음 단계 |
 |---|---|---|---|
-| 후보 고객 결과 요청 작성 | `00-customer-outcome.md` | **완료** (2026-07-05, §5 경계 확정) | — |
-| Team Leader 범위 판단 | `01-teamleader-intake.md` | **완료** (너무 큼 → Phase 4/5 분할) | — |
-| Team Leader plan | `02-plan.md` | **완료** (Builder 4명 실행·검토 완료) | — |
-| 검증 | `03-verification.md` | **완료** (Machine Check PASS + 외부감리 r4 PASS) | — |
-| 완료 기록 | `04-completion.md` | 대기 (재감리 PASS 후 작성) | 로컬 main 자동 머지 → Phase 5 |
+| 후보 고객 결과 요청 작성 | `00-customer-outcome.md` | **완료** (2026-07-05, 경계 확정) | — |
+| Team Leader 범위 판단 | `01-teamleader-intake.md` | **완료** (적정) | — |
+| Team Leader plan | `02-plan.md` | **완료** | Builder 실행 중 |
+| 검증 | `03-verification.md` | **완료** (Machine Check PASS·보안 PASS) — 외부감리 진행 중 | 감리 PASS |
+| 완료 기록 | `04-completion.md` | 준비 전 | 머지 → Feature 2 완료 보고 |
 
 ## 4. 실패 횟수
 
 | 구분 | 현재 횟수 | 최대 | 다음 행동 |
 |---|---:|---:|---|
 | Machine Check 게이트 실패 | 0 | 제한 없음 | Codex 외부감리 호출 전 Claude Code Team Leader가 분류하고 Builder 서브에이전트가 수정 |
-| Codex 외부감리 FAIL | Phase 2: 1회(해소) · Phase 3: 1회(해소) · Phase 4: 3회(전부 해소 — r4 PASS) | 3/phase | Claude Code Team Leader가 분류하고 Builder 서브에이전트가 수정 후 재감리 |
+| Codex 외부감리 FAIL | Phase 2: 1회(해소) · Phase 3: 1회(해소) · Phase 4: 3회(해소) · Phase 5: 1회(해소 — r2 PASS) | 3/phase | Claude Code Team Leader가 분류하고 Builder 서브에이전트가 수정 후 재감리 |
 | Codex 외부감리 BLOCKED | 0 | 1 | PM이 대표님에게 고객 언어 질문 하나만 보고 |
 
 ## 5. 알림 상태

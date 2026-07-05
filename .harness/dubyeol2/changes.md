@@ -13,6 +13,7 @@
 | 2026-07-04 | Phase 2 | MAJOR: 유료 검수 신청 건이 검수 결과 없이 RECEIVED 가능+사후 기록 경로 없음 / MINOR: 콘솔 로그 증거 정합, tsx 의존성 기록 누락 | 유료 신청 고객이 검수 결과를 못 받음 (약속 위반) | TL 분류 → Builder 수정: 신청 건 검수 필수 3계층(TDD)+문서 정정 2건 | **PASS** (r2, findings 0) |
 | 2026-07-04 | Phase 3 | MAJOR: 고객 노출 라벨("수수료 5%", "¥1/개")에 요율 숫자 하드코딩 — rates.ts 컷팅 시 계산과 설명 분리 | 컷팅 후 셀러가 금액 근거를 잘못 이해 (투명 견적 약속 훼손) | TL 분류 → Builder 수정: 라벨을 RATES에서 파생(TDD)+접수 폼 라벨 포함 | **PASS** (r2, findings 0) |
 | 2026-07-05 | Phase 4 | MAJOR 2: ①정본 3문서(PROJECT·current-run·phases)가 Feature 1 완료 상태로 잔존 — Phase 4 착수 시 상태판 갱신 누락 ②03 Superpowers 체크리스트 개별 행 미준수 | 다음 Phase·완료 보고의 기준 문서 엉킴 | PM/TL 직접 수정: 정본 3문서 Feature 2/Phase 4 정합화 + 체크리스트 14행 전개 | r2 FAIL(§3 게이트 표) → 갱신 → r3 FAIL(랜딩 FAQ ÷6,000 하드코딩) → 파생 수정+전수 grep → **r4 PASS (findings 0)** — 3회 FAIL 전부 문서·문구 정합성, 코드 결함 0 |
+| 2026-07-05 | Phase 5 | MAJOR: 홈 예치금 배너에 '준비 중' 미표시 — 충전 버튼이 실기능처럼 보임 (거짓 기능 기준) | 셀러가 결제 기능 오해 | Builder 수정: 배지+안내 문구+라벨 '(준비 중)' (501b24f)+홈 재스냅샷 | **PASS** (r2, findings 0) |
 
 ## 2. design-system.md 정본 변경
 

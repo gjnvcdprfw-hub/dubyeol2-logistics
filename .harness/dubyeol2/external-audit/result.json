@@ -1,1 +1,1 @@
-{"schema":"dubyeol2.external_audit.result.v0","verdict":"PASS","summary_for_owner":"Phase 4 공개 영역 재감리 PASS입니다. 이전 FAIL이었던 랜딩 FAQ의 부피계수 하드코딩은 `RATES.volumeDivisor` 파생으로 수정됐고, 공개 메뉴·계산기·준비 중 표기·두리 카피 금지·요율 정본 사용 기준이 고객 약속과 맞습니다.","findings":[],"question_for_pm_to_ask_owner":""}
+{"schema":"dubyeol2.external_audit.result.v0","verdict":"PASS","summary_for_owner":"Phase 5 대시보드 12메뉴는 고객 약속 기준을 통과했습니다. 12개 메뉴 경로가 존재하고, 홈 실집계·입고 관리·프로필·주문 상세 회귀 증거가 확인됩니다. 이전 FAIL 사유였던 홈 예치금 배너의 '준비 중' 표시는 최신 코드와 Playwright 스냅샷에서 해소됐습니다.","findings":[],"question_for_pm_to_ask_owner":""}
