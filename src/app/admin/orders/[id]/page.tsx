@@ -7,8 +7,21 @@ export default async function AdminInboundPage({ params }: { params: Promise<{ i
   if (!user || user.role !== "ADMIN") redirect("/dashboard");
 
   const { id } = await params;
-  const order = await prisma.order.findUnique({ where: { id }, include: { seller: { select: { email: true } } } });
+  const order = await prisma.order.findUnique({
+    where: { id },
+    include: {
+      seller: { select: { email: true } },
+      productLines: {
+        include: { skuLines: { orderBy: { sortOrder: "asc" } } },
+        orderBy: { sortOrder: "asc" },
+      },
+    },
+  });
   if (!order || order.status !== "REQUESTED") notFound();
+  const skuLines = order.productLines.flatMap((line) =>
+    line.skuLines.map((sku) => ({ ...sku, productName: line.productName })),
+  );
+  const hasSkuLines = skuLines.length > 0;
   return (
     <div className="max-w-2xl space-y-6">
       <h1 className="text-xl font-semibold text-heading">입고 기록 — {order.productName} × {order.quantity}</h1>
@@ -25,7 +38,51 @@ export default async function AdminInboundPage({ params }: { params: Promise<{ i
         <label className="block text-sm text-secondary">외포장 메모
           <input name="outerNote" className="mt-1 w-full border border-black/10 rounded-lg px-3 py-2" />
         </label>
-        {order.inspectionRequested && (
+        {hasSkuLines ? (
+          <fieldset className="rounded-lg bg-surface-alt p-4 space-y-4 text-sm">
+            <p className="font-medium text-body">SKU별 입고·검수 결과</p>
+            <div className="space-y-4">
+              {skuLines.map((sku, index) => (
+                <div key={sku.id} className="rounded-lg border border-black/10 bg-white p-4 space-y-3">
+                  <input type="hidden" name={`sku[${index}][id]`} value={sku.id} />
+                  <div>
+                    <p className="font-medium text-body">{sku.productName}</p>
+                    <p className="text-secondary">{sku.optionText} · 주문 {sku.quantity}개</p>
+                  </div>
+                  <label className="block text-secondary">입고 수량
+                    <input
+                      type="number"
+                      name={`sku[${index}][inboundQuantity]`}
+                      min={0}
+                      max={sku.quantity}
+                      defaultValue={sku.quantity}
+                      className="mt-1 w-full border border-black/10 rounded-lg px-3 py-2"
+                    />
+                  </label>
+                  <label className="block text-secondary">하자 수량
+                    <input
+                      type="number"
+                      name={`sku[${index}][defectCount]`}
+                      min={0}
+                      defaultValue={0}
+                      className="mt-1 w-full border border-black/10 rounded-lg px-3 py-2"
+                    />
+                  </label>
+                  <label className="block text-body">
+                    <input type="checkbox" name={`sku[${index}][inspectionPassed]`} defaultChecked /> 검수 통과
+                  </label>
+                  <label className="block text-secondary">SKU별 검수 메모
+                    <input
+                      name={`sku[${index}][inspectionNote]`}
+                      placeholder="SKU별 검수 메모"
+                      className="mt-1 w-full border border-black/10 rounded-lg px-3 py-2"
+                    />
+                  </label>
+                </div>
+              ))}
+            </div>
+          </fieldset>
+        ) : order.inspectionRequested && (
           <fieldset className="rounded-lg bg-surface-alt p-4 space-y-3 text-sm">
             <p className="font-medium text-body">검수 결과 기록 (유료 검수 신청 건 — 필수)</p>
             <label className="block text-secondary">실입고 수량

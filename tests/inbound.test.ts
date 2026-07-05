@@ -33,6 +33,44 @@ describe("recordInbound", () => {
     });
     expect(o.inspCountActual).toBe(97);
   });
+  it("SKU별 입고·부족·하자 수량을 기록한다", async () => {
+    const order = await createOrder(seller.id, {
+      serviceType: "PURCHASE",
+      inspectionRequested: true,
+      items: [{
+        productUrl: "https://a.com",
+        productName: "상품 A",
+        skus: [
+          { optionText: "빨강", quantity: 50 },
+          { optionText: "파랑", quantity: 50 },
+        ],
+      }],
+    });
+    const saved = await prisma.order.findUniqueOrThrow({
+      where: { id: order.id },
+      include: { productLines: { include: { skuLines: true }, orderBy: { sortOrder: "asc" } } },
+    });
+    const red = saved.productLines[0].skuLines[0];
+    const blue = saved.productLines[0].skuLines[1];
+
+    await recordInbound(order.id, {
+      photoPaths: ["/uploads/a.jpg"],
+      outerIssue: false,
+      skuResults: [
+        { skuLineId: red.id, inboundQuantity: 50, defectCount: 0, inspectionPassed: true, inspectionNote: "정상" },
+        { skuLineId: blue.id, inboundQuantity: 45, defectCount: 0, inspectionPassed: true, inspectionNote: "5개 부족" },
+      ],
+    });
+
+    const rows = await prisma.orderSkuLine.findMany({
+      where: { productLine: { orderId: order.id } },
+      orderBy: { sortOrder: "asc" },
+    });
+    expect(rows[0].inboundQuantity).toBe(50);
+    expect(rows[0].missingQuantity).toBe(0);
+    expect(rows[1].inboundQuantity).toBe(45);
+    expect(rows[1].missingQuantity).toBe(5);
+  });
   it("검수 신청 건에 검수 결과 없이 입고 기록하면 거부한다", async () => {
     await expect(recordInbound(orderInsp.id, {
       photoPaths: ["/uploads/a.jpg"], outerIssue: false,
