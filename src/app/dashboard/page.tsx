@@ -2,10 +2,15 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/session";
 import { listOrdersBySeller } from "@/lib/orders";
+import { getWalletSummary } from "@/lib/wallet";
 import StatusTile, { type StatusTone } from "@/components/dashboard/status-tile";
 
-// 마이페이지 홈 — 두리무역 벤치(benchmark-duly.md §2.1) 카드 순서.
+// 마이페이지 홈 카드 순서.
 // 집계는 listOrdersBySeller(where: { sellerId }) 스코프 쿼리에서만 파생한다.
+
+function krw(value: number) {
+  return `₩${value.toLocaleString("ko-KR")}`;
+}
 
 function SectionCard({
   title, count, href, prep, children,
@@ -28,13 +33,12 @@ export default async function DashboardHome() {
   const session = await getSession();
   if (!session.userId) redirect("/auth/login");
   const orders = await listOrdersBySeller(session.userId);
+  const wallet = await getWalletSummary(session.userId);
   const requested = orders.filter((o) => o.status === "REQUESTED").length;
   const received = orders.filter((o) => o.status === "RECEIVED").length;
   const quoted = orders.filter((o) => o.quotedAt !== null).length;
+  const shipmentRequested = orders.filter((o) => o.status === "SHIPMENT_REQUESTED").length;
 
-  const shipmentTiles: { label: string; tone: StatusTone }[] = [
-    { label: "포장중", tone: "muted" }, { label: "발송대기", tone: "muted" }, { label: "발송완료", tone: "muted" },
-  ];
   const returnTiles: { label: string; tone: StatusTone }[] = [
     { label: "처리대기", tone: "muted" }, { label: "완료", tone: "muted" },
   ];
@@ -44,12 +48,12 @@ export default async function DashboardHome() {
       <h1 className="text-xl font-semibold text-heading">마이페이지</h1>
 
       <section className="rounded-[27px] bg-gradient-to-br from-brand to-[#8b0000] text-white p-6 shadow-card">
-        <p className="text-sm text-white/80">예치금 현황 <span className="ml-2 rounded-full bg-white/20 text-white text-xs px-2 py-0.5">준비 중</span></p>
-        <p className="mt-1 text-2xl font-bold">사용 가능 잔액 ₩0</p>
-        <p className="text-xs text-white/70">예치금 충전·결제는 정식 오픈 시 열립니다.</p>
+        <p className="text-sm text-white/80">예치금 현황 <span className="ml-2 rounded-full bg-white/20 text-white text-xs px-2 py-0.5">로컬 테스트 원장</span></p>
+        <p className="mt-1 text-2xl font-bold">사용 가능 잔액 {krw(wallet.balanceKrw)}</p>
+        <p className="text-xs text-white/70">실계좌·실입금·실결제 연동은 오픈 전 확정합니다.</p>
         <div className="mt-4 flex gap-3">
-          <Link href="/dashboard/wallet" className="rounded-[18px] bg-white text-brand text-sm font-semibold px-4 py-2">충전하기 (준비 중)</Link>
-          <Link href="/dashboard/wallet" className="rounded-[18px] bg-white text-brand text-sm font-semibold px-4 py-2">내역보기 (준비 중)</Link>
+          <Link href="/dashboard/wallet" className="rounded-[18px] bg-white text-brand text-sm font-semibold px-4 py-2">충전하기 (오픈 전 확정)</Link>
+          <Link href="/dashboard/wallet" className="rounded-[18px] bg-white text-brand text-sm font-semibold px-4 py-2">내역보기</Link>
         </div>
       </section>
 
@@ -64,8 +68,10 @@ export default async function DashboardHome() {
         <StatusTile label="입고완료" count={received} tone="success" />
       </SectionCard>
 
-      <SectionCard title="출고 관리 현황" count={0} href="/dashboard/shipment" prep>
-        {shipmentTiles.map((t) => <StatusTile key={t.label} label={t.label} count={0} tone={t.tone} />)}
+      <SectionCard title="출고 관리 현황" count={shipmentRequested} href="/dashboard/shipment">
+        <StatusTile label="출고 요청" count={shipmentRequested} tone="warning" />
+        <StatusTile label="출고 준비" count={0} tone="muted" />
+        <StatusTile label="발송완료" count={0} tone="muted" />
       </SectionCard>
 
       <SectionCard title="반품 관리 현황" count={0} href="/dashboard/returns" prep>

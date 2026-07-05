@@ -34,6 +34,20 @@ const PRICE_TIERS: [string, string][] = [
   ["장기 (10일 이상)", "정기 검품·상주형 일정"],
 ];
 
+const APPLICATION_TABS: [string, string][] = [
+  ["기본정보", "품목, 수량, 검사 목적을 정리하는 자리입니다."],
+  ["공장정보", "공장명과 위치 정보는 고객 입력 전까지 저장하지 않습니다."],
+  ["일정관리", "방문 희망일과 검품 가능 일정을 조율하는 흐름입니다."],
+  ["보고서", "사진과 체크리스트 결과가 담긴 보고서 샘플 자리입니다."],
+];
+
+const RELATED_SERVICES: [string, string, string, string][] = [
+  ["🛒", "구매대행", "상품 구매와 판매자 협의를 함께 진행", "/services/purchase-agency"],
+  ["🚢", "배송대행", "검품 후 출고와 통관까지 이어지는 흐름", "/services/shipping-agency"],
+  ["₩", "요금 안내", "검수·부가서비스 단가 기준 확인", "/guide/pricing"],
+  ["📘", "이용가이드", "신청 전 준비할 항목 확인", "/guide"],
+];
+
 const FAQ: [string, string][] = [
   ["창고 검수와 출장검품은 무엇이 다른가요?", `창고 검수는 저희 중국 창고에 입고된 상품을 확인하는 것(유료 검수 개당 ¥${RATES.inspectionFeeFenPerUnit / 100})이고, 출장검품은 전문 검품원이 공장·생산 현장을 직접 방문하는 별도 서비스입니다. 창고 입고 전, 생산 단계에서 문제를 잡아야 하는 대량 발주에는 출장검품이 맞습니다.`],
   ["비용은 어떻게 책정되나요?", "검품 일수 기준의 일당 요금제이며, 일정이 길수록 일당이 낮아지는 구조입니다. 교통·출장 실비 포함 여부는 견적에 항목으로 표기합니다. 구체 단가는 오픈 전 확정해 공개합니다."],
@@ -56,7 +70,7 @@ export default function InspectionPage() {
           ))}
         </div>
         <h1 className="mt-6 text-4xl md:text-5xl font-semibold text-heading leading-tight">
-          받아보기 전에,<br /><span className="text-accent">현장에서 먼저 확인합니다</span>
+          제품 검수 대행<br /><span className="text-accent">현장에서 먼저 확인합니다</span>
         </h1>
         <p className="mt-5 text-lg text-secondary max-w-2xl">
           전문 검품원이 중국 공장·생산 현장을 직접 방문해 품질·수량·포장을 확인하고
@@ -64,8 +78,8 @@ export default function InspectionPage() {
           대시보드에서 단계별로 확인할 수 있습니다.
         </p>
         <div className="mt-8 flex gap-4">
-          <Link href="/auth/register" className="bg-accent text-white text-lg font-semibold rounded-[12px] px-8 py-4">무료 가입하기</Link>
-          <Link href="/guide" className="text-heading text-lg font-semibold px-4 py-4">이용 가이드 →</Link>
+          <Link href="#inspection-request" className="bg-accent text-white text-lg font-semibold rounded-[12px] px-8 py-4">검사 신청하기</Link>
+          <Link href="#inspection-report" className="text-heading text-lg font-semibold px-4 py-4">샘플 보기 →</Link>
         </div>
       </section>
 
@@ -117,6 +131,38 @@ export default function InspectionPage() {
         </div>
       </section>
 
+      <section id="inspection-request" className="max-w-6xl mx-auto px-6 py-16">
+        <div className="flex items-center gap-3">
+          <h2 className="text-3xl font-semibold text-heading">검사 신청 흐름</h2>
+          <span className={BADGE}>제출 없음</span>
+        </div>
+        <p className="mt-3 text-secondary max-w-2xl">
+          원본의 신청 탭 구조를 기준판에 두되, 실제 폼 제출·공장 연락·외부 상태 변경은 하지 않습니다.
+        </p>
+        <div className="mt-8 grid md:grid-cols-4 gap-4">
+          {APPLICATION_TABS.map(([title, desc], index) => (
+            <div key={title} className={`${CARD} p-5`}>
+              <span className="inline-flex w-7 h-7 items-center justify-center rounded-full bg-accent text-white text-sm font-semibold">{index + 1}</span>
+              <h3 className="mt-3 font-semibold text-heading">{title}</h3>
+              <p className="mt-2 text-sm text-secondary">{desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section id="inspection-report" className="bg-surface border-y border-black/5">
+        <div className="max-w-6xl mx-auto px-6 py-16">
+          <h2 className="text-3xl font-semibold text-heading">보고서 흐름</h2>
+          <div className="mt-8 rounded-[16px] bg-bg border border-black/5 p-8">
+            <p className="text-xs font-semibold text-muted">이미지·보고서 자리표시</p>
+            <p className="mt-3 text-2xl font-semibold text-heading">검품 사진, 불량 유형, 수량 확인, 조치 의견</p>
+            <p className="mt-2 text-sm text-secondary">
+              실제 보고서 파일이나 현장 이미지는 반입하지 않습니다. 정식 오픈 전 샘플 양식을 확정합니다.
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* 가격 3단 — 오픈 전 확정 자리표시 */}
       <section className="max-w-6xl mx-auto px-6 py-16">
         <div className="flex items-center gap-3">
@@ -134,6 +180,21 @@ export default function InspectionPage() {
           ))}
         </div>
         <p className="mt-4 text-xs text-muted">출장검품 단가는 정식 오픈 전 확정해 공개합니다. 확정 전 견적은 신청 시 개별 안내드립니다.</p>
+      </section>
+
+      <section className="bg-surface-alt border-y border-black/5">
+        <div className="max-w-6xl mx-auto px-6 py-16">
+          <h2 className="text-3xl font-semibold text-heading">관련 서비스</h2>
+          <div className="mt-8 grid md:grid-cols-4 gap-4">
+            {RELATED_SERVICES.map(([icon, title, desc, href]) => (
+              <Link key={title} href={href} className={`${CARD} p-5 border border-black/5 hover:border-accent/40 transition-colors`}>
+                <span className="text-2xl">{icon}</span>
+                <h3 className="mt-3 font-semibold text-heading">{title}</h3>
+                <p className="mt-2 text-sm text-secondary">{desc}</p>
+              </Link>
+            ))}
+          </div>
+        </div>
       </section>
 
       {/* FAQ */}

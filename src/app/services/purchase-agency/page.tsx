@@ -17,6 +17,12 @@ const COMMISSION_LABEL = `상품가의 ${RATES.commissionRate * 100}%`;
 const VAT_LABEL = `수수료의 ${RATES.commissionVatRate * 100}%`;
 const INSPECTION_LABEL = `개당 ¥${RATES.inspectionFeeFenPerUnit / 100}`;
 
+const METRICS: [string, string][] = [
+  ["경험 지표", "오픈 전 확정"],
+  ["수수료", COMMISSION_LABEL],
+  ["AI 번역", "준비 중"],
+];
+
 // 비교표 8행: 일반 배대지 vs 일반 구매대행 vs 물류
 const COMPARE_ROWS: [string, string, string, string][] = [
   ["구매·결제 대행", "직접 구매해야 함", "대행", "대행 (링크·수량만 입력)"],
@@ -72,7 +78,7 @@ export default function PurchaseAgencyPage() {
           ))}
         </div>
         <h1 className="mt-6 text-4xl md:text-5xl font-semibold text-heading leading-tight">
-          1688 구매대행,<br /><span className="text-accent">링크 하나로 끝냅니다</span>
+          1688 구매대행<br /><span className="text-accent">검색부터 통관까지 원스톱 서비스</span>
         </h1>
         <p className="mt-5 text-lg text-secondary max-w-2xl">
           상품 링크와 수량만 입력하면 구매·결제·중국 내 배송을 대신 처리합니다.
@@ -80,8 +86,19 @@ export default function PurchaseAgencyPage() {
           수수료와 부가세까지 항목별 견적으로 투명하게 보여드립니다.
         </p>
         <div className="mt-8 flex gap-4">
-          <Link href="/auth/register" className="bg-accent text-white text-lg font-semibold rounded-[12px] px-8 py-4">무료 가입하기</Link>
-          <Link href="/guide" className="text-heading text-lg font-semibold px-4 py-4">이용 가이드 →</Link>
+          <Link href="/search" className="bg-accent text-white text-lg font-semibold rounded-[12px] px-8 py-4">상품 검색하기</Link>
+          <Link href="/dashboard/orders" className="text-heading text-lg font-semibold px-4 py-4">구매 진행 확인 →</Link>
+        </div>
+      </section>
+
+      <section className="max-w-6xl mx-auto px-6 pb-16">
+        <div className="grid md:grid-cols-3 gap-4">
+          {METRICS.map(([label, value]) => (
+            <div key={label} className={`${CARD} p-6 text-center`}>
+              <p className="text-xs text-muted">{label}</p>
+              <p className="mt-2 text-2xl font-semibold text-heading">{value}</p>
+            </div>
+          ))}
         </div>
       </section>
 
@@ -102,6 +119,22 @@ export default function PurchaseAgencyPage() {
             검수·부가서비스까지 한 번에 처리해 국내 판매 준비 상태로 받아볼 수 있습니다.
             한국어 키워드·이미지로 1688 상품을 찾는 검색 기능은 준비 중이며, 정식 오픈 후 제공됩니다.
           </p>
+        </div>
+      </section>
+
+      <section className="max-w-6xl mx-auto px-6 py-16">
+        <div className={`${CARD} p-8 md:flex items-center justify-between gap-8`}>
+          <div>
+            <p className="text-sm font-semibold text-accent">중국어-한국어 번역 안내</p>
+            <h2 className="mt-2 text-3xl font-semibold text-heading">상품명을 몰라도 검색 흐름을 시작할 수 있습니다</h2>
+            <p className="mt-3 text-secondary max-w-2xl">
+              한국어 키워드 입력, 번역 버튼, 이미지 검색 자리를 공개 화면에 둡니다.
+              현재 기준판에서는 실제 번역·검색 API를 호출하지 않고, 정식 오픈 전 연결 예정 상태로 표시합니다.
+            </p>
+          </div>
+          <Link href="/search" className="inline-flex mt-6 md:mt-0 bg-accent text-white text-lg font-semibold rounded-[12px] px-8 py-4 shrink-0">
+            AI 번역하기
+          </Link>
         </div>
       </section>
 
@@ -174,6 +207,24 @@ export default function PurchaseAgencyPage() {
           </div>
           <Link href="/guide/services" className="inline-block mt-6 text-sm font-semibold text-accent">부가서비스 안내 보기 →</Link>
         </div>
+      </section>
+
+      <section className="max-w-6xl mx-auto px-6 py-16">
+        <h2 className="text-3xl font-semibold text-heading">내 상품 리스트와 재구매</h2>
+        <p className="mt-3 text-secondary max-w-2xl">
+          구매가 끝난 상품은 계정 안에 남아 같은 상품을 다시 주문할 때 링크와 옵션을 처음부터 찾지 않도록 준비합니다.
+          기준판에서는 목록·재구매 버튼의 위치와 역할만 보여주며 실제 주문 생성은 하지 않습니다.
+        </p>
+        <div className="mt-8 grid md:grid-cols-3 gap-6">
+          {["상품 보관함", "매칭된 옵션", "재구매 요청"].map((title) => (
+            <div key={title} className={`${CARD} p-6`}>
+              <p className="text-xs font-semibold text-muted">준비 중</p>
+              <h3 className="mt-2 font-semibold text-heading">{title}</h3>
+              <p className="mt-2 text-sm text-secondary">정식 오픈 전 기능 연결 예정입니다.</p>
+            </div>
+          ))}
+        </div>
+        <Link href="/dashboard/my-products" className="inline-block mt-6 text-sm font-semibold text-accent">내 상품 리스트 보기 →</Link>
       </section>
 
       {/* 수수료 섹션 */}

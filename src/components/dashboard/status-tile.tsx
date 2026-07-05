@@ -1,4 +1,4 @@
-// 두리무역 벤치 상태 칩 타일 (benchmark-duly.md §2.1). 틴트 배경 + 라벨 + 숫자.
+// 상태 칩 타일: 틴트 배경 + 라벨 + 숫자.
 export type StatusTone = "warning" | "success" | "info" | "muted";
 
 const TONE_STYLES: Record<StatusTone, { bg: string; number: string }> = {

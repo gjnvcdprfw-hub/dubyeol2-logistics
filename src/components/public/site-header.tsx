@@ -15,9 +15,12 @@ const MENU = [
 export default function SiteHeader() {
   return (
     <header className="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-black/5">
-      <div className="max-w-6xl mx-auto flex items-center justify-between px-6 h-16">
-        <Link href="/" className="font-bold text-brand text-lg shrink-0">물류</Link>
-        <nav className="hidden md:flex items-center gap-5 text-sm text-[#666666]">
+      <div className="max-w-6xl mx-auto flex items-center justify-between gap-6 px-6 h-16">
+        <Link href="/" className="shrink-0" aria-label="홈으로">
+          <span className="block text-xs font-semibold text-muted">비공개 기준판</span>
+          <span className="block font-bold text-brand text-lg leading-5">브랜드 자리표시</span>
+        </Link>
+        <nav className="hidden lg:flex items-center gap-5 text-sm font-medium text-[#666666]" aria-label="공개 메뉴">
           {MENU.map((m) => (
             <Link key={m.href} href={m.href} className="hover:text-heading">{m.label}</Link>
           ))}

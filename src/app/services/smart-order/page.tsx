@@ -63,6 +63,19 @@ const COMPARE_ROWS: [string, string, string][] = [
   ["반복 주문", "같은 작업을 처음부터 반복", "저장된 매칭으로 즉시 재주문"],
 ];
 
+const RELATED_LINKS: [string, string, string][] = [
+  ["구매대행", "1688 상품 구매와 결제까지 맡기는 흐름", "/services/purchase-agency"],
+  ["배송대행", "직접 구매한 상품의 입고와 출고 흐름", "/services/shipping-agency"],
+  ["이용 가이드", "주문 엑셀을 준비하는 기본 흐름", "/guide"],
+];
+
+const FAQ: [string, string][] = [
+  ["엑셀을 올리면 바로 주문되나요?", "아닙니다. 기준판에서는 업로드를 받지 않고, 정식 오픈 후에도 고객이 매칭을 확인·확정한 뒤에만 주문 흐름으로 넘어갑니다."],
+  ["양식을 꼭 맞춰야 하나요?", "정식 오픈 후에는 주요 플랫폼 주문 엑셀을 그대로 읽는 방향으로 준비합니다. 기준판에서는 양식 변환 없이 시작한다는 흐름만 보여줍니다."],
+  ["한 번 매칭한 상품은 다시 쓸 수 있나요?", "매칭 라이브러리에 저장해 반복 주문 때 다시 쓰는 구조를 준비합니다. 현재 화면에서는 자리표시입니다."],
+  ["운송장 회신도 되나요?", "출고 후 국내 운송장 회신 엑셀을 돌려주는 흐름을 준비합니다. 기준판에서는 실제 파일 생성이나 외부 상태 변경을 하지 않습니다."],
+];
+
 export default function SmartOrderPage() {
   return (
     <main className="bg-bg text-body">
@@ -83,7 +96,7 @@ export default function SmartOrderPage() {
           ))}
         </div>
         <h1 className="mt-6 text-4xl md:text-5xl font-semibold text-heading leading-tight">
-          대량 주문,<br /><span className="text-accent">엑셀 한 장으로 끝</span>
+          스마트오더<br /><span className="text-accent">Excel로 시작하는 1688 대량 구매 자동화</span>
         </h1>
         <p className="mt-5 text-lg text-secondary max-w-2xl">
           스마트스토어·쿠팡 주문 엑셀을 올리면 AI가 주문 행을 구조화하고,
@@ -91,8 +104,9 @@ export default function SmartOrderPage() {
           하나의 흐름으로 처리합니다. 수작업 변환과 옵션 오기입이 사라집니다.
         </p>
         <div className="mt-8 flex gap-4">
-          <Link href="/auth/register" className="bg-accent text-white text-lg font-semibold rounded-[12px] px-8 py-4">오픈 소식 먼저 받기</Link>
-          <Link href="/services/purchase-agency" className="text-heading text-lg font-semibold px-4 py-4">구매대행 먼저 보기 →</Link>
+          <Link href="/auth/register" className="bg-accent text-white text-lg font-semibold rounded-[12px] px-8 py-4">스마트오더 시작</Link>
+          <Link href="/dashboard/smart-order" className="text-heading text-lg font-semibold px-4 py-4">작업공간 열기 →</Link>
+          <Link href="#smart-order-sample" className="hidden md:inline-flex text-heading text-lg font-semibold px-4 py-4">처리 예시 보기</Link>
         </div>
       </section>
 
@@ -109,6 +123,26 @@ export default function SmartOrderPage() {
               </li>
             ))}
           </ol>
+        </div>
+      </section>
+
+      <section id="smart-order-sample" className="max-w-6xl mx-auto px-6 py-16">
+        <div className={`${CARD} p-8`}>
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <p className="text-sm font-semibold text-accent">처리 예시</p>
+              <h2 className="mt-2 text-3xl font-semibold text-heading">업로드 화면은 자리표시만 둡니다</h2>
+            </div>
+            <span className="text-xs font-semibold rounded-full bg-warning-tint text-heading px-3 py-1">실제 파일 업로드 없음</span>
+          </div>
+          <div className="mt-8 grid md:grid-cols-3 gap-4">
+            {["엑셀 행 구조화", "1688 상품 매칭", "운송장 회신"].map((label) => (
+              <div key={label} className="rounded-[16px] bg-bg border border-black/5 p-5">
+                <p className="font-semibold text-heading">{label}</p>
+                <p className="mt-2 text-sm text-secondary">정식 오픈 전 연결 예정인 화면 자리입니다.</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -192,6 +226,33 @@ export default function SmartOrderPage() {
         <p className="mt-4 text-xs text-muted">
           구매 방식은 구매대행(수수료 상품가의 {RATES.commissionRate * 100}% + VAT) 기준이며, 고객 1688 계정으로 직접 구매하는 방식(구매 수수료 없음)도 준비하고 있습니다. 요율은 서비스 준비 중 기준으로 변경될 수 있습니다.
         </p>
+      </section>
+
+      <section className="bg-surface border-y border-black/5">
+        <div className="max-w-6xl mx-auto px-6 py-16">
+          <h2 className="text-3xl font-semibold text-heading">관련 문서와 서비스</h2>
+          <div className="mt-8 grid md:grid-cols-3 gap-6">
+            {RELATED_LINKS.map(([title, desc, href]) => (
+              <Link key={title} href={href} className={`${CARD} p-6 hover:border-accent/40 border border-black/5 transition-colors`}>
+                <h3 className="font-semibold text-heading">{title}</h3>
+                <p className="mt-2 text-sm text-secondary">{desc}</p>
+                <p className="mt-4 text-sm font-semibold text-accent">바로가기 →</p>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="max-w-6xl mx-auto px-6 py-16">
+        <h2 className="text-3xl font-semibold text-heading">자주 묻는 질문</h2>
+        <div className="mt-8 space-y-4">
+          {FAQ.map(([q, a]) => (
+            <details key={q} className={`${CARD} p-5`}>
+              <summary className="font-semibold text-heading cursor-pointer">{q}</summary>
+              <p className="mt-3 text-sm text-secondary">{a}</p>
+            </details>
+          ))}
+        </div>
       </section>
 
       <TrustStats />

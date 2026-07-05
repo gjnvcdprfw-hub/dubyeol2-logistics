@@ -1,0 +1,147 @@
+{
+  "schema": "dubyeol2.external_audit.request.v0",
+  "project": {
+    "name": "물류 — 두리무역 1:1 비공개 기준판",
+    "root": "/Users/twostars/Documents/물류",
+    "dubyeol2_root": ".harness/dubyeol2"
+  },
+  "run": {
+    "id": "phase-006-duly-private-baseline-20260705",
+    "phase_id": "phase-006",
+    "phase_index": 6,
+    "phase_total": 7
+  },
+  "phase_goal": {
+    "customer_goal": "대표님이 정식 운영 전 원본 공개 화면과 로컬 기준판을 나란히 보고 우리 회사용 수정 기준을 잡을 수 있다.",
+    "why_this_phase_matters": "대표님 최신 지시: 로고, 이미지, 실주소, 전화번호, 계좌, 사업자정보만 빼고 두리무역 디자인, 기능, 구조, 문구, 버튼 흐름, 상태 문구, 아이콘/이모티콘 역할을 1:1로 맞춘다.",
+    "done_when_customer_can": "공개 영역 기준판이 로컬에서 렌더되고, 제외 6종 실제값 없이 원본 공개 화면의 주요 흐름과 정보 밀도에 대응한다."
+  },
+  "feature_contract": {
+    "feature_md": ".harness/dubyeol2/phase-packets/phase-006/feature-contract-snapshot.md",
+    "customer_promise": "두리무역 공개 영역을 비공개 제작 기준판으로 1:1에 가깝게 복사한다. 제외 6종은 실제 값을 넣지 않고 자리표시한다. 기준판은 고객 공개용 또는 정식 운영본이 아니다.",
+    "must_not_happen_when_paid": [
+      "비공개 기준판이 고객에게 공개됨",
+      "로고, 이미지, 실주소, 전화번호, 계좌, 사업자정보 실제값이 코드나 화면에 들어감",
+      "실조회, 결제, 실입금, 유료 API, 실DB 쓰기, deploy, git push가 발생함",
+      "준비 중인 기능이 실제 작동하는 것처럼 보임",
+      "우리 회사용 수정 전 기준판을 정식 운영본처럼 보고함"
+    ],
+    "in_scope": [
+      "대표님 Chrome 읽기 전용으로 두리무역 공개 URL 인벤토리 작성",
+      "공개 헤더, 푸터, 신뢰 지표, CTA, 준비 중 컴포넌트, 약관/개인정보 링크 자리표시",
+      "랜딩, 1688 검색 진입, 회사소개, 구매대행, 배송대행, 스마트오더, 검품감사 공개 화면",
+      "배송조회, 이용가이드, 요금/부가서비스, 계산기 허브와 계산기 화면",
+      "제외 6종 검사에 걸리던 기존 대시보드 주석과 창고 주소 자리표시의 최소 안전 정리"
+    ],
+    "out_of_scope": [
+      "로그인 후 대시보드 1:1 완성",
+      "예치금, 결제, 실입금, 계좌 흐름",
+      "우리 회사용 문구, 실주소, 전화번호, 계좌, 사업자정보 확정",
+      "정식 운영 전환, deploy, 원격 push, 원격 머지",
+      "외부 조회 API, 1688 API, 세관 API, 환율 API 실호출"
+    ],
+    "acceptance_example": {
+      "name": "공개 랜딩과 공개 메뉴 기준판 비교",
+      "customer_input": "대표님이 두리무역 원본 공개 화면과 로컬 `/`, `/search`, `/guide`, `/calculators`, `/services/*`를 나란히 확인한다.",
+      "customer_visible_result": "로고, 이미지, 실주소, 전화번호, 계좌, 사업자정보는 자리표시이고, 나머지 공개 흐름과 정보 밀도는 같은 역할로 대응한다.",
+      "pass_criteria": "23개 공개 로컬 URL 200 렌더, 브라우저 콘솔 오류 0, 제외 6종 검색 0, 테스트 36 통과, build 성공",
+      "counterexample": "원본의 실제 연락처/계좌/주소/사업자정보가 보이거나, 준비 중인 기능이 실제 조회·결제처럼 보이면 실패"
+    }
+  },
+  "phase_qa": {
+    "normal_flow": "Chrome 기준 인벤토리 확인 후 로컬 공개 URL 23개를 열어 H1 렌더, HTTP 200, console error 0, page exception 0을 확인한다.",
+    "failure_flow": "미구현 조회, 계산, 업로드, 약관 본문은 준비 중 또는 오픈 전 확정 자리표시로 막는다.",
+    "customer_harm_guardrail": "기준판은 로컬/비공개만 허용하고, 제외 6종 실제값과 실서비스 상태 변경을 금지한다.",
+    "next_phase_handoff_check": "외부감리 PASS 후 04-completion 작성과 로컬 main 머지. 후속 Phase에서 우리 회사용 수정 또는 로그인 후 대시보드/돈 흐름을 별도 정렬한다."
+  },
+  "ui_qa": {
+    "has_ui": true,
+    "scenario_prepared": true,
+    "separate_live_ui_qa_required": false,
+    "summary": "Chrome headless DevTools Protocol로 `http://localhost:3000` 공개 URL 23개 확인: 23/23 HTTP 200, H1 렌더, console error 0, page exception 0, 제외 6종 가시 텍스트 매치 0."
+  },
+  "design_system": {
+    "design_system_md": ".harness/dubyeol2/design-system.md",
+    "relevant_rules": [
+      "기존 공개 화면 톤과 토큰 유지",
+      "준비 중 기능은 실제 작동처럼 보이지 않게 담장 표시",
+      "로고와 이미지는 원본 반입 없이 텍스트/색면/자리표시로 대응"
+    ],
+    "changed": false,
+    "change_summary": "디자인 시스템 파일 변경 없음. lint 결과 errors 0, warnings 26."
+  },
+  "changes": {
+    "summary": "Phase 6을 새 Feature 3 계약으로 재정렬하고, 두리무역 공개 영역 인벤토리와 공개 화면 기준판을 구현했다. 제외 6종 실제값은 코드/공개 화면에서 제거하고 자리표시 처리했다.",
+    "files_changed": [
+      ".harness/dubyeol2/duly-public-inventory.md",
+      ".harness/dubyeol2/phase-packets/phase-006/00-customer-outcome.md",
+      ".harness/dubyeol2/phase-packets/phase-006/01-teamleader-intake.md",
+      ".harness/dubyeol2/phase-packets/phase-006/02-plan.md",
+      ".harness/dubyeol2/phase-packets/phase-006/03-verification.md",
+      ".superpowers/sdd/task-1-report.md",
+      ".superpowers/sdd/task-2-report.md",
+      ".superpowers/sdd/task-3-report.md",
+      ".superpowers/sdd/task-4-report.md",
+      "src/components/public/*",
+      "src/app/page.tsx",
+      "src/app/search/page.tsx",
+      "src/app/about/page.tsx",
+      "src/app/services/*/page.tsx",
+      "src/app/tracking/page.tsx",
+      "src/app/guide/page.tsx",
+      "src/app/calculators/page.tsx",
+      "src/app/calculators/*/page.tsx",
+      "src/app/legal/terms/page.tsx",
+      "src/app/legal/privacy/page.tsx",
+      "src/app/dashboard/warehouse-address/page.tsx",
+      "src/components/dashboard/sidebar.tsx",
+      "src/components/dashboard/status-tile.tsx",
+      "src/app/dashboard/page.tsx"
+    ],
+    "risk_notes": [
+      "SUPERSEDED: 이전 Phase 6 문구 전용 Machine Check와 감리 요청은 현재 계약의 완료 증거가 아니다.",
+      "모드 B: Codex가 빌드 주체이므로 외부감리는 Claude가 수행해야 한다. Codex 자가감리 금지.",
+      "Playwright MCP는 기존 프로필 락으로 사용 불가였고, Chrome headless DevTools Protocol로 실제 브라우저 QA를 대체했다.",
+      "기준판은 비공개 제작용이다. 우리 회사용 정보·정책·약관 확정 전 고객 공개 또는 정식 운영하면 실패다.",
+      "요율 숫자는 기존 정본 파생값을 사용한다. 추후 대표님 컷팅 시 기견적 소급 변동 위험을 별도 정렬해야 한다."
+    ]
+  },
+  "machine_check": {
+    "status": "PASS",
+    "commands_or_checks": [
+      "npx vitest run → PASS, 5 files, 36 tests passed",
+      "npm run build → PASS, Next build and TypeScript complete, static pages 48",
+      "npx -y @google/design.md lint .harness/dubyeol2/design-system.md → PASS, errors 0, warnings 26",
+      "git diff --check → PASS",
+      "rg excluded-data pattern in src/app src/components → 0 matches",
+      "rg hardcoded-rate pattern in src/app src/components → only src/app/globals.css color #4a5565, not a rate",
+      "Chrome headless QA on http://localhost:3000 → 23/23 public routes HTTP 200, H1 rendered, console error 0, page exception 0"
+    ],
+    "evidence_files": [
+      ".harness/dubyeol2/duly-public-inventory.md",
+      ".harness/dubyeol2/phase-packets/phase-006/03-verification.md",
+      ".superpowers/sdd/progress.md",
+      ".superpowers/sdd/task-1-report.md",
+      ".superpowers/sdd/task-2-report.md",
+      ".superpowers/sdd/task-3-report.md",
+      ".superpowers/sdd/task-4-report.md"
+    ],
+    "failures": []
+  },
+  "auditor_instruction": {
+    "auditor_engine": "claude",
+    "role": "external_auditor_only",
+    "do_not_modify_code": true,
+    "required_verdicts": [
+      "PASS",
+      "FAIL",
+      "BLOCKED"
+    ],
+    "judge_only": [
+      "whether_customer_promise_is_kept",
+      "whether_customer_harm_guardrails_are_preserved",
+      "whether_machine_check_evidence_supports_the_claim",
+      "whether_design_system_or_screen_flow_is_broken"
+    ]
+  }
+}

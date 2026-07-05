@@ -40,14 +40,11 @@ const AUTOMATION: [string, string][] = [
 ];
 
 const FLOW: [string, string][] = [
-  ["창고 주소 확인", "가입 후 전용 입고 코드가 붙은 중국 창고 주소를 받습니다. 입고 코드가 상품 구분 기준이 됩니다."],
-  ["입고 예정 등록", "구매한 상품의 운송장 번호를 등록합니다. 등록된 번호로 도착 여부를 대조합니다."],
-  ["창고 입고", "상품이 중국 창고에 도착하면 입고 처리되고 대시보드에 반영됩니다."],
-  ["입고 사진 확인", "사진 1~2장과 외포장 이상 여부를 기본 제공합니다. 이상이 있으면 먼저 알려드립니다."],
-  ["검수·부가서비스", "필요 시 유료 검수, 원산지 표기, 재포장 등 부가서비스를 신청합니다."],
-  ["출고 신청", "받을 상품을 묶어 출고를 신청하면 청구중량 기준 운임이 확정됩니다."],
-  ["국제 배송·통관", "한국으로 발송되고 통관이 진행됩니다. 관세·부가세는 이 단계에서 별도 발생합니다."],
-  ["국내 수령", "통관 완료 후 국내 택배로 최종 수령합니다."],
+  ["주소 확인", "전용 입고 코드가 붙은 중국 창고 주소를 확인합니다. 실제 창고 위치 정보는 오픈 전 확정 자리표시입니다."],
+  ["운송장 등록", "직접 구매한 상품의 중국 운송장을 등록해 입고 예정 상태로 둡니다."],
+  ["창고 입고", "창고 도착 시 입고 처리와 사진 1~2장, 외포장 이상 여부를 기본 확인합니다."],
+  ["검수·출고", "필요한 검수·부가서비스를 선택하고 묶음 출고를 신청합니다."],
+  ["통관·수령", "국제 배송과 통관을 거쳐 국내 배송으로 받습니다. 관세·수입 요건 책임은 수입자에게 있습니다."],
 ];
 
 const ADDON_GROUPS: [string, string[]][] = [
@@ -78,7 +75,7 @@ export default function ShippingAgencyPage() {
           ))}
         </div>
         <h1 className="mt-6 text-4xl md:text-5xl font-semibold text-heading leading-tight">
-          직접 구매한 짐,<br /><span className="text-accent">창고에서 한국까지</span>
+          중국 배송대행<br /><span className="text-accent">입고부터 통관까지 원스톱</span>
         </h1>
         <p className="mt-5 text-lg text-secondary max-w-2xl">
           1688·타오바오에서 직접 구매한 상품을 중국 창고 주소로 보내주시면
@@ -89,6 +86,40 @@ export default function ShippingAgencyPage() {
         <div className="mt-8 flex gap-4">
           <Link href="/auth/register" className="bg-accent text-white text-lg font-semibold rounded-[12px] px-8 py-4">무료 가입하기</Link>
           <Link href="/calculators" className="text-heading text-lg font-semibold px-4 py-4">운임 계산해 보기 →</Link>
+        </div>
+      </section>
+
+      <section className="bg-surface border-y border-black/5">
+        <div className="max-w-6xl mx-auto px-6 py-16">
+          <h2 className="text-3xl font-semibold text-heading">배송대행 5단계</h2>
+          <ol className="mt-8 grid md:grid-cols-5 gap-4">
+            {FLOW.map(([t, d], i) => (
+              <li key={t} className="rounded-[16px] bg-bg border border-black/5 p-5">
+                <span className="inline-flex w-7 h-7 items-center justify-center rounded-full bg-accent text-white text-sm font-semibold">{i + 1}</span>
+                <h3 className="mt-3 font-semibold text-heading">{t}</h3>
+                <p className="mt-1 text-xs text-secondary">{d}</p>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+
+      <section className="max-w-6xl mx-auto px-6 py-16">
+        <h2 className="text-3xl font-semibold text-heading">수동 입력을 줄이는 자동화</h2>
+        <p className="mt-3 text-secondary max-w-2xl">
+          원본 공개 화면처럼 Excel 수동 입력 제거, 타오바오 URL 인식, 1688 계정 연동, 운송장 자동 조회, AI HS코드 추천 흐름을 한 화면에 둡니다.
+          기준판에서는 실제 계정 연동·외부 조회를 하지 않습니다.
+        </p>
+        <div className="mt-8 grid md:grid-cols-2 gap-6">
+          {AUTOMATION.slice(0, 4).map(([t, d]) => (
+            <div key={t} className={`${CARD} p-6`}>
+              <div className="flex items-center justify-between gap-3">
+                <h3 className="font-semibold text-heading">{t}</h3>
+                <span className={`${BADGE} shrink-0`}>준비 중</span>
+              </div>
+              <p className="mt-2 text-sm text-secondary">{d}</p>
+            </div>
+          ))}
         </div>
       </section>
 
@@ -143,12 +174,12 @@ export default function ShippingAgencyPage() {
       <section className="bg-surface-alt border-y border-black/5">
         <div className="max-w-6xl mx-auto px-6 py-16">
           <div className="flex items-center gap-3">
-            <h2 className="text-3xl font-semibold text-heading">자동화 기술</h2>
+            <h2 className="text-3xl font-semibold text-heading">추가 자동화 기술</h2>
             <span className={BADGE}>준비 중</span>
           </div>
           <p className="mt-3 text-secondary">아래 자동화 기능은 정식 오픈 후 순차 제공됩니다.</p>
           <div className="mt-8 grid md:grid-cols-2 gap-6">
-            {AUTOMATION.map(([t, d]) => (
+            {AUTOMATION.slice(4).map(([t, d]) => (
               <div key={t} className={`${CARD} p-6`}>
                 <div className="flex items-center justify-between gap-3">
                   <h3 className="font-semibold text-heading">{t}</h3>
@@ -207,20 +238,6 @@ export default function ShippingAgencyPage() {
           </div>
           <Link href="/guide/services" className="inline-block mt-6 text-sm font-semibold text-accent">부가서비스 안내 보기 →</Link>
         </div>
-      </section>
-
-      {/* 8단계 플로우 */}
-      <section className="max-w-6xl mx-auto px-6 py-16">
-        <h2 className="text-3xl font-semibold text-heading">이용 순서 8단계</h2>
-        <ol className="mt-8 grid md:grid-cols-4 gap-4">
-          {FLOW.map(([t, d], i) => (
-            <li key={t} className={`${CARD} p-5`}>
-              <span className="inline-flex w-7 h-7 items-center justify-center rounded-full bg-accent text-white text-sm font-semibold">{i + 1}</span>
-              <h3 className="mt-3 font-semibold text-heading">{t}</h3>
-              <p className="mt-1 text-xs text-secondary">{d}</p>
-            </li>
-          ))}
-        </ol>
       </section>
 
       {/* FAQ */}

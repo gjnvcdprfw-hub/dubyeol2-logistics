@@ -42,59 +42,67 @@ const FAQ = [
   },
 ];
 
+const TRUST_BADGES = ["1개부터 대량까지", "한국어 검색 준비", "입고부터 통관까지"];
+
+const PURCHASE_FEATURES: [string, string][] = [
+  ["한국어 검색", "상품명을 한국어로 입력하고 번역·이미지 검색 흐름까지 한 자리에서 시작합니다."],
+  ["구매대행 신청", "찾은 상품은 링크와 수량을 기준으로 견적 요청까지 이어집니다."],
+  ["항목별 견적", "상품가·수수료·검수비·예상 운임을 나눠 보고 결정합니다."],
+];
+
 export default function Home() {
   return (
     <main className="bg-bg text-body">
       <SiteHeader />
 
-      {/* 히어로: 가치제안 + 검색창 UI + 신뢰 뱃지 3 */}
       <section className="max-w-6xl mx-auto px-6 py-24">
+        <p className="text-sm font-semibold text-accent">1688 x 공개 기준판</p>
         <h1 className="text-[56px] md:text-[96px] leading-none font-semibold text-heading">
-          중국 소싱 물류,<br /><span className="text-accent">투명하게.</span>
+          중국 무역,<br /><span className="text-accent">새로운 기준</span>
         </h1>
         <p className="mt-6 text-lg text-secondary">
-          주문 접수부터 입고 확인, 항목별 견적까지. 사업자 셀러를 위한 중국→한국 통합 물류.
-          구매대행·배송대행·검품·스마트오더를 하나의 계정으로 쓰고, 요율은 전부 공개합니다.
+          1688 상품 검색부터 구매대행, 배송대행, 스마트오더, 검품감사까지 한 흐름으로 비교할 수 있는
+          공개 서비스 기준판입니다. 실제 로고·이미지·연락처·회사 정보는 오픈 전 확정 자리표시로만 둡니다.
         </p>
         <div className="mt-8 flex gap-4">
-          <Link href="/auth/register" className="bg-accent text-white text-lg font-semibold rounded-[12px] px-8 py-4">무료 가입하기</Link>
-          <Link href="/auth/login" className="text-heading text-lg font-semibold px-4 py-4">로그인 →</Link>
+          <Link href="/guide" className="bg-accent text-white text-lg font-semibold rounded-[12px] px-8 py-4">이용 가이드</Link>
+          <Link href="/search" className="text-heading text-lg font-semibold px-4 py-4">1688 검색 →</Link>
         </div>
         <div className="mt-10 max-w-2xl">
           <div className="flex items-center gap-2 rounded-[16px] bg-surface border border-black/10 p-2 shadow-sm">
             <input
               type="text"
-              placeholder="상품명을 입력하세요"
+              placeholder="상품명을 한국어로 입력하세요"
               disabled
               className="flex-1 px-4 py-3 bg-transparent text-sm text-body placeholder:text-muted outline-none"
             />
+            <button type="button" disabled className="hidden sm:inline-flex text-sm font-semibold text-secondary rounded-[12px] px-4 py-3 bg-surface-alt cursor-not-allowed">
+              번역
+            </button>
+            <button type="button" disabled className="hidden sm:inline-flex text-sm font-semibold text-secondary rounded-[12px] px-4 py-3 bg-surface-alt cursor-not-allowed">
+              이미지
+            </button>
             <Link href="/search" className="bg-accent text-white text-sm font-semibold rounded-[12px] px-6 py-3 shrink-0">검색</Link>
           </div>
           <p className="mt-2 text-xs text-muted">🚧 1688 상품 검색은 준비 중입니다 — 오픈 후 이용하실 수 있습니다.</p>
         </div>
         <ul className="mt-10 flex flex-wrap gap-6 text-sm text-secondary">
-          <li>✓ 입고 사진 기본 제공</li>
-          <li>✓ 항목별 투명 견적</li>
-          <li>✓ 사업자 셀러 전용</li>
+          {TRUST_BADGES.map((badge) => (
+            <li key={badge} className="rounded-full bg-surface border border-black/5 px-4 py-2">✓ {badge}</li>
+          ))}
         </ul>
       </section>
 
-      {/* 서비스 1 — 1688 검색·구매대행 */}
       <section className="bg-surface border-t border-black/5">
         <div className="max-w-6xl mx-auto px-6 py-20">
-          <p className="text-sm font-semibold text-accent">1688 검색·구매대행</p>
-          <h2 className="mt-2 text-3xl font-semibold text-heading">상품 링크만 있으면 구매까지 대신합니다</h2>
+          <p className="text-sm font-semibold text-accent">1688 검색 및 구매대행</p>
+          <h2 className="mt-2 text-3xl font-semibold text-heading">검색에서 구매 진행까지 한 화면 흐름으로 이어집니다</h2>
           <p className="mt-3 text-secondary max-w-2xl">
-            상품 링크와 수량만 입력하면 접수 완료. 중국어 소통, 위안화 결제, 판매자 관리, 중국 내 배송까지
-            대신 처리하고, 수수료(상품가의 {RATES.commissionRate * 100}%)와 부가세까지 항목별 견적으로 보여드립니다.
-            한국어 키워드·이미지로 1688 상품을 찾는 검색 기능도 준비하고 있습니다.
+            한국어 키워드 검색, 이미지 검색 자리, 상품 링크 접수, 구매대행 견적 요청이 같은 흐름으로 보이도록 구성했습니다.
+            실제 1688 API 호출은 하지 않으며, 수수료(상품가의 {RATES.commissionRate * 100}%)와 부가세는 정본 요율에서만 보여줍니다.
           </p>
           <div className="mt-8 grid md:grid-cols-3 gap-6">
-            {[
-              ["주문 접수", "상품 링크와 수량만 입력하면 접수 완료. 구매대행·배송대행 중 선택하고, 원산지 표기·바코드 등 부가서비스도 같은 단계에서 함께 신청합니다."],
-              ["입고 확인", "중국 창고 도착 시 입고 사진 1~2장과 외포장 이상 여부를 기본 제공합니다. 수량·외관·하자까지 보는 유료 검수도 신청할 수 있습니다."],
-              ["투명 견적", "상품가, 수수료, 검수비, 예상 국제운임을 항목별로 보여드립니다. 숨은 비용이 없고, 확정 전 금액은 참고용으로 표기합니다."],
-            ].map(([t, d]) => (
+            {PURCHASE_FEATURES.map(([t, d]) => (
               <div key={t} className="rounded-[16px] bg-bg p-6">
                 <h3 className="font-semibold text-heading mb-2">{t}</h3>
                 <p className="text-sm text-secondary">{d}</p>

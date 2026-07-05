@@ -1,0 +1,15 @@
+{
+  "schema": "dubyeol2.external_audit.result.v0",
+  "verdict": "PASS",
+  "summary_for_owner": "Phase 6 공개 영역 비공개 기준판을 코드·화면·테스트로 독립 재검증했다. 제외 6종(로고·이미지·실주소·전화번호·계좌·사업자정보) 실제값은 소스코드와 렌더된 23개 공개 URL 어디에도 없었고, 신규 법무 자리표시 페이지(/legal/terms, /legal/privacy)도 '오픈 전 확정' 문구로 명확히 준비 중임을 표시했다. build·design lint·23개 공개 URL HTTP 200/H1/제외어 재확인 결과 모두 신고된 수치와 일치했다. vitest는 재실행 시 36/36 통과했으나, 최초 전체 스위트 실행에서 이번 Phase와 무관한 tests/orders.test.ts가 FK 제약 오류로 일시 실패했다가 즉시 재실행에서 정상화되는 현상을 발견해 MINOR로 기록한다. push·deploy·원격 머지·실DB 쓰기·유료 API 호출 등 금지선 위반은 없었다.",
+  "findings": [
+    {
+      "severity": "MINOR",
+      "description": "npx vitest run 전체 스위트를 처음 실행했을 때 tests/orders.test.ts가 prisma.order.deleteMany() 외래키 제약 위반으로 7개 테스트 모두 실패했다. 즉시 재실행하면 5 files / 36 tests 전부 통과해, Phase 6 변경분과 무관한 테스트 격리·로컬 DB 상태 경합으로 보인다.",
+      "evidence": "git diff --stat tests/ 결과 tests/ 디렉터리는 이번 phase 변경 파일 목록에 없음. 최초 실행: 'Test Files 1 failed | 4 passed (5)', 'Tests 7 failed | 29 passed (36)', 에러 'Foreign key constraint violated' at tests/orders.test.ts:9 prisma.order.deleteMany(). 단독 재실행과 전체 재실행 모두 7/7, 36/36 통과로 복구됨.",
+      "customer_harm": "이번 Phase 6 고객 약속(공개 화면 기준판)에는 직접 영향 없음. 다만 향후 감리·CI에서 이 파일이 간헐적으로 false failure를 만들어 불필요한 FAIL 판정이나 재작업을 유발할 위험이 있다.",
+      "recheck_criteria": "tests/orders.test.ts의 beforeEach 정리 순서(자식 레코드 우선 삭제 또는 트랜잭션/시딩 격리)를 점검해 전체 스위트 연속 3회 실행에서 결정적으로 36/36 통과하는지 확인한다. Phase 6 완료 조건은 아니며 별도 개선 태스크로 기록 권장."
+    }
+  ],
+  "question_for_pm_to_ask_owner": ""
+}

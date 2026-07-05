@@ -10,43 +10,45 @@
 
 - 프로젝트: 물류 — 사업자(쿠팡·11번가·1688 셀러) 대상 중국→한국 통합 물류 플랫폼. 벤치마크: 두리무역(duly.co.kr)
 - 실행 엔진 모드: **B — 빌드=Codex** (2026-07-05 대표님 선언, engine.md 참조. Claude 복귀 시 "모드 A로 복귀" 선언 → 감리 대기 큐 일괄 처리)
-- 두별2 적용 상태: Feature 1 완료·머지 → **Feature 2(두리무역 전체 화면) 승인·진행 중** (2026-07-05 "우선 두리의 모든 화면을 구현해")
-- 현재 Phase: **Phase 6 (카피 밀착)** — Feature 3(카피+예치금)의 1/2
-- 현재 단계: 단계 3~8/16 — PM packet 작성 → TL plan → Builder
-- 진행자: PM→Team Leader (Claude Code)
-- 진행상태: 진행 중
-- 연결된 기능 약속(첫 출시): 주문 접수 → 중국창고 입고·기본검수(수량+포장외관) → 항목별 투명 견적
-- 연결된 고객 흐름: 사업자 셀러가 중국 소싱 → 우리에게 맡김 → 중국창고 입고·검수 → 견적 확인 → (다음 Phase) LCL·통관·한국배송
-- 연결된 메뉴탭 / 화면 영역: 셀러 주문 접수 · 셀러 대시보드(입고·검수·견적)
-- 현재 packet: phase-001~005 완결 / **phase-006 진행 중**
-- 다음에 필요한 파일: phase-006/03-verification.md
-- 막힌 것: 없음
+- 두별2 적용 상태: Feature 1 완료·머지 → Feature 2 완료·머지 → Feature 3 Phase 6 Machine Check PASS·Claude 교차감리 대기 → **Feature 4 Phase 7 Machine Check PASS·Claude 교차감리 대기**
+- 현재 Phase: **Phase 7 (견적 후 출고 요청·예치금 차감)**
+- 현재 단계: 단계 12/16 — Machine Check PASS → Claude 교차 외부감리 대기
+- 진행자: Team Leader (Codex)
+- 진행상태: Machine Check PASS / 외부감리 대기
+- 연결된 기능 약속: Feature 4 — 로그인 후 셀러 출고 요청·예치금 흐름
+- 연결된 고객 흐름: 셀러가 견적 완료 주문을 출고 요청하고 예치금 차감·상태를 확인
+- 연결된 메뉴탭 / 화면 영역: 셀러 주문 상세 · 출고관리 · 예치금 관리 · 대시보드 홈
+- 현재 packet: phase-001~005 완결 / phase-006 Machine Check PASS·감리 대기 / **phase-007 Machine Check PASS·감리 대기**
+- 다음에 필요한 파일: Claude 외부감리 결과, `phase-007/04-completion.md` (PASS 후)
+- 막힌 것: 없음. 단, Phase 6 완료·main 머지는 Claude 교차감리 PASS 전 금지
 
 ## 2. 다음 행동
 
-1. Phase 6(카피 밀착) → Phase 7(예치금 충전·결제 — gap-analysis §5 실물 스펙) → Feature 3 완료 보고
-2. 대표님 확정 대기 값: 창고 실주소, 요율 컷팅(rates.ts — 기견적 소급 변동 주의), 외관 추가 편집, 약관 본문(오픈 전 필수)
-3. 이월 개선 후보: 로그아웃 JSON 착지, 이메일 미정규화, 재견적 무이력, 그림자 토큰화(Phase 5), 배포 전 체크리스트
+1. Claude 복귀 시 교차감리 큐 처리: Phase 6 `external-audit/request-phase-006.json`, Phase 7 `external-audit/request-phase-007.json` (`request.json`은 현재 Phase 7)
+2. Phase 7 외부감리 PASS 시 `phase-007/04-completion.md` 작성 후 로컬 main 머지. FAIL이면 Team Leader가 분류하고 Builder 수정
+3. Phase 6 외부감리 PASS 시 `phase-006/04-completion.md` 작성 후 로컬 main 머지. FAIL이면 Team Leader가 분류하고 Builder 수정
+4. 대표님 확정 대기 값: 창고 실주소, 요율 컷팅(rates.ts — 기견적 소급 변동 주의), 외관 추가 편집, 약관 본문(오픈 전 필수), 실제 계좌/입금/결제 방식
+5. 이월 개선 후보: 로그아웃 JSON 착지, 이메일 미정규화, 재견적 무이력, 그림자 토큰화(Phase 5), 배포 전 체크리스트
 
 ## 3. 현재 단계 게이트
 
-현재 Phase 5 (`phase-packets/phase-005/`) 기준:
+현재 Phase 7 (`phase-packets/phase-007/`) 기준:
 
 | 단계 | 필요한 파일 | 상태 | 다음 단계 |
 |---|---|---|---|
-| 후보 고객 결과 요청 작성 | `00-customer-outcome.md` | **완료** (2026-07-05, 경계 확정) | — |
-| Team Leader 범위 판단 | `01-teamleader-intake.md` | **완료** (적정) | — |
-| Team Leader plan | `02-plan.md` | **완료** | Builder 실행 중 |
-| 검증 | `03-verification.md` | **완료** (Machine Check PASS + 감리 r2 PASS) | — |
-| 완료 기록 | `04-completion.md` | **완료** — 머지 6e8f250 | Feature 2 완료 보고 |
+| 후보 고객 결과 요청 작성 | `00-customer-outcome.md` | **완료** (견적 후 출고 요청·예치금 차감) | Team Leader 진입 |
+| Team Leader 범위 판단 | `01-teamleader-intake.md` | **완료** (`superpowers:brainstorming`, Phase 7 적정) | `superpowers:writing-plans` |
+| Team Leader plan | `02-plan.md` | **완료** (`superpowers:writing-plans`) | Builder 실행 |
+| 검증 | `03-verification.md` | **완료** (Machine Check PASS) | 교차 감리 |
+| 완료 기록 | `04-completion.md` | 대기 | 외부감리 PASS 후 작성·main 머지 |
 
 ## 4. 실패 횟수
 
 | 구분 | 현재 횟수 | 최대 | 다음 행동 |
 |---|---:|---:|---|
-| Machine Check 게이트 실패 | 0 | 제한 없음 | Codex 외부감리 호출 전 Claude Code Team Leader가 분류하고 Builder 서브에이전트가 수정 |
-| Codex 외부감리 FAIL | Phase 2: 1회(해소) · Phase 3: 1회(해소) · Phase 4: 3회(해소) · Phase 5: 1회(해소 — r2 PASS) | 3/phase | Claude Code Team Leader가 분류하고 Builder 서브에이전트가 수정 후 재감리 |
-| Codex 외부감리 BLOCKED | 0 | 1 | PM이 대표님에게 고객 언어 질문 하나만 보고 |
+| Machine Check 게이트 실패 | 0 | 제한 없음 | 빌드 측 Team Leader가 분류하고 Builder가 수정 |
+| 외부감리 FAIL | Phase 2: 1회(해소) · Phase 3: 1회(해소) · Phase 4: 3회(해소) · Phase 5: 1회(해소 — r2 PASS) · Phase 6 현재 계약: 0회 (이전 문구 전용 r1은 PM 재정렬로 무효화) | 3/phase | 빌드 측 Team Leader가 분류하고 Builder가 수정 후 교차 재감리 |
+| 외부감리 BLOCKED | 0 | 1 | PM이 대표님에게 고객 언어 질문 하나만 보고 |
 
 ## 5. 알림 상태
 
@@ -63,6 +65,8 @@
 | 2026-07-04 | 검수 기본 정책 = 두리무역식(기본 무료: 입고사진 1~2장+외포장 이상 안내, 수량·외관·하자 검수는 유료 옵션) | 대표님: "B 두리무역식" 선택 + "응 일단 두리무역에 맞춰서 해줘 그다음에 컷팅할게" |
 | 2026-07-04 | 요율 초기값 = 두리무역 공개 요율 그대로, 추후 대표님 컷팅 | 같은 발화. 수집 정본: `benchmark-duly.md` §3 |
 | 2026-07-04 | 홈페이지 외관 = 두리무역 그대로 벤치마킹, 추후 대표님 추가 편집 | 대표님: "홈페이지외관은 두리무역 그대로 벤치마킹해줘, 추후에 내가 추가 편집할꺼야" |
+| 2026-07-05 | Feature 3 기준 = 두리무역 1:1 비공개 기준판. 로고·이미지·실주소·전화번호·계좌·사업자정보만 제외 | 대표님: "로고,이미지,실주소,전화번호,계좌,사업자정보 만빼고 1:1로 만들어줘 디자인, 기능, 구조, 이모티콘 하나까지" |
+| 2026-07-05 | Feature 4 첫 범위 = 견적 후 출고 요청·예치금 차감·출고 상태 확인. 실계좌·실입금·실결제 제외 | 대표님: "로그인후 셀러기능 구현하자," → PM 범위·합격 기준 제안 → "그래" |
 | 2026-06-28 | 두별2 운영 규칙 개정 프로세스를 정본화하고 Harness v2.0을 생성 | 사고법뿐 아니라 AGENTS, PM 규칙, Phase 규칙, Team Leader 규칙도 같은 방식으로 버전업하기 위해 |
 | 2026-06-28 | Harness v2.1로 Phase 경계 확정 방식을 수정 | PM이 Phase를 혼자 나누지 않고 Team Leader가 `superpowers:brainstorming`으로 크기 판단 후 PM이 확정하도록 하기 위해 |
 | 2026-06-28 | Harness v2.2로 사고법 적용 라우터를 추가 | 긴 사고법 원문은 유지하되 상황별로 먼저 적용할 사고법 구분을 명확히 하기 위해 |
@@ -83,7 +87,7 @@
 - 현재 Phase의 `01-teamleader-intake.md` 작성 전 `superpowers:writing-plans` 금지
 - 현재 Phase의 `02-plan.md` 작성 전 Builder 실행 금지
 - 현재 Phase의 `03-verification.md` 작성 전 PM 완료 보고 금지
-- 현재 Phase의 `04-completion.md` 작성 전 다음 Phase 진행 금지
+- 현재 Phase의 `04-completion.md` 작성 전 다음 Phase 완료·main 반영 금지. 단, 모드 B에서는 감리 대기 중 feature 브랜치 Phase 준비·빌드는 가능
 
 ## 8. 승인/변경 요약
 

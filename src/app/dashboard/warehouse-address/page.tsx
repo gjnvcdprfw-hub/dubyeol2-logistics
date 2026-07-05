@@ -4,11 +4,11 @@ import { ensureInboundCode } from "@/lib/inbound";
 import CopyButton from "./copy-button";
 
 // 창고 실주소는 오픈 전 확정 (대표님 결정 2026-07-04). 실제 창고 계약 후 값만 교체.
-// 화면 구조·복사 UX는 두리무역 벤치(benchmark-duly.md §2.8) 그대로.
+// 화면 구조·복사 UX는 공개 기준판과 맞추되 실제 창고 정보는 오픈 전까지 비운다.
 const WAREHOUSE = {
   receiver: "물류창고 (오픈 전 확정)",
   phone: "000-0000-0000",
-  address: "山东省威海市 ○○物流园 (창고 주소 오픈 전 확정)",
+  address: "중국 창고 지역 (창고 주소 오픈 전 확정)",
 };
 
 export default async function WarehouseAddressPage() {
