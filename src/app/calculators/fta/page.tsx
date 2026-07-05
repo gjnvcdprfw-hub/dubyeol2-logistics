@@ -21,6 +21,7 @@ export default function FtaPage() {
         <h1 className="mt-2 text-3xl md:text-4xl font-semibold text-heading">FTA 관세율 비교</h1>
         <p className="mt-3 text-secondary">
           같은 상품이라도 기본세율, WTO 협정세율, 한중 FTA 세율이 다를 수 있고, 조건을 갖추면 더 낮은 세율을 적용받을 수 있습니다.
+          특히 중국 수입은 한중 FTA 대상 품목이 많아, 원산지 증명만 갖춰도 관세 부담이 달라지는 경우가 적지 않습니다.
           HS코드를 입력하면 세 가지 세율을 나란히 비교하는 도구를 준비하고 있습니다.
         </p>
         <ul className="mt-6 space-y-2 text-sm text-secondary">

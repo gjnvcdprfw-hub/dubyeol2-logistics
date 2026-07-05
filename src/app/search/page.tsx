@@ -27,6 +27,8 @@ export default function SearchPage() {
         </h1>
         <p className="mt-5 text-lg text-secondary max-w-2xl">
           한국어 키워드로 1688 상품을 찾고, 마음에 드는 상품은 그대로 견적을 요청하세요.
+          입력한 한국어를 중국어로 자동 번역해 검색하고, 사진으로 찾는 이미지 검색도 함께 준비하고 있습니다.
+          검색은 회원가입 없이 누구나 쓸 수 있게 열 예정입니다.
         </p>
         <div className="mt-8 max-w-2xl">
           <div className="flex items-center gap-2 rounded-[16px] bg-surface border border-black/10 p-2 shadow-[0_7px_30px_rgba(90,114,123,0.11)]">

@@ -21,6 +21,7 @@ export default function ExchangePage() {
         <h1 className="mt-2 text-3xl md:text-4xl font-semibold text-heading">환율 계산기</h1>
         <p className="mt-3 text-secondary">
           중국 수입은 위안화(CNY) 결제, 일부 거래는 달러(USD) 기준이라 통화 환산이 자주 필요합니다.
+          견적서의 ¥ 단가도 결제일 당일 환율로 원화 환산되므로, 환율 감각이 있으면 원가 예측이 쉬워집니다.
           USD·CNY·KRW 세 통화를 서로 환산하는 도구를 준비하고 있습니다.
         </p>
         <ul className="mt-6 space-y-2 text-sm text-secondary">

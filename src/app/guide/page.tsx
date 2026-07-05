@@ -52,6 +52,7 @@ export default function GuideHubPage() {
         <h1 className="mt-2 text-4xl md:text-5xl font-semibold text-heading">이용 가이드</h1>
         <p className="mt-4 text-secondary max-w-2xl">
           처음이어도 괜찮습니다. 주문부터 수령까지의 흐름과 요금을 한눈에 확인하세요.
+          구매대행과 배송대행 각각 4단계 흐름으로 정리했고, 요율은 전부 공개 요율표로 확인할 수 있습니다.
         </p>
       </section>
 

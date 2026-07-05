@@ -21,7 +21,8 @@ export default function CustomsReqPage() {
         <h1 className="mt-2 text-3xl md:text-4xl font-semibold text-heading">세관 요건 확인</h1>
         <p className="mt-3 text-secondary">
           전자제품의 KC 인증, 식품의 검역처럼 품목에 따라 수입 전 갖춰야 하는 요건이 다릅니다.
-          요건을 모르고 들여오면 통관이 막힐 수 있어, 주문 전에 품목별 수입 요건을 미리 확인하는 도구를 준비하고 있습니다.
+          요건을 모르고 들여오면 통관이 막히거나 반송·폐기로 이어질 수 있어, 요건 확인은 주문 전에 끝내는 것이 안전합니다.
+          품목별 수입 요건을 미리 확인하는 도구를 준비하고 있습니다.
         </p>
         <ul className="mt-6 space-y-2 text-sm text-secondary">
           <li>· 품목·HS코드로 수입 요건 대상 여부 확인</li>

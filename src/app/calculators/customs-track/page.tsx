@@ -21,6 +21,7 @@ export default function CustomsTrackPage() {
         <h1 className="mt-2 text-3xl md:text-4xl font-semibold text-heading">통관 진행 조회</h1>
         <p className="mt-3 text-secondary">
           화물이 한국에 도착한 뒤 지금 통관 어느 단계인지 궁금할 때가 많습니다.
+          반입·신고·수리 중 어디에 있는지 알면 국내 배송 일정과 판매 준비를 미리 계획할 수 있습니다.
           화물관리번호 또는 BL 번호를 입력하면 세관 통관 진행 상태를 단계별로 조회하는 도구를 준비하고 있습니다.
         </p>
         <ul className="mt-6 space-y-2 text-sm text-secondary">

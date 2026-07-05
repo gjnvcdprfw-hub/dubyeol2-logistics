@@ -21,6 +21,7 @@ export default function ImportCostPage() {
         <h1 className="mt-2 text-3xl md:text-4xl font-semibold text-heading">수입비용 계산기</h1>
         <p className="mt-3 text-secondary">
           상품가에 운임, 관세, 부가세까지 더해야 실제 수입 원가가 나옵니다.
+          판매가를 정하기 전에 원가 구조를 항목별로 알아야 마진 계산이 어긋나지 않습니다.
           상품가와 HS코드를 입력하면 통관까지의 총 수입비용을 한 번에 추정하는 도구를 준비하고 있습니다.
         </p>
         <ul className="mt-6 space-y-2 text-sm text-secondary">

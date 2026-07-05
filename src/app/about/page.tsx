@@ -77,6 +77,7 @@ export default function AboutPage() {
         <p className="mt-6 text-lg text-secondary max-w-2xl">
           사업자 셀러가 상품에만 집중할 수 있도록, 주문 접수부터 입고 확인·항목별 견적·국제 배송까지
           숨은 비용 없이 처리하는 통합 물류 서비스를 만들고 있습니다.
+          수수료·운임·검수비를 공개 요율표로 먼저 보여드리고, 견적서에는 그 요율이 항목별로 그대로 반영됩니다.
         </p>
       </section>
 

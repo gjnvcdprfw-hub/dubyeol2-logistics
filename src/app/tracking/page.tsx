@@ -31,6 +31,7 @@ export default function TrackingPage() {
         </h1>
         <p className="mt-5 text-lg text-secondary max-w-2xl">
           운송장 번호로 중국 창고 입고부터 한국 도착까지 단계별 위치를 확인할 수 있습니다.
+          입고 → 출고 → 국제 운송 → 통관 → 국내 배송 순서로 지금 어느 구간인지 보여드릴 예정입니다.
         </p>
         <div className="mt-8 max-w-2xl">
           <div className="flex items-center gap-2 rounded-[16px] bg-surface border border-black/10 p-2 shadow-[0_7px_30px_rgba(90,114,123,0.11)]">

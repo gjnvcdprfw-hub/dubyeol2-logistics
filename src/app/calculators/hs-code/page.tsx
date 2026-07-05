@@ -21,6 +21,7 @@ export default function HsCodePage() {
         <h1 className="mt-2 text-3xl md:text-4xl font-semibold text-heading">HS코드 조회</h1>
         <p className="mt-3 text-secondary">
           HS코드는 수입 상품마다 부여되는 품목 분류 번호로, 관세율과 수입 요건이 이 번호로 결정됩니다.
+          같은 상품이라도 코드가 달라지면 세율과 요건이 달라지므로, 주문 전에 코드를 확인해 두면 통관 단계의 변수를 크게 줄일 수 있습니다.
           상품명을 입력하면 HS코드 후보와 기본 관세율을 찾아주는 도구를 준비하고 있습니다.
         </p>
         <ul className="mt-6 space-y-2 text-sm text-secondary">

@@ -7,7 +7,8 @@ export default function SiteFooter() {
         <div>
           <p className="font-bold text-brand text-lg">물류</p>
           <p className="mt-2 text-secondary">
-            사업자 셀러를 위한 중국→한국 통합 물류. 주문 접수부터 입고 확인, 항목별 견적까지 투명하게.
+            사업자 셀러를 위한 중국→한국 통합 물류. 주문 접수부터 입고 확인, 항목별 견적, 국제 배송까지
+            공개 요율과 투명한 내역으로 처리합니다.
           </p>
         </div>
         <div>

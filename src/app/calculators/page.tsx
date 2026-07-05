@@ -141,6 +141,7 @@ export default function CalculatorsHub() {
         <h1 className="text-4xl md:text-5xl font-semibold text-heading">무역 계산기</h1>
         <p className="mt-4 text-lg text-secondary max-w-2xl">
           부피 계산부터 운임 비교, 관세·통관 확인까지. 중국 수입에 필요한 계산을 한곳에서 해결하세요.
+          계산에 쓰이는 요율은 요금 안내에 전면 공개된 값과 동일하며, 회원가입 없이 누구나 사용할 수 있습니다.
           모든 결과는 참고용 안내이며 최종 금액이 아닙니다.
         </p>
       </section>

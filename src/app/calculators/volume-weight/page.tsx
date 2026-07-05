@@ -9,6 +9,43 @@ import { RATES } from "@/lib/rates";
 
 const DIVISOR = RATES.volumeDivisor.toLocaleString("ko-KR");
 
+// 계산 원리 안내 — 수치는 RATES 파생
+const PRINCIPLES = [
+  {
+    title: "부피중량이 왜 필요한가요?",
+    body: "항공기·선박의 적재 공간은 무게보다 부피로 먼저 차기 때문에, 국제운임은 무게와 부피를 함께 봅니다. 가볍지만 자리를 많이 차지하는 화물에 실중량만 적용하면 운송 원가가 맞지 않아, 부피를 무게로 환산한 부피중량 개념을 사용합니다.",
+  },
+  {
+    title: "산출 공식",
+    body: `부피중량(kg) = 가로 × 세로 × 높이(cm) ÷ ${DIVISOR}. 국제 특송에서 널리 쓰이는 환산 계수이며, 요금 안내와 견적서도 같은 계수를 사용합니다.`,
+  },
+  {
+    title: "청구중량 결정 규칙",
+    body: "실중량과 부피중량 중 큰 값이 청구중량입니다. 청구중량이 정해지면 해운은 kg 단위, 항공은 100g 단위로 올림해 운임이 계산됩니다.",
+  },
+];
+
+// 사용 예시 — 부피중량은 calcVolumetricKg로 계산 (숫자 하드코딩 금지)
+function buildExamples() {
+  const ex1 = calcVolumetricKg(60, 40, 50);
+  const ex2 = calcVolumetricKg(80, 60, 60);
+  const ex3 = calcVolumetricKg(30, 20, 15);
+  return [
+    {
+      title: "예시 1 — 의류 박스 60×40×50cm, 실중량 15kg",
+      body: `부피중량은 ${ex1.toLocaleString("ko-KR")}kg로 실중량 15kg보다 큽니다. 청구중량은 부피중량 ${ex1.toLocaleString("ko-KR")}kg가 되어, 저울 무게보다 운임이 높게 나옵니다.`,
+    },
+    {
+      title: "예시 2 — 쿠션·인형류 80×60×60cm, 실중량 8kg",
+      body: `부피중량이 ${ex2.toLocaleString("ko-KR")}kg까지 커지는 대표적인 부피 화물입니다. 실중량 8kg의 몇 배로 청구되므로, 압축 포장이나 묶음 포장으로 부피를 줄이면 운임을 크게 아낄 수 있습니다.`,
+    },
+    {
+      title: "예시 3 — 소형 전자기기 30×20×15cm, 실중량 3kg",
+      body: `부피중량은 ${ex3.toLocaleString("ko-KR")}kg에 불과해 실중량 3kg이 청구중량이 됩니다. 작고 밀도 높은 화물은 실중량 기준이라 예상 운임 계산이 단순합니다.`,
+    },
+  ];
+}
+
 export default function VolumeWeightCalculatorPage() {
   const [width, setWidth] = useState("");
   const [depth, setDepth] = useState("");
@@ -85,6 +122,35 @@ export default function VolumeWeightCalculatorPage() {
         <p className="mt-6 text-xs text-muted">
           계산식: 부피중량(kg) = 가로 × 세로 × 높이(cm) ÷ {DIVISOR}. 참고용 안내이며 최종 금액이 아닙니다.
         </p>
+
+        {/* 계산 원리 */}
+        <div className="mt-12">
+          <h2 className="text-2xl font-semibold text-heading">계산 원리</h2>
+          <div className="mt-5 space-y-4">
+            {PRINCIPLES.map((p) => (
+              <div key={p.title} className="rounded-[16px] bg-surface border border-black/5 p-6">
+                <p className="font-semibold text-heading">{p.title}</p>
+                <p className="mt-2 text-sm text-secondary">{p.body}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* 사용 예시 */}
+        <div className="mt-12">
+          <h2 className="text-2xl font-semibold text-heading">사용 예시</h2>
+          <p className="mt-2 text-sm text-secondary">
+            같은 무게라도 부피에 따라 청구중량이 달라지는 대표 사례 세 가지입니다.
+          </p>
+          <div className="mt-5 space-y-4">
+            {buildExamples().map((ex) => (
+              <div key={ex.title} className="rounded-[16px] bg-surface border border-black/5 p-6">
+                <p className="font-semibold text-heading">{ex.title}</p>
+                <p className="mt-2 text-sm text-secondary">{ex.body}</p>
+              </div>
+            ))}
+          </div>
+        </div>
 
         <div className="mt-8 flex flex-wrap gap-4 text-sm">
           <Link href="/calculators/shipping-cost" className="font-semibold text-accent">다음 단계: 배송비 계산기 →</Link>
