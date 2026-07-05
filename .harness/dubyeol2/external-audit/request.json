@@ -6,57 +6,55 @@
     "dubyeol2_root": ".harness/dubyeol2"
   },
   "run": {
-    "id": "phase-005-dashboard-20260705-r2",
-    "phase_id": "phase-005",
-    "phase_index": 5,
-    "phase_total": 5
+    "id": "phase-006-copy-density-20260705-r2",
+    "phase_id": "phase-006",
+    "phase_index": 6,
+    "phase_total": 7
   },
   "phase_goal": {
-    "customer_goal": "셀러 대시보드가 두리무역 구조(4그룹 12메뉴·예치금 배너·현황 카드 5종)가 된다",
-    "why_this_phase_matters": "Feature 2(두리의 모든 화면)의 마지막 절반 — 이후 기능이 들어갈 자리 완성",
-    "done_when_customer_can": "12메뉴 전부 진입 가능, 기존 실동작(주문·입고 증거·견적) 회귀 0, 미구현은 준비 중 명확"
+    "customer_goal": "셀러·방문자가 두리무역과 같은 밀도의 안내를 읽는다 (섹션·문장 수·정보 항목 1:1, 표현은 자체 작성)",
+    "why_this_phase_matters": "대표님 지시: 이미지·로고 빼고 똑같이 — 배포 전 대표님이 직접 수정할 초안. Feature 3의 1/2",
+    "done_when_customer_can": "페이지를 두리와 나란히 놓으면 정보량이 대응되고, 원문 문장은 코드에 0건"
   },
   "feature_contract": {
     "feature_md": ".harness/dubyeol2/feature.md",
-    "customer_promise": "두리무역 구조의 대시보드 — 기존 Feature 1 실동작 유지, 거짓 기능 0, 격리 유지",
+    "customer_promise": "두리무역 밀도의 안내 — 원문 복제 금지(대표님이 benchmark 원문 보고 배포 전 직접 수정 가능), 이미지·로고 제외, 기능 변경 0",
     "must_not_happen_when_paid": [
-      "Feature 1 회귀 (주문·입고·견적)",
-      "타 셀러 데이터 노출 (집계·목록)",
-      "민감정보(passwordHash 등) 노출",
-      "거짓 기능",
-      "두리 카피 복제"
+      "두리 원문 문장·실데이터가 코드에 유입",
+      "기능·경로·격리 회귀",
+      "요율·정책 수치 오기(정본 파생 이탈)",
+      "준비 중·검수 경계·면책 문구 소실"
     ],
     "in_scope": [
-      "사이드바 4그룹 12메뉴 (기존 경로 orders·warehouse-address 재사용 — 이동·삭제 0)",
-      "마이페이지 홈: 예치금 배너(₩0, 준비 중)+현황 카드 5종(주문·입고 실집계 sellerId 스코프)",
-      "입고 관리(실데이터 목록+탭 전환), 프로필(기본 정보 실표시)",
-      "장바구니·내상품·스마트오더·출고·반품·출장검품·예치금 — 두리무역 구조+준비 중",
-      "--shadow-card 토큰 신설 (신규 파일 적용)"
+      "공개+대시보드 전 화면 문구 밀착 재작성 (+490/-145, 문자열·텍스트 요소만)",
+      "배송비·CBM·부피중량 계산기에 계산 원리·사용 예시·FAQ (수치는 calcShipping 등 런타임 파생)",
+      "요금·부가서비스 안내 밀도 상향 (PRICING/RATES 파생 유지)",
+      "기존 두리 원문 잔존 3곳 청소"
     ],
     "out_of_scope": [
-      "예치금 실충전·장바구니·출고/반품 실처리",
-      "운영자 개편",
-      "기존 파일 그림자 일괄 치환"
+      "기능·스키마·API 변경",
+      "이미지·로고",
+      "예치금(Phase 7)"
     ],
     "acceptance_example": {
-      "name": "데모 셀러 대시보드 순회",
-      "customer_input": "로그인 → 홈 → 입고 관리 탭 전환 → 프로필 → 주문 상세(회귀)",
-      "customer_visible_result": "홈 실집계(접수 1·견적 1·입고 1), 입고 목록 검수 뱃지, 프로필 4필드, 주문 상세 견적 ¥2,330=₩442,700 그대로",
-      "pass_criteria": "12메뉴 404 0, 회귀 0, 격리·민감정보 검증",
-      "counterexample": "기존 견적 흐름이 깨지거나 준비 중 메뉴가 되는 척하면 실패"
+      "name": "배송비 계산기 페이지 비교",
+      "customer_input": "두리 실물(계산 원리 3블록·예시 3건·FAQ)과 우리 페이지 대조",
+      "customer_visible_result": "같은 구성(원리·예시 3건·FAQ 3)이 존재하되 문장은 자체 작성, 예시 운임은 런타임 계산값",
+      "pass_criteria": "정보 항목 1:1 + 원문 grep 0 + 테스트 36 유지",
+      "counterexample": "원문 문장이 grep되거나 수치가 정본과 다르면 실패"
     }
   },
   "phase_qa": {
-    "normal_flow": "12메뉴 curl 전수(307)+Playwright 실측 6시나리오",
-    "failure_flow": "미구현 disabled+준비 중, ?tab= 화이트리스트 폴백",
-    "customer_harm_guardrail": "sellerId 스코프(코드+검토 실증), 민감 필드 렌더 0, 기존 경로 무변경(diff)",
-    "next_phase_handoff_check": "Feature 2 완료 — 다음 feature(LCL 등)는 대표님과 신규 정렬"
+    "normal_flow": "build 전 라우트 + Playwright 렌더(랜딩·계산기) + 콘솔 0",
+    "failure_flow": "해당 없음 (문구 전용)",
+    "customer_harm_guardrail": "원문 대조 20구절 0건, 보호 문구 유지 검사, 로직 무변경(diff 검증)",
+    "next_phase_handoff_check": "Phase 7 예치금 (gap-analysis §5 실물 스펙)"
   },
   "ui_qa": {
     "has_ui": true,
     "scenario_prepared": true,
     "separate_live_ui_qa_required": false,
-    "summary": "curl 12메뉴 전수 307 + Playwright: 홈 실집계 일치·입고 탭 전환·검수 뱃지·프로필 실데이터·Feature 1 회귀(견적 금액 그대로)·콘솔 0 — 03 §3.2"
+    "summary": "Playwright 랜딩·배송비 계산기 렌더·콘솔 0 + build 전 라우트. 문구 정밀 검수는 대표님 최종 몫(의도된 초안) — 03 §3.2"
   },
   "design_system": {
     "design_system_md": ".harness/dubyeol2/design-system.md",
@@ -65,37 +63,34 @@
       "금지 UI: 검수 경계 흐리기"
     ],
     "changed": false,
-    "change_summary": "--shadow-card 토큰 추가 (globals.css @theme — design-system.md 값과 동일). lint errors 0"
+    "change_summary": "변경 없음 (lint errors 0)"
   },
   "changes": {
-    "summary": "Phase 5: 대시보드 12메뉴 — 셸·홈(BT15)+9화면(BT16~18 병렬)+검수 뱃지 수정. 커밋 main..phase-005 5개 (5a4877b→d825f7e). 신설 API 0·스키마 무변경",
+    "summary": "Phase 6: 전 화면 카피 밀착 재작성 — 3커밋(9e27963·00861f1·3bc7e45), +490/-145, 문자열만. 원문 대조 20구절 0건",
     "files_changed": [
-      "src/components/dashboard/{sidebar,status-tile,prep-notice}.tsx",
-      "src/app/dashboard/{layout,page}.tsx (가드 무변경, 사이드바·홈 개편)",
-      "src/app/dashboard/{cart,my-products,smart-order,inbound,shipment,returns,inspection,profile,wallet}/page.tsx (신규 9)",
-      "src/app/globals.css (--shadow-card)"
+      "src/app/page.tsx·services/* (BT19)",
+      "src/app/calculators/*·guide/*·about·search·tracking·components/public/* (BT20)",
+      "src/app/dashboard/*·components/dashboard/* (BT21)"
     ],
     "risk_notes": [
-      "r1 MAJOR 반영: 홈 예치금 배너에 '준비 중' 배지+안내 문구+버튼 라벨 '(준비 중)' 추가(커밋 501b24f). Playwright 홈 재스냅샷(.playwright-mcp/page-2026-07-05T08-42-28-318Z.yml)에서 '예치금 현황 준비 중'·'예치금 충전·결제는 정식 오픈 시 열립니다.'·'충전하기 (준비 중)' 확인. 실집계 증거는 기존 스냅샷(08-32-04, 접수 1·견적 1·입고 1 — 이후 테스트 실행이 dev DB를 비워 최신 스냅샷은 0 표시, 코드 무관)",
-      "검토 발견 I-1(입고 목록 검수 뱃지 누락 — 플랜 명세) 수정 완료 d825f7e, 실화면 실측",
-      "보안 검토 PASS (C/H 0): 격리·민감정보·admin 무영향·read-only 확인",
-      "남은 위험: getSessionUser select 프로젝션(Low·배포 전), 테스트-dev DB 공유 flake(장기)"
+      "r1 MAJOR 반영: 창고주소 '자동 확인' 문구를 실동작(운영자 입고 기록 후 표시)에 맞게 수정(20df534), '자동' 잔존 grep 0건, build 성공",
+      "요청·수행 원칙: 두리 원문 복제 금지(표현 재작성) — 대표님이 배포 전 직접 수정 예정(승인 발화 '그래')",
+      "검토 방식 이탈: 문구 전용이라 태스크별 검토자 대신 TL 원문 대조·보호 문구·로직 무변경 검사로 대체 (03 §2 기록)",
+      "vitest flake 1회는 dev 서버 DB 경합으로 원인 확정(systematic-debugging) — 서버 종료 후 36/36"
     ]
   },
   "machine_check": {
     "status": "PASS",
     "commands_or_checks": [
-      "npx vitest run → 36/36 (기존 테스트 회귀 0 — 이 phase는 read-only 화면이라 신규 TDD 대상 없음, 03 §2 사유)",
-      "npm run build → 성공 (대시보드 12라우트 dynamic)",
+      "npx vitest run → 36/36 (flake 원인 확정 후 전건)",
+      "npm run build → 성공",
       "design lint → errors 0",
-      "curl 12메뉴 전수 → 307 (404 0)",
-      "Playwright: 홈 실집계·입고 탭·검수 뱃지·프로필·Feature 1 회귀(¥2,330 그대로)·콘솔 0",
-      "보안 검토 PASS (개인정보 표시 phase — 조건부 필수 수행)"
+      "원문 대조: 두리 특징 구절 20종 grep-rF → 0건 + Builder 자가 대조 각 5~9구절 0건",
+      "보호 문구 유지: 준비 중·수량 미확인·검수 경계·면책 grep 확인",
+      "Playwright: 랜딩·배송비 계산기 렌더, 콘솔 0"
     ],
     "evidence_files": [
-      ".harness/dubyeol2/phase-packets/phase-005/03-verification.md",
-      ".playwright-mcp/page-2026-07-05T08-32-38-191Z.yml",
-      ".playwright-mcp/page-2026-07-05T08-42-28-318Z.yml"
+      ".harness/dubyeol2/phase-packets/phase-006/03-verification.md"
     ],
     "failures": []
   },
