@@ -26,12 +26,16 @@ export async function recordInbound(orderId: string, input: InboundInput) {
   if (input.photoPaths.length < 1 || input.photoPaths.length > 2)
     throw new ValidationError("입고 사진은 1~2장이어야 합니다");
   const skuLines = order.productLines.flatMap((line) => line.skuLines);
+  const hasSkuLines = skuLines.length > 0;
   const hasSkuResults = Boolean(input.skuResults?.length);
-  const useAggregateInspection = order.inspectionRequested && !hasSkuResults;
+  const useAggregateInspection = order.inspectionRequested && !hasSkuLines && !hasSkuResults;
   if (input.inspection && !order.inspectionRequested)
     throw new ValidationError("검수를 신청하지 않은 주문에는 검수 결과를 기록할 수 없습니다");
   if (hasSkuResults && !order.inspectionRequested)
     throw new ValidationError("검수를 신청하지 않은 주문에는 검수 결과를 기록할 수 없습니다");
+  if (order.inspectionRequested && hasSkuLines && !hasSkuResults) {
+    throw new ValidationError("유료 검수 신청 건은 모든 SKU의 검수 결과를 함께 기록해야 합니다");
+  }
   if (useAggregateInspection && !input.inspection)
     throw new ValidationError("유료 검수 신청 건은 검수 결과를 함께 기록해야 합니다");
   if (hasSkuResults) {

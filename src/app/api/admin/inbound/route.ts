@@ -20,7 +20,7 @@ export async function POST(req: Request) {
     const skuResults = skuIndexes.map((index) => ({
       skuLineId: String(form.get(`sku[${index}][id]`) ?? ""),
       inboundQuantity: Number(form.get(`sku[${index}][inboundQuantity]`)),
-      defectCount: Number(form.get(`sku[${index}][defectCount]`) ?? 0),
+      defectCount: Number(form.get(`sku[${index}][defectCount]`)),
       inspectionPassed: form.get(`sku[${index}][inspectionPassed]`) === "on",
       inspectionNote: String(form.get(`sku[${index}][inspectionNote]`) ?? "") || undefined,
     }));

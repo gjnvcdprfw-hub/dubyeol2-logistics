@@ -27,6 +27,8 @@ describe("recordInbound", () => {
     expect(photos).toHaveLength(2);
   });
   it("검수 신청 건은 검수 결과를 함께 기록한다", async () => {
+    await prisma.orderSkuLine.deleteMany({ where: { productLine: { orderId: orderInsp.id } } });
+
     const o = await recordInbound(orderInsp.id, {
       photoPaths: ["/uploads/a.jpg"], outerIssue: false,
       inspection: { countActual: 97, appearanceOk: true, defectCount: 0, note: "3개 부족" },
@@ -70,6 +72,38 @@ describe("recordInbound", () => {
     expect(rows[0].missingQuantity).toBe(0);
     expect(rows[1].inboundQuantity).toBe(45);
     expect(rows[1].missingQuantity).toBe(5);
+  });
+  it("유료 검수 SKU 주문은 SKU 검수 결과 없이 집계 검수만 넣으면 거부한다", async () => {
+    const order = await createOrder(seller.id, {
+      serviceType: "PURCHASE",
+      inspectionRequested: true,
+      items: [{
+        productUrl: "https://sku-only.com",
+        productName: "SKU 검수품",
+        skus: [
+          { optionText: "빨강", quantity: 4 },
+          { optionText: "파랑", quantity: 6 },
+        ],
+      }],
+    });
+
+    await expect(recordInbound(order.id, {
+      photoPaths: ["/uploads/a.jpg"],
+      outerIssue: false,
+      inspection: { countActual: 10, appearanceOk: true, defectCount: 0, note: "집계만 입력" },
+    })).rejects.toThrow("모든 SKU의 검수 결과를 함께 기록");
+  });
+  it("SKU 라인이 없는 유료 검수 legacy 주문은 집계 검수를 계속 허용한다", async () => {
+    await prisma.orderSkuLine.deleteMany({ where: { productLine: { orderId: orderInsp.id } } });
+
+    const o = await recordInbound(orderInsp.id, {
+      photoPaths: ["/uploads/a.jpg"],
+      outerIssue: false,
+      inspection: { countActual: 97, appearanceOk: true, defectCount: 0, note: "3개 부족" },
+    });
+
+    expect(o.inspCountActual).toBe(97);
+    expect(o.inspDefectCount).toBe(0);
   });
   it("검수 신청 건에 검수 결과 없이 입고 기록하면 거부한다", async () => {
     await expect(recordInbound(orderInsp.id, {

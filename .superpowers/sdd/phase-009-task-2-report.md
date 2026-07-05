@@ -37,7 +37,7 @@ Concerns:
 ## Fix After Task Review
 
 - Status: done
-- Commit hash: `e8e282e`
+- Commit hash: `07d0da7`
 
 ### RED evidence
 
@@ -69,3 +69,39 @@ Concerns:
 
 - 관리자 입고 화면은 검수 미신청 주문에서 SKU별 수량/하자/통과/메모 입력을 숨기고, 사진과 외포장 상태만 기록한다는 안내만 보여준다.
 - `recordInbound()`는 직접 요청이 들어와도 검수 미신청 주문의 `skuResults`를 거부하고, 유료 검수 주문에서는 중복 SKU ID를 막아 전체 SKU ID 집합 일치를 강제한다.
+
+## Fix After Second Task Review
+
+- Status: done
+- Commit hash: `37f3548`
+
+### RED evidence
+
+- Command: `npx vitest run tests/inbound.test.ts`
+- Result: failed
+- Key failure:
+  - `유료 검수 SKU 주문은 SKU 검수 결과 없이 집계 검수만 넣으면 거부한다`
+  - `AssertionError: promise resolved instead of rejecting`
+
+### GREEN evidence
+
+- Command: `npx vitest run tests/inbound.test.ts`
+- Result: passed
+- Summary: `Test Files 1 passed (1), Tests 13 passed (13)`
+
+### Verification commands
+
+- `npx vitest run tests/inbound.test.ts`
+- `npm run build`
+- `git diff --check`
+
+### Verification results
+
+- `npx vitest run tests/inbound.test.ts` -> pass
+- `npm run build` -> pass
+- `git diff --check` -> pass
+
+### Concerns
+
+- 이 코드베이스의 신규 주문은 기본 SKU row 1개도 함께 생성되므로, aggregate inspection fallback은 실제 legacy 상태처럼 `skuLines`가 없는 주문에서만 열리게 제한했다.
+- route의 SKU `defectCount` 파싱은 더 이상 누락값을 `0`으로 보정하지 않고 `NaN`을 그대로 넘겨 `recordInbound()`의 SKU 수량 검증에서 `ValidationError`가 나도록 맞췄다.
