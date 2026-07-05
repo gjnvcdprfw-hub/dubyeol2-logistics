@@ -10,20 +10,20 @@
 
 - 프로젝트: 물류 — 사업자(쿠팡·11번가·1688 셀러) 대상 중국→한국 통합 물류 플랫폼. 벤치마크: 두리무역(duly.co.kr)
 - 두별2 적용 상태: Feature 1 완료·머지 → **Feature 2(두리무역 전체 화면) 승인·진행 중** (2026-07-05 "우선 두리의 모든 화면을 구현해")
-- 현재 Phase: **Phase 5 (대시보드 12메뉴)** — Feature 2의 2/2, 마지막
-- 현재 단계: 단계 13/16 — Machine Check PASS, 외부감리 진행
-- 진행자: Team Leader (Claude Code)
-- 진행상태: 진행 중
+- 현재 Phase: 없음 — **Feature 2 완료** (Phase 4: a17dbaa / Phase 5: 6e8f250). 다음 Phase 번호는 6
+- 현재 단계: 단계 16/16 — PM 기능 완료 보고 (2026-07-05)
+- 진행자: PM (Claude Code)
+- 진행상태: 기능 완료 보고 후 다음 기능 정렬 대기
 - 연결된 기능 약속(첫 출시): 주문 접수 → 중국창고 입고·기본검수(수량+포장외관) → 항목별 투명 견적
 - 연결된 고객 흐름: 사업자 셀러가 중국 소싱 → 우리에게 맡김 → 중국창고 입고·검수 → 견적 확인 → (다음 Phase) LCL·통관·한국배송
 - 연결된 메뉴탭 / 화면 영역: 셀러 주문 접수 · 셀러 대시보드(입고·검수·견적)
-- 현재 packet: phase-001~004 **완결** (Phase 4: 감리 r4 PASS·머지 a17dbaa) / **phase-005 진행 중(00~02 작성)**
-- 다음에 필요한 파일: phase-005/04-completion.md (감리 PASS 후)
+- 현재 packet: phase-001~005 **전부 완결(00~04)**
+- 다음에 필요한 파일: 다음 기능 정렬 → feature.md 갱신 → phase-packets/phase-006/
 - 막힌 것: 없음
 
 ## 2. 다음 행동
 
-1. Phase 5 Builder(셸→병렬 3) → 검토 → Machine Check(12메뉴 순회+회귀) → 외부감리 → 머지 → **Feature 2 완료 보고**
+1. 대표님과 다음 기능 정렬 — 후보: LCL 국제배송(Feature 3, 원 로드맵) / 요율 컷팅 / 준비 중 기능 실동작화(예치금·장바구니·출고 등) / 약관 본문
 2. 대표님 확정 대기 값: 창고 실주소, 요율 컷팅(rates.ts — 기견적 소급 변동 주의), 외관 추가 편집, 약관 본문(오픈 전 필수)
 3. 이월 개선 후보: 로그아웃 JSON 착지, 이메일 미정규화, 재견적 무이력, 그림자 토큰화(Phase 5), 배포 전 체크리스트
 
@@ -36,8 +36,8 @@
 | 후보 고객 결과 요청 작성 | `00-customer-outcome.md` | **완료** (2026-07-05, 경계 확정) | — |
 | Team Leader 범위 판단 | `01-teamleader-intake.md` | **완료** (적정) | — |
 | Team Leader plan | `02-plan.md` | **완료** | Builder 실행 중 |
-| 검증 | `03-verification.md` | **완료** (Machine Check PASS·보안 PASS) — 외부감리 진행 중 | 감리 PASS |
-| 완료 기록 | `04-completion.md` | 준비 전 | 머지 → Feature 2 완료 보고 |
+| 검증 | `03-verification.md` | **완료** (Machine Check PASS + 감리 r2 PASS) | — |
+| 완료 기록 | `04-completion.md` | **완료** — 머지 6e8f250 | Feature 2 완료 보고 |
 
 ## 4. 실패 횟수
 
