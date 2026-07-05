@@ -33,7 +33,7 @@ export default async function WarehouseAddressPage() {
         <ol className="space-y-2 text-secondary list-decimal list-inside">
           <li>위 수령인·연락처·주소를 복사해 1688/타오바오 주문의 배송지로 등록합니다.</li>
           <li>주소 끝의 입고ID까지 한 글자도 빠뜨리지 말고 그대로 입력합니다.</li>
-          <li>상품이 창고에 도착하면 입고ID로 자동 확인되어 입고 관리 화면에 표시됩니다.</li>
+          <li>상품이 창고에 도착하면 입고ID로 주문을 구분하고, 저희가 입고 확인(사진·외포장)을 기록하면 입고 관리 화면에 표시됩니다.</li>
         </ol>
         <div className="rounded-[12px] bg-warning-tint p-4 text-xs text-secondary space-y-1">
           <p className="font-medium text-heading">주의해 주세요</p>
