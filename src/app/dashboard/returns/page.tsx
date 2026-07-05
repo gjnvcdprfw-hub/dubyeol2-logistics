@@ -24,14 +24,14 @@ export default async function ReturnsPage() {
         ))}
       </div>
       <div className="bg-surface rounded-[27px] shadow-card p-12 text-center text-muted">
-        반품 요청 내역이 없습니다
+        아직 접수된 반품 요청이 없습니다
       </div>
       <div className="bg-surface rounded-[27px] shadow-card p-6">
         <p className="font-semibold text-heading">반품 처리 안내</p>
         <ul className="mt-3 space-y-1 text-sm text-secondary list-disc list-inside">
-          <li>반품 요청 후 창고 담당자가 확인하여 승인 또는 거절합니다.</li>
-          <li>처리에는 영업일 기준 2~3일이 소요됩니다.</li>
-          <li>승인 시 환급 절차는 정식 오픈 시 안내드립니다.</li>
+          <li>반품을 요청하면 창고 담당자가 상품 상태를 직접 확인한 뒤 승인 또는 거절로 처리합니다.</li>
+          <li>확인부터 처리 완료까지 영업일 기준 2~3일이 걸립니다.</li>
+          <li>승인된 건의 환급 방식·절차는 정식 오픈 시 이 화면에서 안내드립니다.</li>
         </ul>
       </div>
       <PrepNotice feature="반품 관리" />

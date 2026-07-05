@@ -15,8 +15,8 @@ export default async function CartPage() {
 
       <section className="bg-surface rounded-[27px] shadow-card p-10 text-center">
         <p className="text-3xl">🛒</p>
-        <p className="mt-4 font-semibold text-heading">장바구니가 비어있습니다</p>
-        <p className="mt-2 text-sm text-secondary">1688에서 상품을 찾아 담아보세요.</p>
+        <p className="mt-4 font-semibold text-heading">아직 담긴 상품이 없습니다</p>
+        <p className="mt-2 text-sm text-secondary">1688 검색에서 상품을 담아 두면, 여러 상품을 한 번에 견적 요청할 수 있습니다.</p>
         <Link
           href="/search"
           className="mt-5 inline-block rounded-[18px] bg-brand text-white text-sm font-semibold px-5 py-2.5"

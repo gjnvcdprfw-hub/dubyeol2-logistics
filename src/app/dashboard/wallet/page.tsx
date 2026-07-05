@@ -16,11 +16,18 @@ export default async function WalletPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-xl font-semibold text-heading">예치금 관리</h1>
+      <div>
+        <h1 className="text-xl font-semibold text-heading">예치금 관리</h1>
+        <p className="mt-1 text-sm text-secondary">미리 충전해 두면 견적 확정 즉시 결제까지 끝나는 예치금 결제 방식입니다.</p>
+      </div>
 
       <section className="rounded-[27px] bg-gradient-to-br from-brand to-[#8b0000] text-white p-6 shadow-card">
-        <p className="text-sm text-white/80">사용 가능 잔액</p>
+        <p className="text-sm text-white/80">
+          사용 가능 잔액
+          <span className="ml-2 rounded-full bg-white/20 text-white text-xs px-2 py-0.5">결제에 바로 쓰이는 금액</span>
+        </p>
         <p className="mt-1 text-2xl font-bold">₩0</p>
+        <p className="mt-1 text-xs text-white/70">정식 오픈 후 충전한 금액이 이 잔액으로 표시됩니다.</p>
         <div className="mt-4 flex gap-3">
           <button
             type="button"
@@ -55,8 +62,8 @@ export default async function WalletPage() {
         </div>
         <div className="py-8 text-center">
           <p className="text-3xl">💳</p>
-          <p className="mt-4 font-semibold text-heading">거래 내역이 없습니다</p>
-          <p className="mt-2 text-sm text-secondary">예치금 서비스가 열리면 여기에 표시됩니다.</p>
+          <p className="mt-4 font-semibold text-heading">아직 거래 내역이 없습니다</p>
+          <p className="mt-2 text-sm text-secondary">예치금 서비스가 열리면 첫 충전과 함께 거래가 시작되고, 충전·사용 내역이 모두 여기에 남습니다.</p>
         </div>
       </section>
 

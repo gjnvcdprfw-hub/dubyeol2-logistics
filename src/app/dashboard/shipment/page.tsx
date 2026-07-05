@@ -24,7 +24,7 @@ export default async function ShipmentPage() {
             <StatusTile key={t.label} label={t.label} count={0} tone={t.tone} />
           ))}
         </div>
-        <p className="mt-6 text-center text-muted">해당 상태의 출고 건이 없습니다</p>
+        <p className="mt-6 text-center text-muted">이 상태에 해당하는 출고 건이 아직 없습니다</p>
       </div>
       <PrepNotice feature="출고 관리" />
     </div>
