@@ -17,13 +17,21 @@ export async function POST(req: Request) {
         .map((key) => key.match(/^sku\[(\d+)\]\[id\]$/)?.[1])
         .filter((value): value is string => Boolean(value)),
     )).sort((a, b) => Number(a) - Number(b));
-    const skuResults = skuIndexes.map((index) => ({
-      skuLineId: String(form.get(`sku[${index}][id]`) ?? ""),
-      inboundQuantity: Number(form.get(`sku[${index}][inboundQuantity]`)),
-      defectCount: Number(form.get(`sku[${index}][defectCount]`)),
-      inspectionPassed: form.get(`sku[${index}][inspectionPassed]`) === "on",
-      inspectionNote: String(form.get(`sku[${index}][inspectionNote]`) ?? "") || undefined,
-    }));
+    const skuResults = skuIndexes.map((index) => {
+      const inboundQuantityKey = `sku[${index}][inboundQuantity]`;
+      const defectCountKey = `sku[${index}][defectCount]`;
+      if (!form.has(inboundQuantityKey))
+        throw new ValidationError("SKU 입고 수량이 올바르지 않습니다");
+      if (!form.has(defectCountKey))
+        throw new ValidationError("SKU 하자 수량이 올바르지 않습니다");
+      return {
+        skuLineId: String(form.get(`sku[${index}][id]`) ?? ""),
+        inboundQuantity: Number(form.get(inboundQuantityKey)),
+        defectCount: Number(form.get(defectCountKey)),
+        inspectionPassed: form.get(`sku[${index}][inspectionPassed]`) === "on",
+        inspectionNote: String(form.get(`sku[${index}][inspectionNote]`) ?? "") || undefined,
+      };
+    });
     const files = form.getAll("photos").filter((f): f is File => f instanceof File && f.size > 0);
     if (files.length < 1 || files.length > 2) throw new ValidationError("입고 사진은 1~2장이어야 합니다");
     const photoPaths: string[] = [];

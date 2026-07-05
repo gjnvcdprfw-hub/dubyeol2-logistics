@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { prisma } from "../src/lib/db";
 import { registerSeller } from "../src/lib/auth";
 import { createOrder } from "../src/lib/orders";
@@ -8,12 +8,20 @@ let seller: { id: string };
 let orderInsp: { id: string }, orderPlain: { id: string };
 
 beforeEach(async () => {
+  vi.restoreAllMocks();
   await prisma.inboundPhoto.deleteMany();
   await prisma.order.deleteMany();
   await prisma.user.deleteMany();
   seller = await registerSeller({ email: "s@s.com", password: "password1", contactName: "S" });
   orderInsp = await createOrder(seller.id, { productUrl: "https://a.com", productName: "검수품", quantity: 100, serviceType: "PURCHASE", inspectionRequested: true });
   orderPlain = await createOrder(seller.id, { productUrl: "https://b.com", productName: "일반품", quantity: 50, serviceType: "SHIPPING", inspectionRequested: false });
+});
+
+afterEach(() => {
+  vi.doUnmock("@/lib/session");
+  vi.doUnmock("@/lib/uploads");
+  vi.resetModules();
+  vi.restoreAllMocks();
 });
 
 describe("recordInbound", () => {
@@ -202,5 +210,53 @@ describe("ensureInboundCode", () => {
     expect(c1).toMatch(/^[A-Z0-9]{8}$/);
     const c2 = await ensureInboundCode(seller.id);
     expect(c2).toBe(c1);
+  });
+});
+
+describe("admin inbound route", () => {
+  async function importAdminInboundRoute() {
+    vi.resetModules();
+    vi.doMock("@/lib/session", () => ({
+      getSessionUser: vi.fn(async () => ({ id: "admin-1", role: "ADMIN" })),
+    }));
+    vi.doMock("@/lib/uploads", () => ({
+      saveInboundPhoto: vi.fn(async () => "/uploads/a.jpg"),
+    }));
+    return import("../src/app/api/admin/inbound/route");
+  }
+
+  it("SKU 입고 수량 필드가 누락되면 400으로 거부한다", async () => {
+    const order = await createOrder(seller.id, {
+      serviceType: "PURCHASE",
+      inspectionRequested: true,
+      items: [{
+        productUrl: "https://route-test.com",
+        productName: "라우트 검수품",
+        skus: [{ optionText: "빨강", quantity: 3 }],
+      }],
+    });
+    const saved = await prisma.order.findUniqueOrThrow({
+      where: { id: order.id },
+      include: { productLines: { include: { skuLines: true } } },
+    });
+    const sku = saved.productLines[0].skuLines[0];
+    const form = new FormData();
+    form.set("orderId", order.id);
+    form.append("photos", new File(["a"], "a.jpg", { type: "image/jpeg" }));
+    form.set("sku[0][id]", sku.id);
+    form.set("sku[0][defectCount]", "0");
+    form.set("sku[0][inspectionPassed]", "on");
+
+    const { POST } = await importAdminInboundRoute();
+    const response = await POST(
+      new Request("http://localhost/api/admin/inbound", {
+        method: "POST",
+        body: form,
+      }),
+    );
+    const body = await response.text();
+
+    expect(response.status).toBe(400);
+    expect(body).toContain("SKU 입고 수량이 올바르지 않습니다");
   });
 });
