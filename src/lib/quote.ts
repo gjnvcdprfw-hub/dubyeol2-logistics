@@ -1,4 +1,5 @@
 import { RATES } from "./rates";
+import { calcShipping } from "./calculators";
 import { ValidationError } from "./auth";
 
 export type QuoteInput = {
@@ -47,17 +48,7 @@ export function computeQuote(input: QuoteInput) {
   const volumetricGrams = Math.ceil((input.volumeCm3 * 1000) / RATES.volumeDivisor);
   const chargeableGrams = Math.max(input.weightGrams, volumetricGrams);
 
-  let intlFen: number;
-  let chargeableWeightKg: number;
-  if (input.shippingMethod === "SEA") {
-    const kg = Math.max(1, Math.ceil(chargeableGrams / 1000));
-    chargeableWeightKg = kg;
-    intlFen = RATES.sea.firstKgFen + (kg - 1) * RATES.sea.additionalPerKgFen;
-  } else {
-    const units100g = Math.max(1, Math.ceil(chargeableGrams / 100));
-    chargeableWeightKg = units100g / 10;
-    intlFen = RATES.air.docFeeFen + units100g * RATES.air.per100gFen;
-  }
+  const { fen: intlFen, chargeableWeightKg } = calcShipping(input.shippingMethod, chargeableGrams);
   items.push({ key: "intlShipping", label: `예상 국제운임 (${input.shippingMethod === "SEA" ? "해운" : "항공"})`, amountFen: intlFen });
 
   const totalFen = items.reduce((s, i) => s + i.amountFen, 0);
