@@ -3,6 +3,7 @@ node_modules/
 *.db
 .env*
 .playwright-mcp/
+.playwright-cli/
 .DS_Store
 public/uploads/*
 !public/uploads/.gitkeep
