@@ -355,6 +355,35 @@ describe("admin shipment package route", () => {
     );
   });
 
+  it("운영자 form route는 Accept가 JSON이어도 상세로 돌려보내고 포장단위를 저장한다", async () => {
+    const { order, red } = await createShipmentRequestedSkuOrder(sellerA.id);
+    const { POST } = await importAdminPackageRoute("ADMIN");
+    const form = new FormData();
+    form.set("orderId", order.id);
+    form.set("marker", "BOX-3");
+    form.set("status", "PACKED");
+    form.set("weightKg", "12.5");
+    form.set("volumeCbm", "0.08");
+    form.set("sku[0][id]", red.id);
+    form.set("sku[0][quantity]", "1");
+
+    const response = await POST(new Request("http://localhost/api/admin/shipments/packages", {
+      method: "POST",
+      headers: { accept: "application/json" },
+      body: form,
+    }));
+
+    const detail = await getAdminShipmentOrder(order.id);
+
+    expect(response.status).toBe(303);
+    expect(response.headers.get("location")).toBe(`http://localhost/admin/shipments/${order.id}?packed=1`);
+    expect(detail?.shipmentPackages).toHaveLength(1);
+    expect(detail?.shipmentPackages[0]).toMatchObject({
+      marker: "BOX-3",
+      status: "PACKED",
+    });
+  });
+
   it("운영자가 아니면 form 박스 저장 route도 403으로 거부된다", async () => {
     const { order, red } = await createShipmentRequestedSkuOrder(sellerA.id);
     const { POST } = await importAdminPackageRoute("SELLER");

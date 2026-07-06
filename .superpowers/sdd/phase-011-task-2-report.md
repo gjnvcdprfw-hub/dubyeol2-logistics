@@ -75,3 +75,26 @@
 
 - Non-admin guard no longer branches on request format; both JSON and form POST now return `403`.
 - Added form-data route coverage for the admin UI path, including `sku[0][id]` / `sku[0][quantity]` parsing, package persistence, and redirect to `/admin/shipments/${orderId}?packed=1`.
+
+## fix review loop 2
+
+- status: READY_TO_COMMIT
+- files changed:
+  - `src/app/api/admin/shipments/packages/route.ts`
+  - `tests/shipment-packages.test.ts`
+- commit hash: `485c8b7`
+
+### Commands run
+
+1. `npx vitest run tests/shipment-packages.test.ts -t "Accept가 JSON이어도"`
+   - FAIL
+   - Summary: form-data POST with `Accept: application/json` returned `200` JSON instead of the required `303` redirect, while still persisting the package.
+
+2. `npx vitest run tests/shipment-packages.test.ts`
+   - PASS
+   - Summary: `1 passed`, `12 passed (12)`.
+
+### Self-review
+
+- JSON 응답 분기는 이제 `Accept`가 아니라 request `content-type`이 `application/json`인지로만 결정된다.
+- form-data POST는 `Accept: application/json`이어도 기존 admin form 흐름대로 `/admin/shipments/${orderId}?packed=1`로 redirect되고 패키지도 저장된다.

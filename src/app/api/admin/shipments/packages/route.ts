@@ -4,8 +4,7 @@ import { getSessionUser } from "@/lib/session";
 import { saveShipmentPackage, type ShipmentPackageInput } from "@/lib/shipment-packages";
 
 function wantsJson(req: Request) {
-  return (req.headers.get("accept") ?? "").includes("application/json")
-    || (req.headers.get("content-type") ?? "").includes("application/json");
+  return (req.headers.get("content-type") ?? "").includes("application/json");
 }
 
 function toNumber(value: unknown) {
