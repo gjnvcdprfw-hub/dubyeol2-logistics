@@ -65,6 +65,18 @@ async function renderSellerOrderDetailPageFor(sellerId: string, orderId: string)
   }));
 }
 
+function extractSectionText(html: string, heading: string, nextHeading?: string) {
+  const start = html.indexOf(heading);
+  if (start === -1) {
+    throw new Error(`section heading not found: ${heading}`);
+  }
+
+  const end = nextHeading ? html.indexOf(nextHeading, start) : -1;
+  const sectionHtml = end === -1 ? html.slice(start) : html.slice(start, end);
+
+  return sectionHtml.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+}
+
 async function createQuotedOrderWithoutShipmentRequest(sellerId: string) {
   const order = await createOrder(sellerId, {
     serviceType: "PURCHASE",
@@ -380,6 +392,7 @@ describe("shipment packages domain", () => {
     });
 
     const html = await renderSellerOrderDetailPageFor(sellerA.id, order.id);
+    const packageSection = extractSectionText(html, "포장단위 / 패킹리스트 기초", "항목별 견적");
 
     expect(html).toContain("포장단위 / 패킹리스트 기초");
     expect(html).toContain("BOX-1");
@@ -387,10 +400,11 @@ describe("shipment packages domain", () => {
     expect(html).toContain("9.75kg");
     expect(html).toContain("0.04CBM");
     expect(html).toContain("2차 검수 완료");
-    expect(html).toContain("빨강");
-    expect(html).toContain("파랑");
-    expect(html).toMatch(/빨강[\s\S]*?1개/);
-    expect(html).toMatch(/파랑[\s\S]*?2개/);
+    expect(packageSection).toContain("BOX-1");
+    expect(packageSection).toContain("빨강");
+    expect(packageSection).toContain("파랑");
+    expect(packageSection).toMatch(/빨강\s+1개/);
+    expect(packageSection).toMatch(/파랑\s+2개/);
     expect(html).toContain("정식 패킹리스트 PDF와 실제 배송조회는 아직 연결하지 않았습니다.");
   });
 
