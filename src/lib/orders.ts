@@ -4,6 +4,7 @@ import {
   getSkuCount,
   getTotalQuantity,
   normalizeOrderLines,
+  orderWithLinesAndPackagesInclude,
   orderWithLinesInclude,
   type NewOrderProductLine,
 } from "./order-lines";
@@ -49,5 +50,9 @@ export async function createOrder(sellerId: string, input: NewOrder) {
 
 export async function listOrdersBySeller(sellerId: string) {
   if (!sellerId) throw new ValidationError("로그인이 필요합니다");
-  return prisma.order.findMany({ where: { sellerId }, orderBy: { createdAt: "desc" }, include: orderWithLinesInclude });
+  return prisma.order.findMany({
+    where: { sellerId },
+    orderBy: { createdAt: "desc" },
+    include: orderWithLinesAndPackagesInclude,
+  });
 }

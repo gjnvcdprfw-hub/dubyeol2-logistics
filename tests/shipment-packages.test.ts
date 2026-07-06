@@ -1,3 +1,5 @@
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { prisma } from "../src/lib/db";
 import { registerSeller } from "../src/lib/auth";
@@ -21,6 +23,46 @@ async function importAdminPackageRoute(role: "ADMIN" | "SELLER") {
     getSessionUser: vi.fn(async () => ({ id: `${role.toLowerCase()}-1`, role })),
   }));
   return import("../src/app/api/admin/shipments/packages/route");
+}
+
+async function renderSellerShipmentPageFor(sellerId: string) {
+  vi.resetModules();
+  vi.doMock("next/link", () => ({
+    default: ({ href, children, ...props }: { href: string; children: unknown }) =>
+      createElement("a", { href, ...props }, children),
+  }));
+  vi.doMock("next/navigation", () => ({
+    redirect: vi.fn((path: string) => {
+      throw new Error(`redirect:${path}`);
+    }),
+  }));
+  vi.doMock("@/lib/session", () => ({
+    getSession: vi.fn(async () => ({ userId: sellerId })),
+  }));
+
+  const { default: ShipmentPage } = await import("../src/app/dashboard/shipment/page");
+  return renderToStaticMarkup(await ShipmentPage());
+}
+
+async function renderSellerOrderDetailPageFor(sellerId: string, orderId: string) {
+  vi.resetModules();
+  vi.doMock("next/navigation", () => ({
+    redirect: vi.fn((path: string) => {
+      throw new Error(`redirect:${path}`);
+    }),
+    notFound: vi.fn(() => {
+      throw new Error("notFound");
+    }),
+  }));
+  vi.doMock("@/lib/session", () => ({
+    getSession: vi.fn(async () => ({ userId: sellerId })),
+  }));
+
+  const { default: OrderDetailPage } = await import("../src/app/dashboard/orders/[id]/page");
+  return renderToStaticMarkup(await OrderDetailPage({
+    params: Promise.resolve({ id: orderId }),
+    searchParams: Promise.resolve({}),
+  }));
 }
 
 async function createQuotedOrderWithoutShipmentRequest(sellerId: string) {
@@ -270,6 +312,51 @@ describe("shipment packages domain", () => {
     expect(getShipmentPackageStatusLabel("PACKED")).toBe("포장완료");
     expect(getShipmentPackageStatusLabel("READY")).toBe("출고대기");
     expect(getShipmentPackageStatusLabel("UNKNOWN")).toBe("UNKNOWN");
+  });
+
+  it("셀러 출고관리 화면은 박스별 구성과 상태를 표시한다", async () => {
+    const { order, red } = await createShipmentRequestedSkuOrder(sellerA.id);
+    await saveShipmentPackage(order.id, {
+      marker: "BOX-1",
+      status: "PACKED",
+      weightKg: 12.5,
+      volumeCbm: 0.08,
+      items: [{ skuLineId: red.id, quantity: 1 }],
+    });
+
+    const html = await renderSellerShipmentPageFor(sellerA.id);
+
+    expect(html).toContain("BOX-1");
+    expect(html).toContain("포장완료");
+    expect(html).toContain("12.5kg");
+    expect(html).toContain("0.08CBM");
+  });
+
+  it("셀러 주문 상세 화면은 포장단위와 패킹리스트 기초 정보를 표시한다", async () => {
+    const { order, red, blue } = await createShipmentRequestedSkuOrder(sellerA.id);
+    await saveShipmentPackage(order.id, {
+      marker: "BOX-1",
+      status: "READY",
+      weightKg: 9.75,
+      volumeCbm: 0.04,
+      memo: "2차 검수 완료",
+      items: [
+        { skuLineId: red.id, quantity: 1 },
+        { skuLineId: blue.id, quantity: 2 },
+      ],
+    });
+
+    const html = await renderSellerOrderDetailPageFor(sellerA.id, order.id);
+
+    expect(html).toContain("포장단위 / 패킹리스트 기초");
+    expect(html).toContain("BOX-1");
+    expect(html).toContain("출고대기");
+    expect(html).toContain("9.75kg");
+    expect(html).toContain("0.04CBM");
+    expect(html).toContain("2차 검수 완료");
+    expect(html).toContain("빨강");
+    expect(html).toContain("파랑");
+    expect(html).toContain("정식 패킹리스트 PDF와 실제 배송조회는 아직 연결하지 않았습니다.");
   });
 });
 

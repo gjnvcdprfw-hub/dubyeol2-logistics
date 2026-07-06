@@ -1,6 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import { getSession } from "@/lib/session";
 import { prisma } from "@/lib/db";
+import { getShipmentPackageStatusLabel } from "@/lib/shipment-packages";
 import { computeSkuSettlement } from "@/lib/sku-quote";
 import { getQuotedOrderQuote, getQuotedOrderTotalKrw, getWalletSummary } from "@/lib/wallet";
 
@@ -12,6 +13,14 @@ const STATUS_LABEL: Record<string, string> = {
 
 function krw(value: number) {
   return `₩${value.toLocaleString("ko-KR")}`;
+}
+
+function formatWeight(weightGrams: number) {
+  return `${(weightGrams / 1000).toLocaleString("ko-KR", { maximumFractionDigits: 2 })}kg`;
+}
+
+function formatVolume(volumeCm3: number) {
+  return `${(volumeCm3 / 1_000_000).toLocaleString("ko-KR", { maximumFractionDigits: 4 })}CBM`;
 }
 
 export default async function OrderDetailPage({
@@ -32,6 +41,15 @@ export default async function OrderDetailPage({
       productLines: {
         include: { skuLines: { orderBy: { sortOrder: "asc" } } },
         orderBy: { sortOrder: "asc" },
+      },
+      shipmentPackages: {
+        include: {
+          items: {
+            include: { skuLine: true },
+            orderBy: { createdAt: "asc" },
+          },
+        },
+        orderBy: { marker: "asc" },
       },
     },
   });
@@ -134,6 +152,51 @@ export default async function OrderDetailPage({
               </section>
             ))}
           </div>
+        </section>
+      )}
+      {order.status === "SHIPMENT_REQUESTED" && (
+        <section className="bg-surface rounded-[27px] shadow-[0_7px_30px_rgba(90,114,123,0.11)] p-6 space-y-4">
+          <div className="space-y-1">
+            <h2 className="text-[14px] font-semibold text-heading">포장단위 / 패킹리스트 기초</h2>
+            <p className="text-xs text-muted">정식 패킹리스트 PDF와 실제 배송조회는 아직 연결하지 않았습니다.</p>
+          </div>
+          {order.shipmentPackages.length === 0 ? (
+            <div className="rounded-lg bg-surface-alt p-4 text-sm text-muted">
+              포장단위가 아직 배정되지 않았습니다
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {order.shipmentPackages.map((pkg) => (
+                <section key={pkg.id} className="rounded-lg border border-black/5 bg-surface-alt p-4 space-y-3 text-sm">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                      <p className="font-semibold text-body">{pkg.marker}</p>
+                      <p className="text-secondary">{getShipmentPackageStatusLabel(pkg.status)}</p>
+                    </div>
+                    <div className="text-right text-secondary">
+                      <p>무게 {formatWeight(pkg.weightGrams)}</p>
+                      <p>부피 {formatVolume(pkg.volumeCm3)}</p>
+                    </div>
+                  </div>
+                  {pkg.memo && (
+                    <div className="rounded-lg bg-white px-4 py-3 text-secondary">
+                      메모 {pkg.memo}
+                    </div>
+                  )}
+                  <div className="space-y-2">
+                    {pkg.items.map((item) => (
+                      <div key={item.id} className="rounded-lg bg-white px-4 py-3">
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <p className="font-medium text-body">{item.skuLine.optionText}</p>
+                          <span className="text-secondary">{item.quantity}개</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              ))}
+            </div>
+          )}
         </section>
       )}
       {order.quotedAt && order.quoteShippingMethod && (
