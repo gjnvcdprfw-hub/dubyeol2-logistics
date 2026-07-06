@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { prisma } from "../src/lib/db";
 import { registerSeller } from "../src/lib/auth";
 import {
@@ -145,5 +145,46 @@ describe("wallet top-up requests", () => {
   it("충전 금액과 입금자명은 필수다", async () => {
     await expect(createWalletTopUpRequest(sellerA.id, { amountKrw: 0, depositorName: "A" })).rejects.toThrow("충전 금액");
     await expect(createWalletTopUpRequest(sellerA.id, { amountKrw: 1000, depositorName: " " })).rejects.toThrow("입금자명");
+  });
+});
+
+describe("seller wallet top-up route", () => {
+  async function importSellerTopUpRoute(sellerId: string) {
+    vi.resetModules();
+    vi.doMock("@/lib/session", () => ({
+      getSession: vi.fn(async () => ({ userId: sellerId })),
+    }));
+    return import("../src/app/api/wallet/topups/route");
+  }
+
+  it("JSON 충전 요청은 로그인 셀러로 PENDING 요청을 만든다", async () => {
+    const { POST } = await importSellerTopUpRoute(sellerA.id);
+
+    const response = await POST(new Request("http://localhost/api/wallet/topups", {
+      method: "POST",
+      headers: { "content-type": "application/json", accept: "application/json" },
+      body: JSON.stringify({ amountKrw: 100000, depositorName: "맹기범", memo: "출고 전 충전" }),
+    }));
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.ok).toBe(true);
+    expect(body.request.status).toBe("PENDING");
+    expect(body.request.sellerId).toBe(sellerA.id);
+  });
+
+  it("form 충전 요청은 예치금 화면으로 redirect 한다", async () => {
+    const { POST } = await importSellerTopUpRoute(sellerA.id);
+    const form = new FormData();
+    form.set("amountKrw", "100000");
+    form.set("depositorName", "맹기범");
+
+    const response = await POST(new Request("http://localhost/api/wallet/topups", {
+      method: "POST",
+      body: form,
+    }));
+
+    expect(response.status).toBe(303);
+    expect(response.headers.get("location")).toBe("http://localhost/dashboard/wallet?topup=requested");
   });
 });

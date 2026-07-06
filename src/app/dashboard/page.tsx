@@ -52,7 +52,7 @@ export default async function DashboardHome() {
         <p className="mt-1 text-2xl font-bold">사용 가능 잔액 {krw(wallet.balanceKrw)}</p>
         <p className="text-xs text-white/70">실계좌·실입금·실결제 연동은 오픈 전 확정합니다.</p>
         <div className="mt-4 flex gap-3">
-          <Link href="/dashboard/wallet" className="rounded-[18px] bg-white text-brand text-sm font-semibold px-4 py-2">충전하기 (오픈 전 확정)</Link>
+          <Link href="/dashboard/wallet" className="rounded-[18px] bg-white text-brand text-sm font-semibold px-4 py-2">충전 요청</Link>
           <Link href="/dashboard/wallet" className="rounded-[18px] bg-white text-brand text-sm font-semibold px-4 py-2">내역보기</Link>
         </div>
       </section>
