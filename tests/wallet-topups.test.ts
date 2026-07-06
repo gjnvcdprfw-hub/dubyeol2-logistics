@@ -188,3 +188,58 @@ describe("seller wallet top-up route", () => {
     expect(response.headers.get("location")).toBe("http://localhost/dashboard/wallet?topup=requested");
   });
 });
+
+describe("admin wallet top-up routes", () => {
+  async function importAdminRoute(path: "approve" | "reject", userId: string) {
+    vi.resetModules();
+    vi.doMock("@/lib/session", () => ({
+      getSessionUser: vi.fn(async () => ({ id: userId, role: userId === admin.id ? "ADMIN" : "SELLER" })),
+    }));
+    if (path === "approve") return import("../src/app/api/admin/wallet-topups/[id]/approve/route");
+    return import("../src/app/api/admin/wallet-topups/[id]/reject/route");
+  }
+
+  it("운영자 승인 route는 충전 요청을 승인하고 JSON 결과를 돌려준다", async () => {
+    const request = await createWalletTopUpRequest(sellerA.id, { amountKrw: 100000, depositorName: "A" });
+    const { POST } = await importAdminRoute("approve", admin.id);
+
+    const response = await POST(new Request(`http://localhost/api/admin/wallet-topups/${request.id}/approve`, {
+      method: "POST",
+      headers: { "content-type": "application/json", accept: "application/json" },
+      body: JSON.stringify({ memo: "입금 확인" }),
+    }), { params: Promise.resolve({ id: request.id }) });
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.ok).toBe(true);
+    expect(body.request.status).toBe("APPROVED");
+  });
+
+  it("운영자가 아닌 사용자는 승인할 수 없다", async () => {
+    const request = await createWalletTopUpRequest(sellerA.id, { amountKrw: 100000, depositorName: "A" });
+    const { POST } = await importAdminRoute("approve", sellerA.id);
+
+    const response = await POST(new Request(`http://localhost/api/admin/wallet-topups/${request.id}/approve`, {
+      method: "POST",
+      headers: { accept: "application/json" },
+    }), { params: Promise.resolve({ id: request.id }) });
+
+    expect(response.status).toBe(403);
+  });
+
+  it("운영자 거절 route는 잔액을 바꾸지 않는다", async () => {
+    const request = await createWalletTopUpRequest(sellerA.id, { amountKrw: 100000, depositorName: "A" });
+    const { POST } = await importAdminRoute("reject", admin.id);
+
+    const response = await POST(new Request(`http://localhost/api/admin/wallet-topups/${request.id}/reject`, {
+      method: "POST",
+      headers: { "content-type": "application/json", accept: "application/json" },
+      body: JSON.stringify({ reason: "입금자명 불일치" }),
+    }), { params: Promise.resolve({ id: request.id }) });
+    const summary = await getWalletSummary(sellerA.id);
+
+    expect(response.status).toBe(200);
+    expect(summary.balanceKrw).toBe(0);
+    expect(summary.transactions).toHaveLength(0);
+  });
+});

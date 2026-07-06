@@ -11,6 +11,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       <header className="bg-brand text-white px-6 h-14 flex items-center gap-6">
         <span className="font-bold">물류 운영자</span>
         <Link href="/admin/orders" className="text-sm">주문·입고</Link>
+        <Link href="/admin/wallet-topups" className="text-sm">예치금 확인</Link>
       </header>
       <main className="max-w-5xl mx-auto p-8">{children}</main>
     </div>
