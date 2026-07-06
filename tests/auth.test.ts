@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 import { prisma } from "../src/lib/db";
 import { registerSeller, verifyLogin, ValidationError } from "../src/lib/auth";
 
@@ -45,5 +45,25 @@ describe("verifyLogin", () => {
   it("틀린 비밀번호면 null", async () => {
     await registerSeller({ email: "a@b.com", password: "secret123", contactName: "셀러A" });
     expect(await verifyLogin("a@b.com", "wrongpass")).toBeNull();
+  });
+});
+
+describe("logout route", () => {
+  it("세션을 지우고 로그인 화면으로 보낸다", async () => {
+    vi.resetModules();
+    const destroy = vi.fn();
+    vi.doMock("@/lib/session", () => ({
+      getSession: vi.fn(async () => ({ destroy })),
+    }));
+
+    const { POST } = await import("../src/app/api/auth/logout/route");
+    const response = await POST(new Request("http://localhost/api/auth/logout", { method: "POST" }));
+
+    expect(destroy).toHaveBeenCalledOnce();
+    expect(response.status).toBe(303);
+    expect(response.headers.get("location")).toBe("http://localhost/auth/login");
+
+    vi.doUnmock("@/lib/session");
+    vi.resetModules();
   });
 });

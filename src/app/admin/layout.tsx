@@ -13,6 +13,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         <Link href="/admin/orders" className="text-sm">주문·입고</Link>
         <Link href="/admin/shipments" className="text-sm">출고 처리</Link>
         <Link href="/admin/wallet-topups" className="text-sm">예치금 확인</Link>
+        <form action="/api/auth/logout" method="post" className="ml-auto">
+          <button type="submit" className="text-sm text-white/80 hover:text-white">로그아웃</button>
+        </form>
       </header>
       <main className="max-w-5xl mx-auto p-8">{children}</main>
     </div>

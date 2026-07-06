@@ -59,7 +59,9 @@ export default function DashboardSidebar() {
           </div>
         ))}
       </nav>
-      <form action="/api/auth/logout" method="post"><button className="text-sm text-muted">로그아웃</button></form>
+      <form action="/api/auth/logout" method="post">
+        <button type="submit" className="text-sm text-muted">로그아웃</button>
+      </form>
     </aside>
   );
 }
