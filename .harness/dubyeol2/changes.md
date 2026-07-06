@@ -50,3 +50,5 @@
 | 2026-07-05 | Phase 7 보안 검토 대체 | Codex Mode B 환경에 `/security-review` 슬래시 명령 실행 도구가 없어 정적 권한 검사, 지갑 테스트, live QA 교차 셀러 404로 대체 | Phase 7은 예치금·셀러 권한을 건드리므로 `phase-packets/phase-007/03-verification.md` §3.1에 증거와 한계를 명시 | Claude 교차감리에서 seller isolation과 wallet state를 별도 확인 |
 | 2026-07-06 | Phase 6 외부감리 MINOR | 전체 테스트 최초 1회 FK 제약 일시 실패 후 즉시 재실행 PASS. 고객 약속에는 영향 없음 | `external-audit/result-phase-006.json` | 테스트 DB 격리 개선 후보로 보관 |
 | 2026-07-06 | Phase 7 외부감리 MINOR 해소 | Task 3 화면 변경 커밋 추적성 지적 | 구현·증거 커밋 `776d1e8`로 화면 변경과 감리 증거를 커밋 | `04-completion.md` 작성 전 커밋 완료 |
+| 2026-07-06 | Phase 9 보안 검토 대체 | Codex Mode B 환경에 `/security-review` 슬래시 명령 실행 도구가 없어 정적 검사, SKU/권한 회귀 테스트, live QA로 대체 | `phase-packets/phase-009/03-verification.md` §3.1, Claude 교차감리 PASS | Phase 10에서도 돈/권한 경계가 있으면 같은 한계를 명시하고 교차감리에서 재확인 |
+| 2026-07-06 | Phase 9 live QA host 기준 | `127.0.0.1`로 시작하면 local form redirect가 `localhost`로 바뀌며 개발 쿠키 host가 달라질 수 있음 | 최종 성공 QA는 `http://localhost:5173`로 통일 | 이후 로컬 브라우저 QA는 같은 host를 끝까지 유지 |

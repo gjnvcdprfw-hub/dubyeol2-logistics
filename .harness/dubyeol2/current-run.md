@@ -10,43 +10,47 @@
 
 - 프로젝트: 물류 — 사업자(쿠팡·11번가·1688 셀러) 대상 중국→한국 통합 물류 플랫폼. 벤치마크: 두리무역(duly.co.kr)
 - 실행 엔진 모드: **B — 빌드=Codex** (2026-07-05 대표님 선언, engine.md 참조. Claude 복귀 시 "모드 A로 복귀" 선언 → 감리 대기 큐 일괄 처리)
-- 두별2 적용 상태: Feature 1 완료·머지 → Feature 2 완료·머지 → **Feature 3 Phase 6 완료·로컬 main 머지 완료** → **Feature 4 Phase 7 완료·로컬 main 머지 완료**
-- 현재 Phase: **Phase 6~7 closeout**
-- 현재 단계: 단계 16/16 — Feature 3·4 완료 보고
+- 두별2 적용 상태: Feature 1 완료·머지 → Feature 2 완료·머지 → **Feature 3 Phase 6 완료·로컬 main 머지 완료** → **Feature 4 Phase 7 완료·로컬 main 머지 완료** → **Feature 5 Phase 9 완료**
+- 현재 Phase: **Phase 10 — 예치금 충전 신청·운영자 입금 확인** (Phase 8 정식 운영 전환은 대표님 지시로 보류)
+- 현재 단계: 단계 1/16 — 후보 고객 결과 요청 작성 준비
 - 진행자: PM (Codex)
-- 진행상태: Feature 완료 보고
-- 연결된 기능 약속: Feature 3 — 두리무역 1:1 비공개 기준판 / Feature 4 — 로그인 후 셀러 출고 요청·예치금 흐름
-- 연결된 고객 흐름: 전체 기준판 확인 / 셀러 견적 후 출고 요청·예치금 차감
-- 연결된 메뉴탭 / 화면 영역: 공개 전체 · 셀러 주문 상세 · 출고관리 · 예치금 관리 · 대시보드 홈
-- 현재 packet: phase-001~007 완결
-- 다음에 필요한 파일: 다음 기능 정렬 시 새 `feature.md` 또는 후속 Phase packet
+- 진행상태: Phase 10 후보 고객 결과 요청 준비
+- 연결된 기능 약속: Feature 5 — SKU 작업·정산 기초 + 예치금 충전 + 출고 포장/패킹리스트 기초
+- 연결된 고객 흐름: 상품/SKU별 작업·정산 / 예치금 충전·정산 / 출고 포장·패킹리스트 기초
+- 연결된 메뉴탭 / 화면 영역: 주문 접수 · 주문 상세 · 운영자 입고/검수 · 운영자 견적 · 예치금 관리 · 출고관리
+- 현재 packet: phase-001~007 완결, phase-008 보류, phase-009 `00-customer-outcome.md`~`04-completion.md` 완료, phase-010 준비 전
+- 다음에 필요한 파일: `phase-packets/phase-010/00-customer-outcome.md`
 - 막힌 것: 없음
 
 ## 2. 다음 행동
 
-1. Feature 3·Feature 4 완료 보고
-2. 다음 기능 정렬 또는 Phase 8 후보 선택
-3. 대표님 확정 대기 값: 창고 실주소, 요율 컷팅(rates.ts — 기견적 소급 변동 주의), 외관 추가 편집, 약관 본문(오픈 전 필수), 실제 계좌/입금/결제 방식
-4. 이월 개선 후보: 로그아웃 JSON 착지, 이메일 미정규화, 재견적 무이력, 테스트 DB 격리, 그림자 토큰화(Phase 5), 배포 전 체크리스트
+1. `phase-packets/phase-010/00-customer-outcome.md` 작성
+2. Team Leader `superpowers:brainstorming`으로 Phase 10 범위 판단
+3. `phase-packets/phase-010/01-teamleader-intake.md` 작성
+4. Phase 10 `superpowers:writing-plans` 및 `02-plan.md` 작성
+5. 대표님 확정 대기 값: Phase 8 보류값(창고 실주소, 요율 컷팅, 외관 추가 편집, 약관 본문, 실제 계좌/입금/결제 방식)은 이번 Feature 5에서 확정값으로 쓰지 않음
+6. 이월 개선 후보: 로그아웃 JSON 착지, 이메일 미정규화, 재견적 무이력, 테스트 DB 격리, 그림자 토큰화(Phase 5), 배포 전 체크리스트
 
 ## 3. 현재 단계 게이트
 
-현재 Phase 7 (`phase-packets/phase-007/`) 기준:
+현재 Phase 10 기준:
 
 | 단계 | 필요한 파일 | 상태 | 다음 단계 |
 |---|---|---|---|
-| 후보 고객 결과 요청 작성 | `00-customer-outcome.md` | **완료** (견적 후 출고 요청·예치금 차감) | Team Leader 진입 |
-| Team Leader 범위 판단 | `01-teamleader-intake.md` | **완료** (`superpowers:brainstorming`, Phase 7 적정) | `superpowers:writing-plans` |
-| Team Leader plan | `02-plan.md` | **완료** (`superpowers:writing-plans`) | Builder 실행 |
-| 검증 | `03-verification.md` | **완료** (Machine Check PASS) | 교차 감리 |
-| 완료 기록 | `04-completion.md` | **완료** | Feature 완료 보고 |
+| Feature 5 승인 | `feature.md` | **완료** | Phase 9~11 순차 진행 |
+| Phase 9 완료 | `phase-packets/phase-009/04-completion.md` | **완료** (Machine Check PASS, Claude 교차감리 PASS) | Phase 10 후보 고객 결과 요청 작성 |
+| 후보 고객 결과 요청 작성 | `phase-packets/phase-010/00-customer-outcome.md` | 준비 전 | Team Leader 진입 |
+| Team Leader 범위 판단 | `phase-packets/phase-010/01-teamleader-intake.md` | 준비 전 | `superpowers:writing-plans` |
+| Team Leader plan | `phase-packets/phase-010/02-plan.md` | 준비 전 | Builder 실행 |
+| Machine Check | `phase-packets/phase-010/03-verification.md` | 준비 전 | 교차 감리 |
+| 완료 기록 | `phase-packets/phase-010/04-completion.md` | 준비 전 | Phase 11 또는 기능 완료 보고 |
 
 ## 4. 실패 횟수
 
 | 구분 | 현재 횟수 | 최대 | 다음 행동 |
 |---|---:|---:|---|
 | Machine Check 게이트 실패 | 0 | 제한 없음 | 빌드 측 Team Leader가 분류하고 Builder가 수정 |
-| 외부감리 FAIL | Phase 2: 1회(해소) · Phase 3: 1회(해소) · Phase 4: 3회(해소) · Phase 5: 1회(해소 — r2 PASS) · Phase 6 현재 계약: 0회 (이전 문구 전용 r1은 PM 재정렬로 무효화) | 3/phase | 빌드 측 Team Leader가 분류하고 Builder가 수정 후 교차 재감리 |
+| 외부감리 FAIL | Phase 2: 1회(해소) · Phase 3: 1회(해소) · Phase 4: 3회(해소) · Phase 5: 1회(해소 — r2 PASS) · Phase 6 현재 계약: 0회 (이전 문구 전용 r1은 PM 재정렬로 무효화) · Phase 9: 0회(PASS) | 3/phase | 빌드 측 Team Leader가 분류하고 Builder가 수정 후 교차 재감리 |
 | 외부감리 BLOCKED | 0 | 1 | PM이 대표님에게 고객 언어 질문 하나만 보고 |
 
 ## 5. 알림 상태
@@ -66,6 +70,8 @@
 | 2026-07-04 | 홈페이지 외관 = 두리무역 그대로 벤치마킹, 추후 대표님 추가 편집 | 대표님: "홈페이지외관은 두리무역 그대로 벤치마킹해줘, 추후에 내가 추가 편집할꺼야" |
 | 2026-07-05 | Feature 3 기준 = 두리무역 1:1 비공개 기준판. 로고·이미지·실주소·전화번호·계좌·사업자정보만 제외 | 대표님: "로고,이미지,실주소,전화번호,계좌,사업자정보 만빼고 1:1로 만들어줘 디자인, 기능, 구조, 이모티콘 하나까지" |
 | 2026-07-05 | Feature 4 첫 범위 = 견적 후 출고 요청·예치금 차감·출고 상태 확인. 실계좌·실입금·실결제 제외 | 대표님: "로그인후 셀러기능 구현하자," → PM 범위·합격 기준 제안 → "그래" |
+| 2026-07-06 | Phase 8 정식 운영 전환은 보류하고 Phase 9~11 기능을 먼저 진행 | 대표님: "8은 일단 보류, 9-11까지 먼저 진행해" |
+| 2026-07-06 | Phase 9는 SKU 라인 구조까지만 하고, 포장단위·패킹리스트는 Phase 11 출고요청 때 붙임 | 대표님: "포장단위랑 패킹리스트는 출고요청때 붙이면 어때? 처음부터는 필요할까?" → PM 추천 → "그래" |
 | 2026-06-28 | 두별2 운영 규칙 개정 프로세스를 정본화하고 Harness v2.0을 생성 | 사고법뿐 아니라 AGENTS, PM 규칙, Phase 규칙, Team Leader 규칙도 같은 방식으로 버전업하기 위해 |
 | 2026-06-28 | Harness v2.1로 Phase 경계 확정 방식을 수정 | PM이 Phase를 혼자 나누지 않고 Team Leader가 `superpowers:brainstorming`으로 크기 판단 후 PM이 확정하도록 하기 위해 |
 | 2026-06-28 | Harness v2.2로 사고법 적용 라우터를 추가 | 긴 사고법 원문은 유지하되 상황별로 먼저 적용할 사고법 구분을 명확히 하기 위해 |
