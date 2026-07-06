@@ -13,7 +13,7 @@ const MENU = [
   { href: "/guide", label: "이용가이드" },
 ];
 
-export default function SiteHeader() {
+export default function SiteHeader({ initialRole }: { initialRole?: string | null } = {}) {
   return (
     <header className="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-black/5">
       <div className="max-w-6xl mx-auto flex items-center justify-between gap-6 px-6 h-16">
@@ -27,7 +27,7 @@ export default function SiteHeader() {
           ))}
         </nav>
         <div className="flex items-center gap-3 text-sm shrink-0">
-          <HeaderAuthActions />
+          <HeaderAuthActions initialRole={initialRole} />
         </div>
       </div>
     </header>

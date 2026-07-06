@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { readFileSync } from "fs";
 import { getPublicHeaderActions } from "../src/components/public/header-auth";
 
 describe("public site header", () => {
@@ -15,5 +16,12 @@ describe("public site header", () => {
 
     expect(actions.map((action) => action.label)).toEqual(["운영자", "로그아웃"]);
     expect(actions[0]).toEqual(expect.objectContaining({ href: "/admin/orders" }));
+  });
+
+  it("마이페이지 레이아웃에서도 공개 상단 네비를 유지한다", () => {
+    const source = readFileSync("src/app/dashboard/layout.tsx", "utf8");
+
+    expect(source).toContain('import SiteHeader from "@/components/public/site-header"');
+    expect(source).toContain("<SiteHeader");
   });
 });

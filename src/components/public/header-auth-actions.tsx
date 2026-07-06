@@ -23,8 +23,10 @@ function renderAction(action: PublicHeaderAction) {
   );
 }
 
-export default function HeaderAuthActions() {
-  const [actions, setActions] = useState<PublicHeaderAction[]>(() => getPublicHeaderActions(null));
+export default function HeaderAuthActions({ initialRole }: { initialRole?: string | null }) {
+  const [actions, setActions] = useState<PublicHeaderAction[]>(() =>
+    getPublicHeaderActions(initialRole ? { role: initialRole } : null),
+  );
 
   useEffect(() => {
     let mounted = true;
