@@ -49,7 +49,7 @@ fix status
 - DONE
 
 commit hash
-- `c4422ea`
+- `5e77bbe`
 
 RED evidence
 - added regression: `tests/wallet-topups.test.ts` 동시 승인 회귀 테스트
