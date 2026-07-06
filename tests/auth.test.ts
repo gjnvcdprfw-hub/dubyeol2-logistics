@@ -61,7 +61,7 @@ describe("logout route", () => {
 
     expect(destroy).toHaveBeenCalledOnce();
     expect(response.status).toBe(303);
-    expect(response.headers.get("location")).toBe("http://localhost/auth/login");
+    expect(response.headers.get("location")).toBe("/auth/login");
 
     vi.doUnmock("@/lib/session");
     vi.resetModules();
