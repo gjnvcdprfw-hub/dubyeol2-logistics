@@ -4,6 +4,7 @@ import { registerSeller } from "../src/lib/auth";
 import {
   approveWalletTopUpRequest,
   createWalletTopUpRequest,
+  listAdminWalletTopUps,
   listSellerWalletTopUps,
   rejectWalletTopUpRequest,
 } from "../src/lib/wallet-topups";
@@ -78,6 +79,22 @@ describe("wallet top-up requests", () => {
     expect(summary.transactions).toHaveLength(0);
   });
 
+  it("운영자 권한이 없으면 승인과 거절이 모두 거부된다", async () => {
+    const request = await createWalletTopUpRequest(sellerA.id, { amountKrw: 100000, depositorName: "A" });
+
+    await expect(approveWalletTopUpRequest(sellerA.id, request.id, "셀러 승인 시도")).rejects.toThrow("권한");
+    await expect(rejectWalletTopUpRequest(sellerA.id, request.id, "셀러 거절 시도")).rejects.toThrow("권한");
+    await expect(approveWalletTopUpRequest("missing-admin-id", request.id, "없는 사용자")).rejects.toThrow("권한");
+    await expect(rejectWalletTopUpRequest("missing-admin-id", request.id, "없는 사용자")).rejects.toThrow("권한");
+
+    const summary = await getWalletSummary(sellerA.id);
+    const freshRequest = await prisma.walletTopUpRequest.findUniqueOrThrow({ where: { id: request.id } });
+    expect(freshRequest.status).toBe("PENDING");
+    expect(freshRequest.processedById).toBeNull();
+    expect(summary.balanceKrw).toBe(0);
+    expect(summary.transactions).toHaveLength(0);
+  });
+
   it("셀러는 자기 충전 요청만 본다", async () => {
     await createWalletTopUpRequest(sellerA.id, { amountKrw: 100000, depositorName: "A" });
     await createWalletTopUpRequest(sellerB.id, { amountKrw: 900000, depositorName: "B" });
@@ -87,6 +104,42 @@ describe("wallet top-up requests", () => {
     expect(list).toHaveLength(1);
     expect(list[0].sellerId).toBe(sellerA.id);
     expect(list[0].amountKrw).toBe(100000);
+  });
+
+  it("관리자 목록은 pending 우선 최신순으로 판매자 식별 정보와 함께 반환한다", async () => {
+    const olderPending = await createWalletTopUpRequest(sellerA.id, { amountKrw: 100000, depositorName: "A" });
+    await prisma.walletTopUpRequest.update({
+      where: { id: olderPending.id },
+      data: { createdAt: new Date("2026-07-05T10:00:00.000Z") },
+    });
+
+    const rejected = await createWalletTopUpRequest(sellerB.id, { amountKrw: 200000, depositorName: "B" });
+    await prisma.walletTopUpRequest.update({
+      where: { id: rejected.id },
+      data: { createdAt: new Date("2026-07-05T11:00:00.000Z") },
+    });
+    await rejectWalletTopUpRequest(admin.id, rejected.id, "입금자명 불일치");
+
+    const newerPending = await createWalletTopUpRequest(sellerA.id, { amountKrw: 300000, depositorName: "A2" });
+    await prisma.walletTopUpRequest.update({
+      where: { id: newerPending.id },
+      data: { createdAt: new Date("2026-07-05T12:00:00.000Z") },
+    });
+
+    const list = await listAdminWalletTopUps();
+
+    expect(list).toHaveLength(3);
+    expect(list.map((item) => item.id)).toEqual([newerPending.id, olderPending.id, rejected.id]);
+    expect(list[0].seller).toMatchObject({
+      email: "topup-a@test.local",
+      contactName: "A",
+      companyName: null,
+    });
+    expect(list[2].seller).toMatchObject({
+      email: "topup-b@test.local",
+      contactName: "B",
+      companyName: null,
+    });
   });
 
   it("충전 금액과 입금자명은 필수다", async () => {

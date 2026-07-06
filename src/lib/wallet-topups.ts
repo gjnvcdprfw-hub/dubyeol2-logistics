@@ -27,6 +27,20 @@ function validateTopUpInput(input: TopUpInput) {
   return { amountKrw, depositorName, memo: memo || null };
 }
 
+async function assertAdminRole(
+  db: Pick<typeof prisma, "user">,
+  adminId: string,
+) {
+  const admin = await db.user.findUnique({
+    where: { id: adminId },
+    select: { role: true },
+  });
+
+  if (!admin || admin.role !== "ADMIN") {
+    throw new ValidationError("운영자 권한이 없습니다");
+  }
+}
+
 export async function createWalletTopUpRequest(sellerId: string, input: TopUpInput) {
   if (!sellerId) throw new ValidationError("로그인이 필요합니다");
 
@@ -48,8 +62,8 @@ export async function listSellerWalletTopUps(sellerId: string) {
 }
 
 export async function listAdminWalletTopUps() {
-  return prisma.walletTopUpRequest.findMany({
-    orderBy: [{ status: "asc" }, { createdAt: "desc" }],
+  const requests = await prisma.walletTopUpRequest.findMany({
+    orderBy: { createdAt: "desc" },
     include: {
       seller: {
         select: {
@@ -60,6 +74,21 @@ export async function listAdminWalletTopUps() {
       },
     },
   });
+
+  const statusPriority = new Map([
+    ["PENDING", 0],
+    ["APPROVED", 1],
+    ["REJECTED", 2],
+  ]);
+
+  return requests.sort((a, b) => {
+    const priorityDiff = (statusPriority.get(a.status) ?? 99) - (statusPriority.get(b.status) ?? 99);
+    if (priorityDiff !== 0) {
+      return priorityDiff;
+    }
+
+    return b.createdAt.getTime() - a.createdAt.getTime();
+  });
 }
 
 export async function approveWalletTopUpRequest(adminId: string, requestId: string, memo?: string | null) {
@@ -69,6 +98,8 @@ export async function approveWalletTopUpRequest(adminId: string, requestId: stri
   const adminMemo = cleanText(memo ?? "");
 
   return prisma.$transaction(async (tx) => {
+    await assertAdminRole(tx, adminId);
+
     const request = await tx.walletTopUpRequest.findUnique({ where: { id: requestId } });
     if (!request) throw new ValidationError("충전 요청을 찾을 수 없습니다");
     if (request.status !== "PENDING") throw new ValidationError("이미 처리된 충전 요청입니다");
@@ -110,16 +141,20 @@ export async function rejectWalletTopUpRequest(adminId: string, requestId: strin
   const adminMemo = cleanText(reason);
   if (!adminMemo) throw new ValidationError("거절 사유를 입력해 주세요");
 
-  const update = await prisma.walletTopUpRequest.updateMany({
-    where: { id: requestId, status: "PENDING" },
-    data: {
-      status: "REJECTED",
-      processedById: adminId,
-      processedAt: new Date(),
-      adminMemo,
-    },
-  });
-  if (update.count !== 1) throw new ValidationError("이미 처리된 충전 요청입니다");
+  return prisma.$transaction(async (tx) => {
+    await assertAdminRole(tx, adminId);
 
-  return prisma.walletTopUpRequest.findUniqueOrThrow({ where: { id: requestId } });
+    const update = await tx.walletTopUpRequest.updateMany({
+      where: { id: requestId, status: "PENDING" },
+      data: {
+        status: "REJECTED",
+        processedById: adminId,
+        processedAt: new Date(),
+        adminMemo,
+      },
+    });
+    if (update.count !== 1) throw new ValidationError("이미 처리된 충전 요청입니다");
+
+    return tx.walletTopUpRequest.findUniqueOrThrow({ where: { id: requestId } });
+  });
 }
