@@ -16,8 +16,11 @@ let sellerB: { id: string };
 let admin: { id: string };
 
 beforeEach(async () => {
+  await prisma.shipmentPackageItem.deleteMany();
+  await prisma.shipmentPackage.deleteMany();
   await prisma.walletTransaction.deleteMany();
   await prisma.walletTopUpRequest.deleteMany();
+  await prisma.inboundPhoto.deleteMany();
   await prisma.order.deleteMany();
   await prisma.user.deleteMany();
   sellerA = await registerSeller({ email: "topup-a@test.local", password: "password1", contactName: "A" });

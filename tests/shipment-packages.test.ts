@@ -120,6 +120,8 @@ async function firstSku(orderId: string) {
 }
 
 beforeEach(async () => {
+  await prisma.shipmentPackageItem.deleteMany();
+  await prisma.shipmentPackage.deleteMany();
   await prisma.walletTransaction.deleteMany();
   await prisma.inboundPhoto.deleteMany();
   await prisma.order.deleteMany();

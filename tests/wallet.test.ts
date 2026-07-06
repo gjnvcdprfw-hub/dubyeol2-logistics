@@ -42,6 +42,8 @@ async function createQuotedOrder(sellerId: string, productName = "견적품") {
 
 beforeEach(async () => {
   vi.restoreAllMocks();
+  await prisma.shipmentPackageItem.deleteMany();
+  await prisma.shipmentPackage.deleteMany();
   await prisma.walletTransaction.deleteMany();
   await prisma.inboundPhoto.deleteMany();
   await prisma.order.deleteMany();

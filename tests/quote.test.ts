@@ -18,6 +18,8 @@ let otherSeller: { id: string };
 
 beforeEach(async () => {
   vi.restoreAllMocks();
+  await prisma.shipmentPackageItem.deleteMany();
+  await prisma.shipmentPackage.deleteMany();
   await prisma.walletTransaction.deleteMany();
   await prisma.inboundPhoto.deleteMany();
   await prisma.orderSkuLine.deleteMany();

@@ -113,3 +113,32 @@ concerns:
   - the new regression test checks the exact reviewer concern: same marker, changed composition, changed status, changed measurements, changed memo, and no stale SKU item left behind.
   - I kept the change surgical: only `tests/shipment-packages.test.ts` plus this report file changed.
   - I did not change source code because the replacement behavior already works and the new test did not expose a domain failure.
+
+## fix review loop 2
+
+- scope:
+  - updated DB cleanup in the Phase 11 and adjacent DB test files so shipment package rows are cleared before order/user cleanup.
+  - added the missing `inboundPhoto.deleteMany()` in `tests/wallet-topups.test.ts` and `tests/auth.test.ts` because schema evidence showed `InboundPhoto.order` does not cascade on delete, so clearing shipment package tables alone was not enough to make `order.deleteMany()` robust after `tests/shipment-packages.test.ts`.
+
+- commands:
+  1. `npx vitest run tests/shipment-packages.test.ts tests/orders.test.ts tests/wallet.test.ts tests/wallet-topups.test.ts tests/quote.test.ts tests/inbound.test.ts`
+     - PRE-FIX PASS once locally: `Test Files  6 passed (6)`, `Tests  92 passed (92)`.
+     - POST first patch FAIL: `tests/wallet-topups.test.ts` still hit `prisma.order.deleteMany()` FK failure.
+     - Root-cause evidence: `prisma/schema.prisma` shows `InboundPhoto.order @relation(fields: [orderId], references: [id])` with no `onDelete: Cascade`, while `ShipmentPackage`/`ShipmentPackageItem` do cascade.
+     - FINAL PASS after adding `shipmentPackageItem.deleteMany()`, `shipmentPackage.deleteMany()`, and the missing `inboundPhoto.deleteMany()` where needed: `Test Files  6 passed (6)`, `Tests  92 passed (92)`.
+  2. `npx vitest run tests/auth.test.ts tests/shipment-packages.test.ts tests/orders.test.ts tests/wallet.test.ts tests/wallet-topups.test.ts tests/quote.test.ts tests/inbound.test.ts`
+     - PASS: `Test Files  7 passed (7)`, `Tests  99 passed (99)`.
+
+- files changed:
+  - `tests/shipment-packages.test.ts`
+  - `tests/wallet.test.ts`
+  - `tests/inbound.test.ts`
+  - `tests/orders.test.ts`
+  - `tests/wallet-topups.test.ts`
+  - `tests/auth.test.ts`
+  - `tests/quote.test.ts`
+
+- self-review:
+  - the required shipment package cleanup order is now present before order/user cleanup in every targeted DB test file.
+  - the first patch proved the user-provided root-cause summary was incomplete for `wallet-topups`/`auth`; I corrected only the missing child-table cleanup needed to make the requested suite stable.
+  - edits stayed surgical: test cleanup only, no source/domain/runtime code changes.

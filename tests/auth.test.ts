@@ -3,6 +3,9 @@ import { prisma } from "../src/lib/db";
 import { registerSeller, verifyLogin, ValidationError } from "../src/lib/auth";
 
 beforeEach(async () => {
+  await prisma.shipmentPackageItem.deleteMany();
+  await prisma.shipmentPackage.deleteMany();
+  await prisma.inboundPhoto.deleteMany();
   await prisma.order.deleteMany();
   await prisma.user.deleteMany();
 });
