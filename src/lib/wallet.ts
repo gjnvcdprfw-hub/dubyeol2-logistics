@@ -79,11 +79,17 @@ export function getQuotedOrderTotalKrw(order: OrderLike) {
 export async function getWalletSummary(sellerId: string): Promise<WalletSummary> {
   if (!sellerId) throw new ValidationError("로그인이 필요합니다");
 
-  const transactions = await prisma.walletTransaction.findMany({
-    where: { sellerId },
-    orderBy: { createdAt: "desc" },
-  });
-  const balanceKrw = transactions.reduce((sum, tx) => sum + tx.amountKrw, 0);
+  const [user, transactions] = await Promise.all([
+    prisma.user.findUnique({
+      where: { id: sellerId },
+      select: { walletBalanceKrw: true },
+    }),
+    prisma.walletTransaction.findMany({
+      where: { sellerId },
+      orderBy: { createdAt: "desc" },
+    }),
+  ]);
+  const balanceKrw = user?.walletBalanceKrw ?? 0;
   const totalCreditKrw = transactions
     .filter((tx) => tx.amountKrw > 0)
     .reduce((sum, tx) => sum + tx.amountKrw, 0);
@@ -100,15 +106,28 @@ export async function recordWalletCredit(sellerId: string, amountKrw: number, me
     throw new ValidationError("예치금 금액이 올바르지 않습니다");
   }
 
-  const summary = await getWalletSummary(sellerId);
-  return prisma.walletTransaction.create({
-    data: {
-      sellerId,
-      type: "TEST_CREDIT",
-      amountKrw,
-      balanceAfterKrw: summary.balanceKrw + amountKrw,
-      memo,
-    },
+  return prisma.$transaction(async (tx) => {
+    const seller = await tx.user.update({
+      where: { id: sellerId },
+      data: {
+        walletBalanceKrw: {
+          increment: amountKrw,
+        },
+      },
+      select: {
+        walletBalanceKrw: true,
+      },
+    });
+
+    return tx.walletTransaction.create({
+      data: {
+        sellerId,
+        type: "TEST_CREDIT",
+        amountKrw,
+        balanceAfterKrw: seller.walletBalanceKrw,
+        memo,
+      },
+    });
   });
 }
 
@@ -130,9 +149,12 @@ export async function requestShipmentWithWallet(
     }
 
     const amountKrw = getQuotedOrderTotalKrw(order);
-    const currentTransactions = await tx.walletTransaction.findMany({ where: { sellerId } });
-    const balanceKrw = currentTransactions.reduce((sum, item) => sum + item.amountKrw, 0);
-    if (balanceKrw < amountKrw) throw new ValidationError("예치금 잔액이 부족합니다");
+    const seller = await tx.user.findUnique({
+      where: { id: sellerId },
+      select: { walletBalanceKrw: true },
+    });
+    const currentBalanceKrw = seller?.walletBalanceKrw ?? 0;
+    if (currentBalanceKrw < amountKrw) throw new ValidationError("예치금 잔액이 부족합니다");
 
     const updateResult = await tx.order.updateMany({
       where: { id: order.id, sellerId, status: "RECEIVED" },
@@ -146,6 +168,28 @@ export async function requestShipmentWithWallet(
       throw new ValidationError("이미 출고 요청된 주문입니다");
     }
 
+    const balanceUpdate = await tx.user.updateMany({
+      where: {
+        id: sellerId,
+        walletBalanceKrw: {
+          gte: amountKrw,
+        },
+      },
+      data: {
+        walletBalanceKrw: {
+          decrement: amountKrw,
+        },
+      },
+    });
+    if (balanceUpdate.count !== 1) {
+      throw new ValidationError("예치금 잔액이 부족합니다");
+    }
+    const updatedSeller = await tx.user.findUniqueOrThrow({
+      where: { id: sellerId },
+      select: {
+        walletBalanceKrw: true,
+      },
+    });
     const updatedOrder = await tx.order.findFirstOrThrow({ where: { id: order.id, sellerId } });
     const transaction = await tx.walletTransaction.create({
       data: {
@@ -153,11 +197,11 @@ export async function requestShipmentWithWallet(
         orderId: order.id,
         type: "SHIPMENT_DEBIT",
         amountKrw: -amountKrw,
-        balanceAfterKrw: balanceKrw - amountKrw,
+        balanceAfterKrw: updatedSeller.walletBalanceKrw,
         memo: `출고 요청 차감: ${order.productName}`,
       },
     });
 
-    return { order: updatedOrder, transaction, balanceKrw: balanceKrw - amountKrw };
+    return { order: updatedOrder, transaction, balanceKrw: updatedSeller.walletBalanceKrw };
   });
 }

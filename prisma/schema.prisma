@@ -16,6 +16,7 @@ model User {
   phone              String?
   role               String              @default("SELLER") // "SELLER" | "ADMIN"
   inboundCode        String?             @unique // 회원별 입고ID (8자 대문자영숫자)
+  walletBalanceKrw   Int                 @default(0)
   createdAt          DateTime            @default(now())
   orders             Order[]
   walletTransactions WalletTransaction[]

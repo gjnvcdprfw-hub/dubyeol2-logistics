@@ -159,6 +159,12 @@ describe("wallet shipment request", () => {
     const credit = await recordWalletCredit(sellerA.id, 300000, "QA 예치금");
     const createTransaction = vi.fn();
     const tx = {
+      user: {
+        findUnique: vi.fn().mockResolvedValue({ walletBalanceKrw: 300000 }),
+        findUniqueOrThrow: vi.fn(),
+        update: vi.fn(),
+        updateMany: vi.fn(),
+      },
       order: {
         findFirst: vi.fn().mockResolvedValue(order),
         update: vi.fn().mockResolvedValue({ ...order, status: "SHIPMENT_REQUESTED" }),
@@ -180,6 +186,8 @@ describe("wallet shipment request", () => {
       where: { id: order.id, sellerId: sellerA.id, status: "RECEIVED" },
       data: expect.objectContaining({ status: "SHIPMENT_REQUESTED" }),
     });
+    expect(tx.user.update).not.toHaveBeenCalled();
+    expect(tx.user.updateMany).not.toHaveBeenCalled();
     expect(createTransaction).not.toHaveBeenCalled();
   });
 

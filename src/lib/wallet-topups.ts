@@ -115,14 +115,23 @@ export async function approveWalletTopUpRequest(adminId: string, requestId: stri
     });
     if (update.count !== 1) throw new ValidationError("이미 처리된 충전 요청입니다");
 
-    const transactions = await tx.walletTransaction.findMany({ where: { sellerId: request.sellerId } });
-    const balanceKrw = transactions.reduce((sum, item) => sum + item.amountKrw, 0);
+    const seller = await tx.user.update({
+      where: { id: request.sellerId },
+      data: {
+        walletBalanceKrw: {
+          increment: request.amountKrw,
+        },
+      },
+      select: {
+        walletBalanceKrw: true,
+      },
+    });
     const transaction = await tx.walletTransaction.create({
       data: {
         sellerId: request.sellerId,
         type: "TOPUP_CREDIT",
         amountKrw: request.amountKrw,
-        balanceAfterKrw: balanceKrw + request.amountKrw,
+        balanceAfterKrw: seller.walletBalanceKrw,
         memo: adminMemo || `예치금 충전 승인: ${request.depositorName}`,
       },
     });

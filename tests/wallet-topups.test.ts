@@ -67,6 +67,60 @@ describe("wallet top-up requests", () => {
     expect(summary.transactions).toHaveLength(1);
   });
 
+  it("같은 셀러의 서로 다른 pending 충전 2건을 동시에 승인해도 balanceAfterKrw는 누적 잔액을 반영한다", async () => {
+    const first = await createWalletTopUpRequest(sellerA.id, { amountKrw: 100000, depositorName: "A-1" });
+    const second = await createWalletTopUpRequest(sellerA.id, { amountKrw: 250000, depositorName: "A-2" });
+    const initialSnapshot = await prisma.walletTransaction.findMany({ where: { sellerId: sellerA.id } });
+    let waitingReaders = 0;
+    let releaseReaders: (() => void) | null = null;
+    const readersReady = new Promise<void>((resolve) => {
+      releaseReaders = resolve;
+    });
+
+    const transactionSpy = vi.spyOn(prisma, "$transaction").mockImplementation(async (callback: never) => {
+      const tx = {
+        user: {
+          findUnique: prisma.user.findUnique.bind(prisma.user),
+          update: prisma.user.update.bind(prisma.user),
+        },
+        walletTopUpRequest: {
+          findUnique: prisma.walletTopUpRequest.findUnique.bind(prisma.walletTopUpRequest),
+          updateMany: prisma.walletTopUpRequest.updateMany.bind(prisma.walletTopUpRequest),
+          update: prisma.walletTopUpRequest.update.bind(prisma.walletTopUpRequest),
+        },
+        walletTransaction: {
+          findMany: vi.fn(async () => {
+            waitingReaders += 1;
+            if (waitingReaders === 2) {
+              releaseReaders?.();
+            }
+            await readersReady;
+            return initialSnapshot;
+          }),
+          create: prisma.walletTransaction.create.bind(prisma.walletTransaction),
+        },
+      };
+
+      return callback(tx as never);
+    });
+
+    await Promise.all([
+      approveWalletTopUpRequest(admin.id, first.id, "첫 입금 확인"),
+      approveWalletTopUpRequest(admin.id, second.id, "둘째 입금 확인"),
+    ]);
+
+    transactionSpy.mockRestore();
+
+    const summary = await getWalletSummary(sellerA.id);
+    const balances = summary.transactions
+      .filter((tx) => tx.type === "TOPUP_CREDIT")
+      .map((tx) => tx.balanceAfterKrw);
+
+    expect(summary.balanceKrw).toBe(350000);
+    expect(balances).toHaveLength(2);
+    expect(Math.max(...balances)).toBe(350000);
+  });
+
   it("거절하면 잔액과 원장은 늘지 않고 사유가 남는다", async () => {
     const request = await createWalletTopUpRequest(sellerA.id, { amountKrw: 100000, depositorName: "A" });
 
