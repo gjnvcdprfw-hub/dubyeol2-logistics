@@ -247,6 +247,22 @@ describe("createOrder — SKU 라인 구조", () => {
     ).rejects.toThrow("SKU 입력 형식이 올바르지 않습니다");
   });
 
+  it("SKU 옵션명이 문자열이 아니면 400 경계용 ValidationError로 거부한다", async () => {
+    await expect(
+      createOrder(sellerA.id, {
+        serviceType: "PURCHASE",
+        inspectionRequested: true,
+        items: [
+          {
+            productUrl: "https://detail.1688.com/offer/300.html",
+            productName: "상품 C",
+            skus: [{ optionText: 123, quantity: 5 }] as never,
+          },
+        ],
+      }),
+    ).rejects.toThrow("SKU 입력 형식이 올바르지 않습니다");
+  });
+
   it("SKU 옵션명이 공백뿐이면 기본값으로 저장한다", async () => {
     const order = await createOrder(sellerA.id, {
       serviceType: "PURCHASE",

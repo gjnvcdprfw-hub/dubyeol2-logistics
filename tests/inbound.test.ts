@@ -266,6 +266,34 @@ describe("admin inbound route", () => {
   });
 
   it.each([
+    ["실입고 수량 공백", "countActual"],
+    ["하자 수량 공백", "defectCount"],
+  ])("SKU가 없는 검수 주문에서 %s이면 입고 사진을 저장하기 전에 400으로 거부한다", async (_label, targetKey) => {
+    await prisma.orderSkuLine.deleteMany({ where: { productLine: { orderId: orderInsp.id } } });
+    const form = new FormData();
+    form.set("orderId", orderInsp.id);
+    form.append("photos", new File(["a"], "a.jpg", { type: "image/jpeg" }));
+    form.set("countActual", "100");
+    form.set("defectCount", "0");
+    form.set("appearanceOk", "on");
+    form.set(targetKey, " ");
+
+    const { POST } = await importAdminInboundRoute();
+    const uploads = await import("@/lib/uploads");
+    const response = await POST(
+      new Request("http://localhost/api/admin/inbound", {
+        method: "POST",
+        body: form,
+      }),
+    );
+    const body = await response.text();
+
+    expect(response.status).toBe(400);
+    expect(body).toContain("검수 수치가 올바르지 않습니다");
+    expect(uploads.saveInboundPhoto).not.toHaveBeenCalled();
+  });
+
+  it.each([
     ["입고 수량 공백", "sku[0][inboundQuantity]", "SKU 입고 수량이 올바르지 않습니다"],
     ["하자 수량 공백", "sku[0][defectCount]", "SKU 하자 수량이 올바르지 않습니다"],
   ])("SKU %s이면 입고 사진을 저장하기 전에 400으로 거부한다", async (_label, targetKey, errorText) => {

@@ -12,13 +12,13 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: "권한이 없습니다" }, { status: 403 });
   try {
     const form = await req.formData();
-    const toCount = (value: FormDataEntryValue | null, field: string) => {
+    const toCount = (value: FormDataEntryValue | null, errorMessage: string) => {
       if (typeof value !== "string" || value.trim() === "") {
-        throw new ValidationError(`${field}이 올바르지 않습니다`);
+        throw new ValidationError(errorMessage);
       }
       const count = Number(value.trim());
       if (!Number.isInteger(count) || count < 0) {
-        throw new ValidationError(`${field}이 올바르지 않습니다`);
+        throw new ValidationError(errorMessage);
       }
       return count;
     };
@@ -37,8 +37,8 @@ export async function POST(req: Request) {
         throw new ValidationError("SKU 하자 수량이 올바르지 않습니다");
       return {
         skuLineId: String(form.get(`sku[${index}][id]`) ?? ""),
-        inboundQuantity: toCount(form.get(inboundQuantityKey), "SKU 입고 수량"),
-        defectCount: toCount(form.get(defectCountKey), "SKU 하자 수량"),
+        inboundQuantity: toCount(form.get(inboundQuantityKey), "SKU 입고 수량이 올바르지 않습니다"),
+        defectCount: toCount(form.get(defectCountKey), "SKU 하자 수량이 올바르지 않습니다"),
         inspectionPassed: form.get(`sku[${index}][inspectionPassed]`) === "on",
         inspectionNote: String(form.get(`sku[${index}][inspectionNote]`) ?? "") || undefined,
       };
@@ -90,14 +90,13 @@ export async function POST(req: Request) {
         throw new ValidationError("유료 검수 신청 건은 모든 SKU의 검수 결과를 함께 기록해야 합니다");
       }
     }
-    const countActual = Number(form.get("countActual"));
-    const defectCount = Number(form.get("defectCount") ?? 0);
+    let countActual = 0;
+    let defectCount = 0;
     if (hasInsp && !hasSkuLines) {
-      const validCount = (x: number) => Number.isInteger(x) && x >= 0;
       if (!form.has("countActual") || !form.has("defectCount"))
         throw new ValidationError("검수 수치가 올바르지 않습니다");
-      if (!validCount(countActual) || !validCount(defectCount))
-        throw new ValidationError("검수 수치가 올바르지 않습니다");
+      countActual = toCount(form.get("countActual"), "검수 수치가 올바르지 않습니다");
+      defectCount = toCount(form.get("defectCount"), "검수 수치가 올바르지 않습니다");
     }
     const photoPaths: string[] = [];
     for (const f of files) photoPaths.push(await saveInboundPhoto(f));

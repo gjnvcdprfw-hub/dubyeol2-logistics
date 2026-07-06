@@ -54,6 +54,9 @@ export function normalizeOrderLines(input: {
       sortOrder: productIndex,
       skuLines: item.skus.map((sku, skuIndex) => {
         if (!sku || typeof sku !== "object") throw new ValidationError("SKU 입력 형식이 올바르지 않습니다");
+        if (sku.optionText !== undefined && typeof sku.optionText !== "string") {
+          throw new ValidationError("SKU 입력 형식이 올바르지 않습니다");
+        }
         if (!Number.isInteger(sku.quantity) || sku.quantity < 1) {
           throw new ValidationError("수량은 1 이상이어야 합니다");
         }
