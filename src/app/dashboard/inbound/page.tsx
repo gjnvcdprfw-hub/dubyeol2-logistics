@@ -10,6 +10,14 @@ const ACTIVE_TABS = [
 ] as const;
 const PREP_TABS = ["발송완료", "에러제품", "반송대기"];
 
+function getOrderSummary(order: {
+  quantity: number;
+  productLines: { skuLines: { id: string }[] }[];
+}) {
+  const skuCount = order.productLines.reduce((sum, line) => sum + line.skuLines.length, 0);
+  return skuCount > 0 ? `${order.quantity}개 / ${skuCount} SKU` : `× ${order.quantity}`;
+}
+
 export default async function InboundPage({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
   const session = await getSession();
   if (!session.userId) redirect("/auth/login");
@@ -18,7 +26,13 @@ export default async function InboundPage({ searchParams }: { searchParams: Prom
   // 반드시 sellerId 스코프 — 다른 셀러 주문이 보이면 안 된다.
   const orders = await prisma.order.findMany({
     where: { sellerId: session.userId, status: activeTab.status },
-    include: { photos: true },
+    include: {
+      photos: true,
+      productLines: {
+        include: { skuLines: true },
+        orderBy: { sortOrder: "asc" },
+      },
+    },
     orderBy: { createdAt: "desc" },
   });
   return (
@@ -49,10 +63,10 @@ export default async function InboundPage({ searchParams }: { searchParams: Prom
       ) : (
         <ul className="space-y-3">
           {orders.map((o) => (
-            <li key={o.id} className="bg-surface rounded-[16px] shadow-card p-4 flex items-center justify-between gap-4">
+            <li key={o.id} className="bg-surface rounded-[16px] shadow-card p-4 flex items-start justify-between gap-4">
               <Link href={`/dashboard/orders/${o.id}`} className="block min-w-0">
-                <p className="font-medium text-body truncate">
-                  {o.productName} <span className="text-muted">× {o.quantity}</span>
+                <p className="font-medium text-body break-words">
+                  {o.productName} <span className="text-muted">· {getOrderSummary(o)}</span>
                 </p>
                 <p className="text-sm text-muted">
                   {new Date(o.createdAt).toLocaleDateString("ko-KR")} · 입고 사진 {o.photos.length}장

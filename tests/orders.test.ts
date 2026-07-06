@@ -1,4 +1,6 @@
+import { readFileSync } from "node:fs";
 import { describe, it, expect, beforeEach } from "vitest";
+import { afterEach, vi } from "vitest";
 import { prisma } from "../src/lib/db";
 import { registerSeller } from "../src/lib/auth";
 import { createOrder, listOrdersBySeller } from "../src/lib/orders";
@@ -6,10 +8,22 @@ import { createOrder, listOrdersBySeller } from "../src/lib/orders";
 let sellerA: { id: string }, sellerB: { id: string };
 
 beforeEach(async () => {
+  await prisma.walletTransaction.deleteMany();
+  await prisma.inboundPhoto.deleteMany();
+  await prisma.orderSkuLine.deleteMany();
+  await prisma.orderProductLine.deleteMany();
   await prisma.order.deleteMany();
   await prisma.user.deleteMany();
   sellerA = await registerSeller({ email: "a@a.com", password: "password1", contactName: "A" });
   sellerB = await registerSeller({ email: "b@b.com", password: "password1", contactName: "B" });
+});
+
+afterEach(() => {
+  vi.doUnmock("next/navigation");
+  vi.doUnmock("next/link");
+  vi.doUnmock("@/lib/session");
+  vi.resetModules();
+  vi.restoreAllMocks();
 });
 
 describe("createOrder", () => {
@@ -154,5 +168,24 @@ describe("listOrdersBySeller — 데이터 격리(절대 실패 금지)", () => 
     const listA = await listOrdersBySeller(sellerA.id);
     expect(listA).toHaveLength(1);
     expect(listA[0].productName).toBe("A상품");
+  });
+});
+
+describe("seller order UI", () => {
+  it("주문 접수 폼은 items 상태와 상품/SKU 추가 컨트롤을 가진다", () => {
+    const source = readFileSync("src/app/dashboard/orders/new/page.tsx", "utf8");
+
+    expect(source).toContain("items:");
+    expect(source).toContain("SKU 추가");
+    expect(source).toContain("상품 추가");
+    expect(source).toContain("Number(sku.quantity)");
+  });
+
+  it("주문 목록은 SKU 라인이 있으면 SKU 요약을, 없으면 기존 수량 표기를 유지한다", () => {
+    const source = readFileSync("src/app/dashboard/orders/page.tsx", "utf8");
+
+    expect(source).toContain("productLines.reduce");
+    expect(source).toContain("SKU");
+    expect(source).toContain("× ${order.quantity}");
   });
 });

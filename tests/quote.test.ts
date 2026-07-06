@@ -18,7 +18,10 @@ let otherSeller: { id: string };
 
 beforeEach(async () => {
   vi.restoreAllMocks();
+  await prisma.walletTransaction.deleteMany();
   await prisma.inboundPhoto.deleteMany();
+  await prisma.orderSkuLine.deleteMany();
+  await prisma.orderProductLine.deleteMany();
   await prisma.order.deleteMany();
   await prisma.user.deleteMany();
   seller = await registerSeller({ email: "quote-a@test.local", password: "password1", contactName: "Quote A" });

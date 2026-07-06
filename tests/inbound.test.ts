@@ -1,4 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
 import { prisma } from "../src/lib/db";
 import { registerSeller } from "../src/lib/auth";
 import { createOrder } from "../src/lib/orders";
@@ -9,7 +11,10 @@ let orderInsp: { id: string }, orderPlain: { id: string };
 
 beforeEach(async () => {
   vi.restoreAllMocks();
+  await prisma.walletTransaction.deleteMany();
   await prisma.inboundPhoto.deleteMany();
+  await prisma.orderSkuLine.deleteMany();
+  await prisma.orderProductLine.deleteMany();
   await prisma.order.deleteMany();
   await prisma.user.deleteMany();
   seller = await registerSeller({ email: "s@s.com", password: "password1", contactName: "S" });
@@ -258,5 +263,44 @@ describe("admin inbound route", () => {
 
     expect(response.status).toBe(400);
     expect(body).toContain("SKU 입고 수량이 올바르지 않습니다");
+  });
+});
+
+describe("seller inbound UI", () => {
+  it("입고 목록은 SKU 라인이 있으면 수량과 SKU 수를 함께 보여준다", async () => {
+    vi.resetModules();
+    vi.doMock("next/link", () => ({
+      default: ({ href, children, ...props }: { href: string; children: unknown }) =>
+        createElement("a", { href, ...props }, children),
+    }));
+    vi.doMock("@/lib/session", () => ({
+      getSession: vi.fn(async () => ({ userId: "seller-1" })),
+    }));
+    vi.doMock("@/lib/db", () => ({
+      prisma: {
+        order: {
+          findMany: vi.fn(async () => [
+            {
+              id: "order-1",
+              productName: "상품 A 외 1개 상품",
+              quantity: 95,
+              createdAt: new Date("2026-07-06T00:00:00.000Z"),
+              photos: [{ id: "photo-1" }],
+              inspectionRequested: true,
+              outerIssue: false,
+              status: "REQUESTED",
+              productLines: [
+                { skuLines: [{ id: "sku-1" }, { id: "sku-2" }, { id: "sku-3" }] },
+              ],
+            },
+          ]),
+        },
+      },
+    }));
+
+    const { default: InboundPage } = await import("../src/app/dashboard/inbound/page");
+    const html = renderToStaticMarkup(await InboundPage({ searchParams: Promise.resolve({ tab: "waiting" }) }));
+
+    expect(html).toContain("95개 / 3 SKU");
   });
 });
