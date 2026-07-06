@@ -67,3 +67,39 @@ describe("logout route", () => {
     vi.resetModules();
   });
 });
+
+describe("auth status route", () => {
+  it("로그인한 사용자의 역할만 공개 상태로 돌려준다", async () => {
+    vi.resetModules();
+    vi.doMock("@/lib/session", () => ({
+      getSessionUser: vi.fn(async () => ({ role: "SELLER" })),
+    }));
+
+    const { GET } = await import("../src/app/api/auth/me/route");
+    const response = await GET();
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body).toEqual({ authenticated: true, role: "SELLER" });
+
+    vi.doUnmock("@/lib/session");
+    vi.resetModules();
+  });
+
+  it("로그인하지 않은 사용자는 비로그인 상태만 돌려준다", async () => {
+    vi.resetModules();
+    vi.doMock("@/lib/session", () => ({
+      getSessionUser: vi.fn(async () => null),
+    }));
+
+    const { GET } = await import("../src/app/api/auth/me/route");
+    const response = await GET();
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body).toEqual({ authenticated: false });
+
+    vi.doUnmock("@/lib/session");
+    vi.resetModules();
+  });
+});

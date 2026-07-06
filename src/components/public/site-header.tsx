@@ -1,4 +1,5 @@
 import Link from "next/link";
+import HeaderAuthActions from "./header-auth-actions";
 
 const MENU = [
   { href: "/about", label: "회사소개" },
@@ -26,8 +27,7 @@ export default function SiteHeader() {
           ))}
         </nav>
         <div className="flex items-center gap-3 text-sm shrink-0">
-          <Link href="/auth/login" className="text-secondary">로그인</Link>
-          <Link href="/auth/register" className="bg-accent text-white font-semibold rounded-[12px] px-4 py-2">무료 가입하기</Link>
+          <HeaderAuthActions />
         </div>
       </div>
     </header>
