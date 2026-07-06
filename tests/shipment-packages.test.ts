@@ -315,4 +315,64 @@ describe("admin shipment package route", () => {
 
     expect(response.status).toBe(403);
   });
+
+  it("운영자 form route는 SKU 필드를 파싱해 포장단위를 저장하고 상세로 돌려보낸다", async () => {
+    const { order, red, blue } = await createShipmentRequestedSkuOrder(sellerA.id);
+    const { POST } = await importAdminPackageRoute("ADMIN");
+    const form = new FormData();
+    form.set("orderId", order.id);
+    form.set("marker", "BOX-2");
+    form.set("status", "READY");
+    form.set("weightKg", "9.75");
+    form.set("volumeCbm", "0.04");
+    form.set("memo", "form submit");
+    form.set("sku[0][id]", red.id);
+    form.set("sku[0][quantity]", "1");
+    form.set("sku[1][id]", blue.id);
+    form.set("sku[1][quantity]", "2");
+
+    const response = await POST(new Request("http://localhost/api/admin/shipments/packages", {
+      method: "POST",
+      body: form,
+    }));
+
+    const detail = await getAdminShipmentOrder(order.id);
+
+    expect(response.status).toBe(303);
+    expect(response.headers.get("location")).toBe(`http://localhost/admin/shipments/${order.id}?packed=1`);
+    expect(detail?.shipmentPackages).toHaveLength(1);
+    expect(detail?.shipmentPackages[0]).toMatchObject({
+      marker: "BOX-2",
+      status: "READY",
+      memo: "form submit",
+    });
+    expect(detail?.shipmentPackages[0].items).toHaveLength(2);
+    expect(detail?.shipmentPackages[0].items).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ skuLineId: red.id, quantity: 1 }),
+        expect.objectContaining({ skuLineId: blue.id, quantity: 2 }),
+      ]),
+    );
+  });
+
+  it("운영자가 아니면 form 박스 저장 route도 403으로 거부된다", async () => {
+    const { order, red } = await createShipmentRequestedSkuOrder(sellerA.id);
+    const { POST } = await importAdminPackageRoute("SELLER");
+    const form = new FormData();
+    form.set("orderId", order.id);
+    form.set("marker", "BOX-1");
+    form.set("status", "PACKED");
+    form.set("weightKg", "1");
+    form.set("volumeCbm", "0.01");
+    form.set("sku[0][id]", red.id);
+    form.set("sku[0][quantity]", "1");
+
+    const response = await POST(new Request("http://localhost/api/admin/shipments/packages", {
+      method: "POST",
+      body: form,
+    }));
+
+    expect(response.status).toBe(403);
+    expect(response.headers.get("location")).toBeNull();
+  });
 });

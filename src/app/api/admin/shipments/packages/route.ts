@@ -70,10 +70,7 @@ async function readPayload(req: Request) {
 export async function POST(req: Request) {
   const user = await getSessionUser();
   if (!user || user.role !== "ADMIN") {
-    if (wantsJson(req)) {
-      return NextResponse.json({ ok: false, error: "운영자 권한이 필요합니다" }, { status: 403 });
-    }
-    return NextResponse.redirect(new URL("/dashboard", req.url), 303);
+    return NextResponse.json({ ok: false, error: "운영자 권한이 필요합니다" }, { status: 403 });
   }
 
   let orderId = "";
