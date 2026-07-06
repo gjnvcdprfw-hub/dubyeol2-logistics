@@ -7,6 +7,67 @@ import { createOrder, listOrdersBySeller } from "../src/lib/orders";
 
 let sellerA: { id: string }, sellerB: { id: string };
 
+type ReactNodeLike =
+  | string
+  | number
+  | boolean
+  | null
+  | undefined
+  | { type?: unknown; props?: { children?: ReactNodeLike | ReactNodeLike[]; [key: string]: unknown } }
+  | ReactNodeLike[];
+
+function flattenElements(node: ReactNodeLike): Array<{ type?: unknown; props?: Record<string, unknown> }> {
+  if (!node || typeof node === "string" || typeof node === "number" || typeof node === "boolean") return [];
+  if (Array.isArray(node)) return node.flatMap((child) => flattenElements(child));
+  return [node, ...flattenElements(node.props?.children as ReactNodeLike)];
+}
+
+function textContent(node: ReactNodeLike): string {
+  if (node == null || typeof node === "boolean") return "";
+  if (typeof node === "string" || typeof node === "number") return String(node);
+  if (Array.isArray(node)) return node.map((child) => textContent(child)).join("");
+  return textContent(node.props?.children as ReactNodeLike);
+}
+
+function findByText(
+  node: ReactNodeLike,
+  type: string,
+  text: string,
+  occurrence = 0,
+): { type?: unknown; props?: Record<string, unknown> } {
+  const matches = flattenElements(node).filter(
+    (element) => element.type === type && textContent(element).replace(/\s+/g, " ").trim() === text,
+  );
+  if (!matches[occurrence]) throw new Error(`${type} "${text}" not found`);
+  return matches[occurrence];
+}
+
+function findRegion(
+  node: ReactNodeLike,
+  label: string,
+): { type?: unknown; props?: Record<string, unknown> } {
+  const match = flattenElements(node).find(
+    (element) => element.type === "section" && element.props?.role === "region" && element.props?.["aria-label"] === label,
+  );
+  if (!match) throw new Error(`region "${label}" not found`);
+  return match;
+}
+
+function findControlsByLabel(
+  node: ReactNodeLike,
+  labelText: string,
+): Array<{ type?: unknown; props?: Record<string, unknown> }> {
+  return flattenElements(node)
+    .filter((element) => element.type === "label" && textContent(element).replace(/\s+/g, " ").trim().startsWith(labelText))
+    .map((label) => {
+      const control = flattenElements(label.props?.children as ReactNodeLike).find(
+        (element) => element.type === "input" || element.type === "textarea",
+      );
+      if (!control) throw new Error(`control for label "${labelText}" not found`);
+      return control;
+    });
+}
+
 beforeEach(async () => {
   await prisma.walletTransaction.deleteMany();
   await prisma.inboundPhoto.deleteMany();
@@ -24,6 +85,7 @@ afterEach(() => {
   vi.doUnmock("@/lib/session");
   vi.resetModules();
   vi.restoreAllMocks();
+  vi.unstubAllGlobals();
 });
 
 describe("createOrder", () => {
@@ -172,13 +234,118 @@ describe("listOrdersBySeller — 데이터 격리(절대 실패 금지)", () => 
 });
 
 describe("seller order UI", () => {
-  it("주문 접수 폼은 items 상태와 상품/SKU 추가 컨트롤을 가진다", () => {
-    const source = readFileSync("src/app/dashboard/orders/new/page.tsx", "utf8");
+  it("주문 접수 폼은 여러 상품과 SKU를 입력해 숫자 수량 payload로 전송한다", async () => {
+    const push = vi.fn();
+    const fetchMock = vi.fn(async () => ({
+      json: async () => ({ ok: true }),
+    }));
+    const hookState: unknown[] = [];
+    let hookCursor = 0;
 
-    expect(source).toContain("items:");
-    expect(source).toContain("SKU 추가");
-    expect(source).toContain("상품 추가");
-    expect(source).toContain("Number(sku.quantity)");
+    function useStateMock<T>(initial: T) {
+      const stateIndex = hookCursor++;
+      if (!(stateIndex in hookState)) hookState[stateIndex] = initial;
+      const setState = (value: T | ((current: T) => T)) => {
+        hookState[stateIndex] =
+          typeof value === "function" ? (value as (current: T) => T)(hookState[stateIndex] as T) : value;
+      };
+      return [hookState[stateIndex] as T, setState] as const;
+    }
+
+    vi.resetModules();
+    vi.doMock("react", async () => {
+      const actual = await vi.importActual<typeof import("react")>("react");
+      return { ...actual, useState: useStateMock };
+    });
+    vi.doMock("next/navigation", () => ({
+      useRouter: () => ({ push }),
+    }));
+    vi.stubGlobal("fetch", fetchMock as typeof fetch);
+
+    const { default: NewOrderPage } = await import("../src/app/dashboard/orders/new/page");
+
+    const renderTree = () => {
+      hookCursor = 0;
+      return NewOrderPage();
+    };
+
+    let tree = renderTree();
+    (findByText(tree, "button", "상품 추가").props?.onClick as () => void)();
+    tree = renderTree();
+    (findByText(tree, "button", "SKU 추가").props?.onClick as () => void)();
+    tree = renderTree();
+
+    const product1 = findRegion(tree, "상품 1");
+    const product2 = findRegion(tree, "상품 2");
+
+    (findControlsByLabel(product1, "상품 링크")[0].props?.onChange as (event: { target: { value: string } }) => void)({
+      target: { value: "https://detail.1688.com/offer/100.html" },
+    });
+    tree = renderTree();
+    (findControlsByLabel(findRegion(tree, "상품 1"), "상품명")[0].props?.onChange as (event: { target: { value: string } }) => void)({
+      target: { value: "상품 A" },
+    });
+    tree = renderTree();
+    const product1AfterName = findRegion(tree, "상품 1");
+    (findControlsByLabel(product1AfterName, "옵션")[0].props?.onChange as (event: { target: { value: string } }) => void)({
+      target: { value: "빨강" },
+    });
+    (findControlsByLabel(product1AfterName, "수량")[0].props?.onChange as (event: { target: { value: string } }) => void)({
+      target: { value: "2" },
+    });
+    tree = renderTree();
+    const product1AfterFirstSku = findRegion(tree, "상품 1");
+    (findControlsByLabel(product1AfterFirstSku, "옵션")[1].props?.onChange as (event: { target: { value: string } }) => void)({
+      target: { value: "파랑" },
+    });
+    (findControlsByLabel(product1AfterFirstSku, "수량")[1].props?.onChange as (event: { target: { value: string } }) => void)({
+      target: { value: "3" },
+    });
+    tree = renderTree();
+    const product2AfterSku = findRegion(tree, "상품 2");
+    (findControlsByLabel(product2AfterSku, "상품 링크")[0].props?.onChange as (event: { target: { value: string } }) => void)({
+      target: { value: "https://detail.1688.com/offer/200.html" },
+    });
+    (findControlsByLabel(product2AfterSku, "상품명")[0].props?.onChange as (event: { target: { value: string } }) => void)({
+      target: { value: "상품 B" },
+    });
+    (findControlsByLabel(product2AfterSku, "옵션")[0].props?.onChange as (event: { target: { value: string } }) => void)({
+      target: { value: "L" },
+    });
+    (findControlsByLabel(product2AfterSku, "수량")[0].props?.onChange as (event: { target: { value: string } }) => void)({
+      target: { value: "4" },
+    });
+    tree = renderTree();
+
+    await (flattenElements(tree).find((element) => element.type === "form")?.props?.onSubmit as (event: {
+      preventDefault: () => void;
+    }) => Promise<void>)({
+      preventDefault() {},
+    });
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+
+    const [, requestInit] = fetchMock.mock.calls[0];
+    const body = JSON.parse(String(requestInit?.body));
+
+    expect(body.items).toEqual([
+      {
+        productUrl: "https://detail.1688.com/offer/100.html",
+        productName: "상품 A",
+        skus: [
+          { optionText: "빨강", quantity: 2 },
+          { optionText: "파랑", quantity: 3 },
+        ],
+      },
+      {
+        productUrl: "https://detail.1688.com/offer/200.html",
+        productName: "상품 B",
+        skus: [{ optionText: "L", quantity: 4 }],
+      },
+    ]);
+    expect(body.items[0].skus.every((sku: { quantity: unknown }) => typeof sku.quantity === "number")).toBe(true);
+    expect(body.items[1].skus.every((sku: { quantity: unknown }) => typeof sku.quantity === "number")).toBe(true);
+    expect(push).toHaveBeenCalledWith("/dashboard/orders");
   });
 
   it("주문 목록은 SKU 라인이 있으면 SKU 요약을, 없으면 기존 수량 표기를 유지한다", () => {

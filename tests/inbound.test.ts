@@ -303,4 +303,39 @@ describe("seller inbound UI", () => {
 
     expect(html).toContain("95개 / 3 SKU");
   });
+
+  it("입고 목록은 SKU 라인이 없는 legacy 주문이면 기존 수량 표기를 유지한다", async () => {
+    vi.resetModules();
+    vi.doMock("next/link", () => ({
+      default: ({ href, children, ...props }: { href: string; children: unknown }) =>
+        createElement("a", { href, ...props }, children),
+    }));
+    vi.doMock("@/lib/session", () => ({
+      getSession: vi.fn(async () => ({ userId: "seller-1" })),
+    }));
+    vi.doMock("@/lib/db", () => ({
+      prisma: {
+        order: {
+          findMany: vi.fn(async () => [
+            {
+              id: "order-legacy-1",
+              productName: "레거시 상품",
+              quantity: 50,
+              createdAt: new Date("2026-07-06T00:00:00.000Z"),
+              photos: [{ id: "photo-1" }],
+              inspectionRequested: false,
+              outerIssue: null,
+              status: "REQUESTED",
+              productLines: [],
+            },
+          ]),
+        },
+      },
+    }));
+
+    const { default: InboundPage } = await import("../src/app/dashboard/inbound/page");
+    const html = renderToStaticMarkup(await InboundPage({ searchParams: Promise.resolve({ tab: "waiting" }) }));
+
+    expect(html).toContain("× 50");
+  });
 });

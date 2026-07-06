@@ -116,7 +116,12 @@ export default function NewOrderPage() {
       <form onSubmit={submit} className="bg-surface rounded-[27px] shadow-[0_7px_30px_rgba(90,114,123,0.11)] p-6 space-y-4">
         <div className="space-y-4">
           {form.items.map((item, itemIndex) => (
-            <section key={`item-${itemIndex}`} className="rounded-[16px] border border-black/5 bg-surface-alt p-4 space-y-4">
+            <section
+              key={`item-${itemIndex}`}
+              role="region"
+              aria-label={`상품 ${itemIndex + 1}`}
+              className="rounded-[16px] border border-black/5 bg-surface-alt p-4 space-y-4"
+            >
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <p className="text-sm font-semibold text-heading">상품 {itemIndex + 1}</p>
