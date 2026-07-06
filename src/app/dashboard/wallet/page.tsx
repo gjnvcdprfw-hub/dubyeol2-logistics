@@ -68,7 +68,7 @@ export default async function WalletPage({
             <input
               type="number"
               name="amountKrw"
-              min="1"
+              min="1000"
               step="1000"
               required
               placeholder="충전 요청 금액"

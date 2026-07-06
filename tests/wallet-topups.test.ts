@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { prisma } from "../src/lib/db";
 import { registerSeller } from "../src/lib/auth";
@@ -240,6 +241,14 @@ describe("seller wallet top-up route", () => {
 
     expect(response.status).toBe(303);
     expect(response.headers.get("location")).toBe("http://localhost/dashboard/wallet?topup=requested");
+  });
+
+  it("셀러 충전 요청 폼은 1000원 단위 금액을 브라우저 기본 유효성에서 허용한다", () => {
+    const source = readFileSync("src/app/dashboard/wallet/page.tsx", "utf8");
+
+    expect(source).toContain('min="1000"');
+    expect(source).toContain('step="1000"');
+    expect(source).not.toContain('min="1"');
   });
 });
 
