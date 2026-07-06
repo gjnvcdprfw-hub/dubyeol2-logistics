@@ -45,6 +45,7 @@ export default async function OrderDetailPage({
   const hasInboundEvidence = order.status === "RECEIVED" || order.status === "SHIPMENT_REQUESTED";
   const quotedSkuRows = order.productLines.flatMap((line) =>
     line.skuLines.map((sku) => ({
+      key: sku.id || `${line.id}:${sku.optionText}`,
       label: `${line.productName} / ${sku.optionText}`,
       quantity: sku.quantity,
       unitPriceFen: sku.quoteUnitPriceFen,
@@ -157,8 +158,8 @@ export default async function OrderDetailPage({
                       <span className="text-xs text-muted">상품가 + 중국배송비 + 검수비</span>
                     </div>
                     <div className="space-y-3">
-                      {skuSettlement.lines.map((line) => (
-                        <div key={line.label} className="rounded-lg bg-white px-4 py-3 text-sm space-y-1.5">
+                      {skuSettlement.lines.map((line, index) => (
+                        <div key={quotedSkuRows[index]?.key ?? `${line.label}-${index}`} className="rounded-lg bg-white px-4 py-3 text-sm space-y-1.5">
                           <div className="flex justify-between gap-3">
                             <span className="font-medium text-body">{line.label}</span>
                             <span className="text-body">{yuan(line.totalFen)} <span className="text-muted">({krw(line.totalKrw)})</span></span>

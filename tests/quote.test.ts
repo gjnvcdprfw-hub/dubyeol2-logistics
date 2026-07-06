@@ -1,13 +1,75 @@
-import { describe, it, expect } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { computeQuote } from "../src/lib/quote";
 import { computeSkuSettlement } from "../src/lib/sku-quote";
 import { RATES } from "../src/lib/rates";
+import { prisma } from "../src/lib/db";
+import { registerSeller } from "../src/lib/auth";
+import { createOrder } from "../src/lib/orders";
+import { recordInbound } from "../src/lib/inbound";
 
 const base = {
   quantity: 100, serviceType: "PURCHASE" as const, inspectionRequested: true,
   unitPriceFen: 2000, cnShippingFen: 3000, weightGrams: 12000, volumeCm3: 80000,
   exchangeRateX100: 19000, shippingMethod: "SEA" as const,
 };
+
+let seller: { id: string };
+let otherSeller: { id: string };
+
+beforeEach(async () => {
+  vi.restoreAllMocks();
+  await prisma.inboundPhoto.deleteMany();
+  await prisma.order.deleteMany();
+  await prisma.user.deleteMany();
+  seller = await registerSeller({ email: "quote-a@test.local", password: "password1", contactName: "Quote A" });
+  otherSeller = await registerSeller({ email: "quote-b@test.local", password: "password1", contactName: "Quote B" });
+});
+
+afterEach(() => {
+  vi.doUnmock("@/lib/session");
+  vi.resetModules();
+  vi.restoreAllMocks();
+});
+
+async function importAdminQuoteRoute() {
+  vi.resetModules();
+  vi.doMock("@/lib/session", () => ({
+    getSessionUser: vi.fn(async () => ({ id: "admin-1", role: "ADMIN" })),
+  }));
+  return import("../src/app/api/admin/quote/route");
+}
+
+async function createReceivedSkuOrder(ownerId: string) {
+  const order = await createOrder(ownerId, {
+    serviceType: "PURCHASE",
+    inspectionRequested: false,
+    items: [
+      {
+        productUrl: "https://quote-route.test/item-1",
+        productName: "SKU 주문",
+        skus: [
+          { optionText: "빨강", quantity: 2 },
+          { optionText: "파랑", quantity: 3 },
+        ],
+      },
+    ],
+  });
+  await recordInbound(order.id, { photoPaths: ["/uploads/a.jpg"], outerIssue: false });
+  return prisma.order.findUniqueOrThrow({
+    where: { id: order.id },
+    include: { productLines: { include: { skuLines: true }, orderBy: { sortOrder: "asc" } } },
+  });
+}
+
+function createBaseQuoteForm(orderId: string) {
+  const form = new FormData();
+  form.set("orderId", orderId);
+  form.set("weightKg", "12");
+  form.set("volumeCbm", "0.08");
+  form.set("exchangeRate", "190");
+  form.set("shippingMethod", "SEA");
+  return form;
+}
 
 describe("computeQuote — 00-customer-outcome QA 예시", () => {
   it("항목별 금액이 요율표와 일치한다 (보온병 ×100, 12kg/0.08CBM, 해운)", () => {
@@ -84,5 +146,93 @@ describe("computeSkuSettlement", () => {
     expect(result.lines[1].productFen).toBe(54000);
     expect(result.totalFen).toBeGreaterThan(104000);
     expect(result.totalKrw).toBe(Math.round((result.totalFen * 19000) / 10000));
+  });
+});
+
+describe("admin quote route", () => {
+  it("SKU 행이 있는 주문에서 일부 SKU 견적이 빠지면 400으로 거부한다", async () => {
+    const order = await createReceivedSkuOrder(seller.id);
+    const [firstSku] = order.productLines[0].skuLines;
+    const form = createBaseQuoteForm(order.id);
+    form.set("sku[0][id]", firstSku.id);
+    form.set("sku[0][unitPriceYuan]", "10");
+    form.set("sku[0][cnShippingYuan]", "2");
+
+    const { POST } = await importAdminQuoteRoute();
+    const response = await POST(
+      new Request("http://localhost/api/admin/quote", {
+        method: "POST",
+        body: form,
+      }),
+    );
+    const body = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(body.error).toBe("모든 SKU의 견적을 함께 입력해 주세요");
+  });
+
+  it("다른 주문의 SKU id를 끼워 넣으면 400으로 거부한다", async () => {
+    const order = await createReceivedSkuOrder(seller.id);
+    const otherOrder = await createReceivedSkuOrder(otherSeller.id);
+    const [orderSku] = order.productLines[0].skuLines;
+    const [wrongSku] = otherOrder.productLines[0].skuLines;
+    const form = createBaseQuoteForm(order.id);
+    form.set("sku[0][id]", orderSku.id);
+    form.set("sku[0][unitPriceYuan]", "10");
+    form.set("sku[0][cnShippingYuan]", "2");
+    form.set("sku[1][id]", wrongSku.id);
+    form.set("sku[1][unitPriceYuan]", "11");
+    form.set("sku[1][cnShippingYuan]", "3");
+
+    const { POST } = await importAdminQuoteRoute();
+    const response = await POST(
+      new Request("http://localhost/api/admin/quote", {
+        method: "POST",
+        body: form,
+      }),
+    );
+    const body = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(body.error).toBe("주문에 속한 SKU만 견적을 입력할 수 있습니다");
+  });
+
+  it("주문 견적과 SKU 견적 저장을 같은 prisma.$transaction 경계에서 처리한다", async () => {
+    const order = await createReceivedSkuOrder(seller.id);
+    const [firstSku, secondSku] = order.productLines[0].skuLines;
+    const form = createBaseQuoteForm(order.id);
+    form.set("sku[0][id]", firstSku.id);
+    form.set("sku[0][unitPriceYuan]", "10");
+    form.set("sku[0][cnShippingYuan]", "2");
+    form.set("sku[1][id]", secondSku.id);
+    form.set("sku[1][unitPriceYuan]", "11");
+    form.set("sku[1][cnShippingYuan]", "3");
+
+    const tx = {
+      order: {
+        update: vi.fn(async () => order),
+      },
+      orderSkuLine: {
+        update: vi.fn()
+          .mockRejectedValueOnce(new Error("sku update failed")),
+      },
+    };
+    const transactionSpy = vi.spyOn(prisma, "$transaction").mockImplementation(
+      async (callback: Parameters<typeof prisma.$transaction>[0]) =>
+        (callback as (client: typeof tx) => Promise<unknown>)(tx),
+    );
+
+    const { POST } = await importAdminQuoteRoute();
+    const response = await POST(
+      new Request("http://localhost/api/admin/quote", {
+        method: "POST",
+        body: form,
+      }),
+    );
+
+    expect(response.status).toBe(500);
+    expect(transactionSpy).toHaveBeenCalledTimes(1);
+    expect(tx.order.update).toHaveBeenCalledTimes(1);
+    expect(tx.orderSkuLine.update).toHaveBeenCalledTimes(1);
   });
 });

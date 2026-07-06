@@ -78,16 +78,26 @@ export async function POST(req: Request) {
       unitPriceFen, cnShippingFen, weightGrams, volumeCm3, exchangeRateX100, shippingMethod,
     });
 
-    await prisma.order.update({
-      where: { id: orderId },
-      data: { quoteUnitPriceFen: unitPriceFen, quoteCnShippingFen: cnShippingFen, quoteWeightGrams: weightGrams, quoteVolumeCm3: volumeCm3, quoteExchangeRateX100: exchangeRateX100, quoteShippingMethod: shippingMethod, quotedAt: new Date() },
-    });
-    for (const sku of skuQuotes) {
-      await prisma.orderSkuLine.update({
-        where: { id: sku.id },
-        data: { quoteUnitPriceFen: sku.unitPriceFen, quoteCnShippingFen: sku.cnShippingFen },
+    await prisma.$transaction(async (tx) => {
+      await tx.order.update({
+        where: { id: orderId },
+        data: {
+          quoteUnitPriceFen: unitPriceFen,
+          quoteCnShippingFen: cnShippingFen,
+          quoteWeightGrams: weightGrams,
+          quoteVolumeCm3: volumeCm3,
+          quoteExchangeRateX100: exchangeRateX100,
+          quoteShippingMethod: shippingMethod,
+          quotedAt: new Date(),
+        },
       });
-    }
+      for (const sku of skuQuotes) {
+        await tx.orderSkuLine.update({
+          where: { id: sku.id },
+          data: { quoteUnitPriceFen: sku.unitPriceFen, quoteCnShippingFen: sku.cnShippingFen },
+        });
+      }
+    });
     return NextResponse.redirect(new URL("/admin/orders?quoted=1", req.url), 303);
   } catch (e) {
     if (e instanceof ValidationError)
