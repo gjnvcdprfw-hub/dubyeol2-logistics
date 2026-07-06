@@ -12,6 +12,16 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: "권한이 없습니다" }, { status: 403 });
   try {
     const form = await req.formData();
+    const toCount = (value: FormDataEntryValue | null, field: string) => {
+      if (typeof value !== "string" || value.trim() === "") {
+        throw new ValidationError(`${field}이 올바르지 않습니다`);
+      }
+      const count = Number(value.trim());
+      if (!Number.isInteger(count) || count < 0) {
+        throw new ValidationError(`${field}이 올바르지 않습니다`);
+      }
+      return count;
+    };
     const orderId = String(form.get("orderId") ?? "");
     const skuIndexes = Array.from(new Set(
       Array.from(form.keys())
@@ -27,8 +37,8 @@ export async function POST(req: Request) {
         throw new ValidationError("SKU 하자 수량이 올바르지 않습니다");
       return {
         skuLineId: String(form.get(`sku[${index}][id]`) ?? ""),
-        inboundQuantity: Number(form.get(inboundQuantityKey)),
-        defectCount: Number(form.get(defectCountKey)),
+        inboundQuantity: toCount(form.get(inboundQuantityKey), "SKU 입고 수량"),
+        defectCount: toCount(form.get(defectCountKey), "SKU 하자 수량"),
         inspectionPassed: form.get(`sku[${index}][inspectionPassed]`) === "on",
         inspectionNote: String(form.get(`sku[${index}][inspectionNote]`) ?? "") || undefined,
       };

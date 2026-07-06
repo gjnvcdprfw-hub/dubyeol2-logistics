@@ -265,6 +265,48 @@ describe("admin inbound route", () => {
     expect(body).toContain("SKU 입고 수량이 올바르지 않습니다");
   });
 
+  it.each([
+    ["입고 수량 공백", "sku[0][inboundQuantity]", "SKU 입고 수량이 올바르지 않습니다"],
+    ["하자 수량 공백", "sku[0][defectCount]", "SKU 하자 수량이 올바르지 않습니다"],
+  ])("SKU %s이면 입고 사진을 저장하기 전에 400으로 거부한다", async (_label, targetKey, errorText) => {
+    const order = await createOrder(seller.id, {
+      serviceType: "PURCHASE",
+      inspectionRequested: true,
+      items: [{
+        productUrl: "https://route-test-blank-count.com",
+        productName: "라우트 검수품",
+        skus: [{ optionText: "빨강", quantity: 3 }],
+      }],
+    });
+    const saved = await prisma.order.findUniqueOrThrow({
+      where: { id: order.id },
+      include: { productLines: { include: { skuLines: true } } },
+    });
+    const sku = saved.productLines[0].skuLines[0];
+    const form = new FormData();
+    form.set("orderId", order.id);
+    form.append("photos", new File(["a"], "a.jpg", { type: "image/jpeg" }));
+    form.set("sku[0][id]", sku.id);
+    form.set("sku[0][inboundQuantity]", "3");
+    form.set("sku[0][defectCount]", "0");
+    form.set("sku[0][inspectionPassed]", "on");
+    form.set(targetKey, " ");
+
+    const { POST } = await importAdminInboundRoute();
+    const uploads = await import("@/lib/uploads");
+    const response = await POST(
+      new Request("http://localhost/api/admin/inbound", {
+        method: "POST",
+        body: form,
+      }),
+    );
+    const body = await response.text();
+
+    expect(response.status).toBe(400);
+    expect(body).toContain(errorText);
+    expect(uploads.saveInboundPhoto).not.toHaveBeenCalled();
+  });
+
   it("잘못된 SKU 입력이면 입고 사진을 저장하기 전에 400으로 거부한다", async () => {
     const order = await createOrder(seller.id, {
       serviceType: "PURCHASE",
