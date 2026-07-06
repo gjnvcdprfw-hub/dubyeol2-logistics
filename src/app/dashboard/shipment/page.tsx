@@ -29,10 +29,15 @@ function formatVolume(volumeCm3: number) {
   return `${(volumeCm3 / 1_000_000).toLocaleString("ko-KR", { maximumFractionDigits: 4 })}CBM`;
 }
 
+function formatPackageSkuSummary(items: { quantity: number }[]) {
+  const totalQuantity = items.reduce((sum, item) => sum + item.quantity, 0);
+  return `SKU ${items.length}종 / 총 ${totalQuantity}개`;
+}
+
 export default async function ShipmentPage() {
   const session = await getSession();
   if (!session.userId) redirect("/auth/login");
-  const orders = await listOrdersBySeller(session.userId);
+  const orders = await listOrdersBySeller(session.userId, { includeShipmentPackages: true });
   const shipmentOrders = orders.filter((o) => o.status === "SHIPMENT_REQUESTED");
 
   return (
@@ -82,7 +87,7 @@ export default async function ShipmentPage() {
                           <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs">
                             <span>무게 {formatWeight(pkg.weightGrams)}</span>
                             <span>부피 {formatVolume(pkg.volumeCm3)}</span>
-                            <span>SKU {pkg.items.length}종</span>
+                            <span>{formatPackageSkuSummary(pkg.items)}</span>
                           </div>
                         </li>
                       ))}

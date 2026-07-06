@@ -3,7 +3,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { prisma } from "../src/lib/db";
 import { registerSeller } from "../src/lib/auth";
-import { createOrder } from "../src/lib/orders";
+import { createOrder, listOrdersBySeller } from "../src/lib/orders";
 import { recordInbound } from "../src/lib/inbound";
 import { requestShipmentWithWallet, recordWalletCredit } from "../src/lib/wallet";
 import {
@@ -289,6 +289,25 @@ describe("shipment packages domain", () => {
     expect(own[0].items[0].skuLineId).toBe(red.id);
   });
 
+  it("셀러 주문 조회는 기본으로 포장단위를 포함하지 않고 출고 화면에서만 opt-in 한다", async () => {
+    const { order, red } = await createShipmentRequestedSkuOrder(sellerA.id);
+    await saveShipmentPackage(order.id, {
+      marker: "BOX-1",
+      status: "PACKED",
+      weightKg: 12.5,
+      volumeCbm: 0.08,
+      items: [{ skuLineId: red.id, quantity: 1 }],
+    });
+
+    const defaultList = await listOrdersBySeller(sellerA.id);
+    const packageList = await listOrdersBySeller(sellerA.id, { includeShipmentPackages: true });
+
+    expect(defaultList).toHaveLength(1);
+    expect("shipmentPackages" in defaultList[0]).toBe(false);
+    expect(packageList[0].shipmentPackages).toHaveLength(1);
+    expect(packageList[0].shipmentPackages[0].items[0].skuLine.optionText).toBe("빨강");
+  });
+
   it("운영자는 출고요청 주문 목록과 주문별 포장단위를 함께 본다", async () => {
     const { order, red } = await createShipmentRequestedSkuOrder(sellerA.id);
     await saveShipmentPackage(order.id, {
@@ -314,22 +333,36 @@ describe("shipment packages domain", () => {
     expect(getShipmentPackageStatusLabel("UNKNOWN")).toBe("UNKNOWN");
   });
 
-  it("셀러 출고관리 화면은 박스별 구성과 상태를 표시한다", async () => {
-    const { order, red } = await createShipmentRequestedSkuOrder(sellerA.id);
+  it("셀러 출고관리 화면은 포장단위 개수와 SKU 요약을 표시한다", async () => {
+    const { order, red, blue } = await createShipmentRequestedSkuOrder(sellerA.id);
     await saveShipmentPackage(order.id, {
       marker: "BOX-1",
       status: "PACKED",
       weightKg: 12.5,
       volumeCbm: 0.08,
-      items: [{ skuLineId: red.id, quantity: 1 }],
+      items: [
+        { skuLineId: red.id, quantity: 1 },
+        { skuLineId: blue.id, quantity: 2 },
+      ],
     });
 
     const html = await renderSellerShipmentPageFor(sellerA.id);
 
+    expect(html).toContain("포장단위 1개");
     expect(html).toContain("BOX-1");
     expect(html).toContain("포장완료");
     expect(html).toContain("12.5kg");
     expect(html).toContain("0.08CBM");
+    expect(html).toContain("SKU 2종 / 총 3개");
+  });
+
+  it("셀러 출고관리 화면은 포장단위가 없으면 빈 상태를 표시한다", async () => {
+    await createShipmentRequestedSkuOrder(sellerA.id);
+
+    const html = await renderSellerShipmentPageFor(sellerA.id);
+
+    expect(html).toContain("포장단위 0개");
+    expect(html).toContain("포장단위가 아직 배정되지 않았습니다");
   });
 
   it("셀러 주문 상세 화면은 포장단위와 패킹리스트 기초 정보를 표시한다", async () => {
@@ -356,7 +389,18 @@ describe("shipment packages domain", () => {
     expect(html).toContain("2차 검수 완료");
     expect(html).toContain("빨강");
     expect(html).toContain("파랑");
+    expect(html).toMatch(/빨강[\s\S]*?1개/);
+    expect(html).toMatch(/파랑[\s\S]*?2개/);
     expect(html).toContain("정식 패킹리스트 PDF와 실제 배송조회는 아직 연결하지 않았습니다.");
+  });
+
+  it("셀러 주문 상세 화면은 출고요청 상태가 아니면 포장단위 섹션을 숨긴다", async () => {
+    const order = await createQuotedOrderWithoutShipmentRequest(sellerA.id);
+    const html = await renderSellerOrderDetailPageFor(sellerA.id, order.id);
+
+    expect(html).not.toContain("포장단위 / 패킹리스트 기초");
+    expect(html).not.toContain("포장단위가 아직 배정되지 않았습니다");
+    expect(html).not.toContain("정식 패킹리스트 PDF와 실제 배송조회는 아직 연결하지 않았습니다.");
   });
 });
 
