@@ -14,10 +14,10 @@
 
 | Builder Task | 고객에게 생기는 변화 | 완료 기준 | 주요 파일 | 상태 |
 |---|---|---|---|---|
-| Task 1 — 충전 요청 모델·도메인 | 충전 요청이 잔액과 분리되어 대기/승인/거절 상태로 남는다 | 승인 전 잔액 미반영, 승인 시 원장 1건, 중복 승인 차단, 거절 시 잔액 미변경 | `prisma/schema.prisma`, `src/lib/wallet-topups.ts`, `src/lib/wallet.ts`, `tests/wallet-topups.test.ts` | 준비 전 |
-| Task 2 — 셀러 충전 요청 API·화면 | 셀러가 예치금 관리 화면에서 충전 요청을 남기고 상태를 본다 | 100,000원 요청 후 상태는 충전 대기, 잔액은 그대로, 자기 요청만 보임 | `src/app/api/wallet/topups/route.ts`, `src/app/dashboard/wallet/page.tsx`, `src/app/dashboard/page.tsx`, `tests/wallet-topups.test.ts` | 준비 전 |
-| Task 3 — 운영자 승인/거절 API·화면 | 운영자가 충전 대기 요청을 승인/거절한다 | 승인 시 잔액·원장 증가, 거절 시 미증가, 운영자 아닌 사용자는 처리 불가 | `src/app/api/admin/wallet-topups/[id]/approve/route.ts`, `src/app/api/admin/wallet-topups/[id]/reject/route.ts`, `src/app/admin/wallet-topups/page.tsx`, `src/app/admin/layout.tsx`, `tests/wallet-topups.test.ts` | 준비 전 |
-| Task 4 — Phase 10 검증·감리 준비 | 실제 화면 한 건으로 충전 요청→승인→원장 확인을 증명한다 | 전체 테스트, build, diff check, 디자인 lint, live QA, 외부감리 request 준비 | `phase-packets/phase-010/03-verification.md`, `external-audit/pending/request-phase-010.json`, screenshots | 준비 전 |
+| Task 1 — 충전 요청 모델·도메인 | 충전 요청이 잔액과 분리되어 대기/승인/거절 상태로 남는다 | 승인 전 잔액 미반영, 승인 시 원장 1건, 중복 승인 차단, 거절 시 잔액 미변경 | `prisma/schema.prisma`, `src/lib/wallet-topups.ts`, `src/lib/wallet.ts`, `tests/wallet-topups.test.ts` | 완료 |
+| Task 2 — 셀러 충전 요청 API·화면 | 셀러가 예치금 관리 화면에서 충전 요청을 남기고 상태를 본다 | 100,000원 요청 후 상태는 충전 대기, 잔액은 그대로, 자기 요청만 보임 | `src/app/api/wallet/topups/route.ts`, `src/app/dashboard/wallet/page.tsx`, `src/app/dashboard/page.tsx`, `tests/wallet-topups.test.ts` | 완료 |
+| Task 3 — 운영자 승인/거절 API·화면 | 운영자가 충전 대기 요청을 승인/거절한다 | 승인 시 잔액·원장 증가, 거절 시 미증가, 운영자 아닌 사용자는 처리 불가 | `src/app/api/admin/wallet-topups/[id]/approve/route.ts`, `src/app/api/admin/wallet-topups/[id]/reject/route.ts`, `src/app/admin/wallet-topups/page.tsx`, `src/app/admin/layout.tsx`, `tests/wallet-topups.test.ts` | 완료 |
+| Task 4 — Phase 10 검증·감리 준비 | 실제 화면 한 건으로 충전 요청→승인→원장 확인을 증명한다 | 전체 테스트, build, diff check, 디자인 lint, live QA, 외부감리 request 준비 | `phase-packets/phase-010/03-verification.md`, `external-audit/pending/request-phase-010.json`, screenshots | 완료 |
 
 ## 3. 이번 Phase에서 하지 않는 것
 

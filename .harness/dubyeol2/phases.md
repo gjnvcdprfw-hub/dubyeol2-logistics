@@ -1,6 +1,6 @@
 # phases.md
 
-상태: PM 작성 (2026-07-06, Phase 9 완료·Phase 10 준비)
+상태: PM 작성 (2026-07-06, Phase 10 완료·Phase 11 준비)
 
 이 문서는 `feature.md`의 고객 약속을 달성하기 위한 phase 계획이다. 대표님 승인 대상은 아니다. 한 기능에도 여러 phase가 나올 수 있다.
 
@@ -42,7 +42,7 @@ Team Leader는 Superpowers 공식 workflow를 따르고, 구현은 `superpowers:
 | 7 | (Feature 4) 견적 후 출고 요청·예치금 차감·출고 상태 확인 | 셀러 주문 상세 · 출고관리 · 예치금 관리 · 대시보드 홈 | 견적 확인 뒤 고객이 "보내달라" 결정을 끝낸다 | **완료·머지** (Claude 감리 PASS) | 완결 — Feature 4 종료 |
 | 8 | (보류) 우리 회사용 수정·정식 운영 전환 | 전체 | 복사 기준판을 고객에게 보여도 되는 우리 회사 서비스로 바꾼다 | **보류** (대표님: "8은 일단 보류") | 보류 |
 | 9 | (Feature 5) 상품/SKU 라인 구조 | 주문 접수 · 운영자 입고/검수 · 견적 | 상품별·SKU별 작업과 정산이 섞이지 않게 한다 | **완료·로컬 main 반영** (Claude 감리 PASS) | 완결 |
-| 10 | (Feature 5) 예치금 충전 신청·운영자 입금 확인 | 예치금 관리 · 운영자 | 고객이 출고 전에 돈을 넣고, 운영자가 확인해 잔액을 맞춘다 | Team Leader plan 완료 | `phase-packets/phase-010/02-plan.md` |
+| 10 | (Feature 5) 예치금 충전 신청·운영자 입금 확인 | 예치금 관리 · 운영자 | 고객이 출고 전에 돈을 넣고, 운영자가 확인해 잔액을 맞춘다 | **완료·로컬 main 반영** (Claude 감리 PASS) | 완결 |
 | 11 | (Feature 5) 출고요청·포장단위 마커·패킹리스트 기초 | 출고관리 · 주문 상세 · 운영자 | 출고 때 박스별 SKU 구성과 패킹리스트 근거를 남긴다 | PM 초안 | `phase-packets/phase-011/00-customer-outcome.md` |
 
 ## 3. Phase 상세
@@ -70,6 +70,7 @@ Team Leader는 Superpowers 공식 workflow를 따르고, 구현은 `superpowers:
 - 이번 phase에서 되는 것: 충전 요청, 충전 대기/승인/거절, 운영자 확인, 잔액 반영, 예치금 원장 기록.
 - 이번 phase에서 안 하는 것: 실계좌 실제값 노출, PG/간편결제, 은행 API, 자동 입금 확인, 정식 운영 전환.
 - 완료 기준: 셀러 A가 100,000원 충전을 요청하고 운영자가 승인하면 잔액과 원장·대시보드가 모두 같은 결과를 보여준다.
+- 완료 결과: Machine Check PASS, Claude 교차 외부감리 PASS, `phase-packets/phase-010/04-completion.md` 작성 완료.
 - Phase packet: `phase-packets/phase-010/`
 
 ### Phase 11

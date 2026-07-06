@@ -10,27 +10,27 @@
 
 - 프로젝트: 물류 — 사업자(쿠팡·11번가·1688 셀러) 대상 중국→한국 통합 물류 플랫폼. 벤치마크: 두리무역(duly.co.kr)
 - 실행 엔진 모드: **B — 빌드=Codex** (2026-07-05 대표님 선언, engine.md 참조. Claude 복귀 시 "모드 A로 복귀" 선언 → 감리 대기 큐 일괄 처리)
-- 두별2 적용 상태: Feature 1 완료·머지 → Feature 2 완료·머지 → **Feature 3 Phase 6 완료·로컬 main 머지 완료** → **Feature 4 Phase 7 완료·로컬 main 머지 완료** → **Feature 5 Phase 9 완료**
-- 현재 Phase: **Phase 10 — 예치금 충전 신청·운영자 입금 확인** (Phase 8 정식 운영 전환은 대표님 지시로 보류)
-- 현재 단계: 단계 8/16 — Builder 실행 준비
-- 진행자: Team Leader (Codex)
-- 진행상태: `superpowers:subagent-driven-development` 준비
+- 두별2 적용 상태: Feature 1 완료·머지 → Feature 2 완료·머지 → **Feature 3 Phase 6 완료·로컬 main 머지 완료** → **Feature 4 Phase 7 완료·로컬 main 머지 완료** → **Feature 5 Phase 9~10 완료**
+- 현재 Phase: **Phase 11 — 출고요청·포장단위 마커·패킹리스트 기초** (Phase 8 정식 운영 전환은 대표님 지시로 보류)
+- 현재 단계: 단계 1/16 — 후보 고객 결과 요청 준비
+- 진행자: PM (Codex)
+- 진행상태: PM 정렬 완료 범위 안에서 `00-customer-outcome.md` 작성 준비
 - 연결된 기능 약속: Feature 5 — SKU 작업·정산 기초 + 예치금 충전 + 출고 포장/패킹리스트 기초
 - 연결된 고객 흐름: 상품/SKU별 작업·정산 / 예치금 충전·정산 / 출고 포장·패킹리스트 기초
 - 연결된 메뉴탭 / 화면 영역: 주문 접수 · 주문 상세 · 운영자 입고/검수 · 운영자 견적 · 예치금 관리 · 출고관리
-- 현재 packet: phase-001~007 완결, phase-008 보류, phase-009 `00-customer-outcome.md`~`04-completion.md` 완료, phase-010 `00-customer-outcome.md`·`01-teamleader-intake.md`·`02-plan.md` 작성 완료
-- 다음에 필요한 파일: Builder 실행 후 `phase-packets/phase-010/03-verification.md`
+- 현재 packet: phase-001~007 완결, phase-008 보류, phase-009 `00-customer-outcome.md`~`04-completion.md` 완료, phase-010 `00-customer-outcome.md`~`04-completion.md` 완료
+- 다음에 필요한 파일: `phase-packets/phase-011/00-customer-outcome.md`
 - 막힌 것: 없음
 
 ## 2. 다음 행동
 
-1. Phase 10 Builder Task 1 — 충전 요청 모델·도메인 실행
-2. Task 1 리뷰·수정 루프
-3. Task 2 — 셀러 충전 요청 API·화면
-4. Task 3 — 운영자 승인/거절 API·화면
-5. Task 4 — Machine Check, live QA, 외부감리 request 준비
+1. Phase 11 `00-customer-outcome.md` 작성 — 출고요청 후 포장단위 마커와 패킹리스트 기초
+2. Team Leader `superpowers:brainstorming` 범위 판단
+3. Team Leader `superpowers:writing-plans`
+4. Builder 태스크 실행
+5. Machine Check, live QA, 외부감리 request 준비
 6. 대표님 확정 대기 값: Phase 8 보류값(창고 실주소, 요율 컷팅, 외관 추가 편집, 약관 본문, 실제 계좌/입금/결제 방식)은 이번 Feature 5에서 확정값으로 쓰지 않음
-7. 이월 개선 후보: 로그아웃 JSON 착지, 이메일 미정규화, 재견적 무이력, 테스트 DB 격리, 그림자 토큰화(Phase 5), 배포 전 체크리스트
+7. 이월 개선 후보: Phase 10 `listAdminWalletTopUps()` 내부 관리자 권한 방어선, 로그아웃 JSON 착지, 이메일 미정규화, 재견적 무이력, 테스트 DB 격리, 그림자 토큰화(Phase 5), 배포 전 체크리스트
 
 ## 3. 현재 단계 게이트
 
@@ -43,15 +43,16 @@
 | 후보 고객 결과 요청 작성 | `phase-packets/phase-010/00-customer-outcome.md` | **완료** | Team Leader 진입 |
 | Team Leader 범위 판단 | `phase-packets/phase-010/01-teamleader-intake.md` | **완료** (`superpowers:brainstorming`, Phase 10 적정) | `superpowers:writing-plans` |
 | Team Leader plan | `phase-packets/phase-010/02-plan.md` | **완료** (`superpowers:writing-plans`) | Builder 실행 |
-| Machine Check | `phase-packets/phase-010/03-verification.md` | 준비 전 | 교차 감리 |
-| 완료 기록 | `phase-packets/phase-010/04-completion.md` | 준비 전 | Phase 11 또는 기능 완료 보고 |
+| Machine Check | `phase-packets/phase-010/03-verification.md` | **완료** (Machine Check PASS, Claude 교차감리 PASS) | 완료 기록 |
+| 완료 기록 | `phase-packets/phase-010/04-completion.md` | **완료** | Phase 11 후보 고객 결과 요청 작성 |
+| Phase 11 후보 고객 결과 요청 | `phase-packets/phase-011/00-customer-outcome.md` | 준비 전 | Team Leader 진입 |
 
 ## 4. 실패 횟수
 
 | 구분 | 현재 횟수 | 최대 | 다음 행동 |
 |---|---:|---:|---|
 | Machine Check 게이트 실패 | 0 | 제한 없음 | 빌드 측 Team Leader가 분류하고 Builder가 수정 |
-| 외부감리 FAIL | Phase 2: 1회(해소) · Phase 3: 1회(해소) · Phase 4: 3회(해소) · Phase 5: 1회(해소 — r2 PASS) · Phase 6 현재 계약: 0회 (이전 문구 전용 r1은 PM 재정렬로 무효화) · Phase 9: 0회(PASS) | 3/phase | 빌드 측 Team Leader가 분류하고 Builder가 수정 후 교차 재감리 |
+| 외부감리 FAIL | Phase 2: 1회(해소) · Phase 3: 1회(해소) · Phase 4: 3회(해소) · Phase 5: 1회(해소 — r2 PASS) · Phase 6 현재 계약: 0회 (이전 문구 전용 r1은 PM 재정렬로 무효화) · Phase 9: 0회(PASS) · Phase 10: 0회(PASS, MINOR finding 1건) | 3/phase | 빌드 측 Team Leader가 분류하고 Builder가 수정 후 교차 재감리 |
 | 외부감리 BLOCKED | 0 | 1 | PM이 대표님에게 고객 언어 질문 하나만 보고 |
 
 ## 5. 알림 상태
