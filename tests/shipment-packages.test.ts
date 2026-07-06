@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { prisma } from "../src/lib/db";
 import { registerSeller } from "../src/lib/auth";
 import { createOrder } from "../src/lib/orders";
@@ -14,6 +14,14 @@ import {
 
 let sellerA: { id: string };
 let sellerB: { id: string };
+
+async function importAdminPackageRoute(role: "ADMIN" | "SELLER") {
+  vi.resetModules();
+  vi.doMock("@/lib/session", () => ({
+    getSessionUser: vi.fn(async () => ({ id: `${role.toLowerCase()}-1`, role })),
+  }));
+  return import("../src/app/api/admin/shipments/packages/route");
+}
 
 async function createQuotedOrderWithoutShipmentRequest(sellerId: string) {
   const order = await createOrder(sellerId, {
@@ -120,6 +128,7 @@ async function firstSku(orderId: string) {
 }
 
 beforeEach(async () => {
+  vi.restoreAllMocks();
   await prisma.shipmentPackageItem.deleteMany();
   await prisma.shipmentPackage.deleteMany();
   await prisma.walletTransaction.deleteMany();
@@ -128,6 +137,12 @@ beforeEach(async () => {
   await prisma.user.deleteMany();
   sellerA = await registerSeller({ email: "shipment-a@test.local", password: "password1", contactName: "A" });
   sellerB = await registerSeller({ email: "shipment-b@test.local", password: "password1", contactName: "B" });
+});
+
+afterEach(() => {
+  vi.doUnmock("@/lib/session");
+  vi.resetModules();
+  vi.restoreAllMocks();
 });
 
 describe("shipment packages domain", () => {
@@ -255,5 +270,49 @@ describe("shipment packages domain", () => {
     expect(getShipmentPackageStatusLabel("PACKED")).toBe("포장완료");
     expect(getShipmentPackageStatusLabel("READY")).toBe("출고대기");
     expect(getShipmentPackageStatusLabel("UNKNOWN")).toBe("UNKNOWN");
+  });
+});
+
+describe("admin shipment package route", () => {
+  it("운영자 JSON route는 박스 포장단위를 저장한다", async () => {
+    const { order, red } = await createShipmentRequestedSkuOrder(sellerA.id);
+    const { POST } = await importAdminPackageRoute("ADMIN");
+
+    const response = await POST(new Request("http://localhost/api/admin/shipments/packages", {
+      method: "POST",
+      headers: { "content-type": "application/json", accept: "application/json" },
+      body: JSON.stringify({
+        orderId: order.id,
+        marker: "BOX-1",
+        status: "PACKED",
+        weightKg: 12.5,
+        volumeCbm: 0.08,
+        items: [{ skuLineId: red.id, quantity: 1 }],
+      }),
+    }));
+
+    const body = await response.json();
+    expect(response.status).toBe(200);
+    expect(body.ok).toBe(true);
+    expect(body.result.marker).toBe("BOX-1");
+  });
+
+  it("운영자가 아니면 박스 저장 route가 거부된다", async () => {
+    const { order, red } = await createShipmentRequestedSkuOrder(sellerA.id);
+    const { POST } = await importAdminPackageRoute("SELLER");
+
+    const response = await POST(new Request("http://localhost/api/admin/shipments/packages", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        orderId: order.id,
+        marker: "BOX-1",
+        weightKg: 1,
+        volumeCbm: 0.01,
+        items: [{ skuLineId: red.id, quantity: 1 }],
+      }),
+    }));
+
+    expect(response.status).toBe(403);
   });
 });
