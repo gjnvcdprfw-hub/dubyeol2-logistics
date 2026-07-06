@@ -34,6 +34,19 @@ export type ShipmentRequestResult = {
   balanceKrw: number;
 };
 
+export function getWalletTransactionLabel(type: string) {
+  switch (type) {
+    case "TOPUP_CREDIT":
+      return "예치금 충전 승인";
+    case "TEST_CREDIT":
+      return "로컬 QA 예치금";
+    case "SHIPMENT_DEBIT":
+      return "출고 요청 차감";
+    default:
+      return "지갑 거래";
+  }
+}
+
 export function getQuotedOrderQuoteInput(order: OrderLike): QuoteInput {
   if (!order.quotedAt || !order.quoteShippingMethod) {
     throw new ValidationError("견적 완료된 주문만 출고 요청할 수 있습니다");

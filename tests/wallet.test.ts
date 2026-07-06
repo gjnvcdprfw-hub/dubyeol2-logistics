@@ -5,7 +5,12 @@ import { prisma } from "../src/lib/db";
 import { registerSeller } from "../src/lib/auth";
 import { createOrder } from "../src/lib/orders";
 import { recordInbound } from "../src/lib/inbound";
-import { getWalletSummary, recordWalletCredit, requestShipmentWithWallet } from "../src/lib/wallet";
+import {
+  getWalletSummary,
+  getWalletTransactionLabel,
+  recordWalletCredit,
+  requestShipmentWithWallet,
+} from "../src/lib/wallet";
 
 const execFileAsync = promisify(execFile);
 
@@ -52,6 +57,13 @@ afterEach(() => {
 });
 
 describe("wallet shipment request", () => {
+  it("거래 타입별 지갑 라벨을 돌려준다", () => {
+    expect(getWalletTransactionLabel("TOPUP_CREDIT")).toBe("예치금 충전 승인");
+    expect(getWalletTransactionLabel("TEST_CREDIT")).toBe("로컬 QA 예치금");
+    expect(getWalletTransactionLabel("SHIPMENT_DEBIT")).toBe("출고 요청 차감");
+    expect(getWalletTransactionLabel("UNKNOWN")).toBe("지갑 거래");
+  });
+
   it("견적 완료 주문 출고 요청 시 예치금을 차감하고 주문 상태를 함께 바꾼다", async () => {
     const order = await createQuotedOrder(sellerA.id);
     await recordWalletCredit(sellerA.id, 300000, "QA 예치금");

@@ -19,6 +19,8 @@ model User {
   createdAt          DateTime            @default(now())
   orders             Order[]
   walletTransactions WalletTransaction[]
+  walletTopUpRequests          WalletTopUpRequest[] @relation("WalletTopUpSeller")
+  processedWalletTopUpRequests WalletTopUpRequest[] @relation("WalletTopUpProcessor")
 }
 
 model Order {
@@ -106,4 +108,26 @@ model WalletTransaction {
   balanceAfterKrw Int
   memo            String
   createdAt       DateTime @default(now())
+  topUpRequest    WalletTopUpRequest?
+}
+
+model WalletTopUpRequest {
+  id                  String             @id @default(cuid())
+  seller              User               @relation("WalletTopUpSeller", fields: [sellerId], references: [id], onDelete: Cascade)
+  sellerId            String
+  amountKrw           Int
+  depositorName       String
+  memo                String?
+  status              String             @default("PENDING")
+  adminMemo           String?
+  processedBy         User?              @relation("WalletTopUpProcessor", fields: [processedById], references: [id], onDelete: SetNull)
+  processedById       String?
+  walletTransaction   WalletTransaction? @relation(fields: [walletTransactionId], references: [id], onDelete: SetNull)
+  walletTransactionId String?            @unique
+  createdAt           DateTime           @default(now())
+  processedAt         DateTime?
+
+  @@index([sellerId])
+  @@index([status])
+  @@index([processedById])
 }
