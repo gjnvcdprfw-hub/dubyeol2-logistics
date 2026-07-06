@@ -55,6 +55,7 @@ model Order {
   shipmentRequestedAmountKrw Int?
   productLines               OrderProductLine[]
   photos                     InboundPhoto[]
+  shipmentPackages           ShipmentPackage[]
   walletTransactions         WalletTransaction[]
 }
 
@@ -86,8 +87,40 @@ model OrderSkuLine {
   quoteCnShippingFen Int?
   sortOrder          Int
   createdAt          DateTime         @default(now())
+  shipmentPackageItems ShipmentPackageItem[]
 
   @@index([productLineId])
+}
+
+model ShipmentPackage {
+  id          String                @id @default(cuid())
+  order       Order                 @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId     String
+  marker      String
+  status      String                @default("PACKING")
+  weightGrams Int
+  volumeCm3   Int
+  memo        String?
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
+  items       ShipmentPackageItem[]
+
+  @@unique([orderId, marker])
+  @@index([orderId])
+  @@index([status])
+}
+
+model ShipmentPackageItem {
+  id         String          @id @default(cuid())
+  package    ShipmentPackage @relation(fields: [packageId], references: [id], onDelete: Cascade)
+  packageId  String
+  skuLine    OrderSkuLine    @relation(fields: [skuLineId], references: [id], onDelete: Cascade)
+  skuLineId  String
+  quantity   Int
+  createdAt  DateTime        @default(now())
+
+  @@unique([packageId, skuLineId])
+  @@index([skuLineId])
 }
 
 model InboundPhoto {

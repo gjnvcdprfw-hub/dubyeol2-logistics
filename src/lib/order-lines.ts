@@ -18,6 +18,19 @@ export const orderWithLinesInclude = {
   },
 };
 
+export const orderWithLinesAndPackagesInclude = {
+  ...orderWithLinesInclude,
+  shipmentPackages: {
+    include: {
+      items: {
+        include: { skuLine: true },
+        orderBy: { createdAt: "asc" as const },
+      },
+    },
+    orderBy: { marker: "asc" as const },
+  },
+};
+
 export function normalizeOrderLines(input: {
   productUrl?: string;
   productName?: string;
