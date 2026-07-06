@@ -22,7 +22,7 @@ concerns:
 ## Fix — 2026-07-06
 
 - status: DONE
-- commit hash: 455e998
+- commit hash: c249066
 - RED evidence:
   - `npx vitest run tests/orders.test.ts`
   - exit 1; `tests/orders.test.ts` 2 failed, 9 passed

@@ -33,7 +33,7 @@
 ## Fix: Task review follow-up
 
 - Status: completed
-- Commit: `0160df6`
+- Commit: `afd269e`
 
 ### RED evidence
 
