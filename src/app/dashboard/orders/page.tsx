@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/session";
-import { listOrdersBySeller } from "@/lib/orders";
+import { listOrdersBySeller, type SellerOrder } from "@/lib/orders";
 
 const STATUS_LABEL: Record<string, string> = { REQUESTED: "접수됨", RECEIVED: "입고완료" };
 
-function getOrderSummary(order: Awaited<ReturnType<typeof listOrdersBySeller>>[number]) {
+function getOrderSummary(order: SellerOrder) {
   const skuCount = order.productLines.reduce((sum, line) => sum + line.skuLines.length, 0);
   return skuCount > 0 ? `${order.quantity}개 / ${skuCount} SKU` : `× ${order.quantity}`;
 }

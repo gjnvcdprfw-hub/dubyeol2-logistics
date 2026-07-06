@@ -17,8 +17,8 @@ export type NewOrder = {
   inspectionRequested: boolean; memo?: string;
 };
 
-type OrderWithLines = Prisma.OrderGetPayload<{ include: typeof orderWithLinesInclude }>;
-type OrderWithLinesAndPackages = Prisma.OrderGetPayload<{ include: typeof orderWithLinesAndPackagesInclude }>;
+export type SellerOrder = Prisma.OrderGetPayload<{ include: typeof orderWithLinesInclude }>;
+export type SellerOrderWithShipmentPackages = Prisma.OrderGetPayload<{ include: typeof orderWithLinesAndPackagesInclude }>;
 
 export async function createOrder(sellerId: string, input: NewOrder) {
   if (!sellerId) throw new ValidationError("로그인이 필요합니다");
@@ -52,15 +52,15 @@ export async function createOrder(sellerId: string, input: NewOrder) {
   });
 }
 
-export async function listOrdersBySeller(sellerId: string): Promise<OrderWithLines[]>;
+export async function listOrdersBySeller(sellerId: string): Promise<SellerOrder[]>;
 export async function listOrdersBySeller(
   sellerId: string,
   options: { includeShipmentPackages: true },
-): Promise<OrderWithLinesAndPackages[]>;
+): Promise<SellerOrderWithShipmentPackages[]>;
 export async function listOrdersBySeller(
   sellerId: string,
   options?: { includeShipmentPackages?: boolean },
-): Promise<OrderWithLines[] | OrderWithLinesAndPackages[]> {
+): Promise<SellerOrder[] | SellerOrderWithShipmentPackages[]> {
   if (!sellerId) throw new ValidationError("로그인이 필요합니다");
   return prisma.order.findMany({
     where: { sellerId },
