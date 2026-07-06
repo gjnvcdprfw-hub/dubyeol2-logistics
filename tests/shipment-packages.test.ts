@@ -150,6 +150,45 @@ describe("shipment packages domain", () => {
     expect(box.items).toHaveLength(2);
   });
 
+  it("같은 포장단위 마커를 다시 저장하면 이전 SKU 구성이 교체된다", async () => {
+    const { order, red, blue } = await createShipmentRequestedSkuOrder(sellerA.id);
+
+    await saveShipmentPackage(order.id, {
+      marker: "BOX-1",
+      status: "PACKED",
+      weightKg: 12.5,
+      volumeCbm: 0.08,
+      memo: "1차 포장",
+      items: [
+        { skuLineId: red.id, quantity: 2 },
+        { skuLineId: blue.id, quantity: 1 },
+      ],
+    });
+
+    const replaced = await saveShipmentPackage(order.id, {
+      marker: "BOX-1",
+      status: "READY",
+      weightKg: 9.75,
+      volumeCbm: 0.04,
+      memo: "재포장 완료",
+      items: [{ skuLineId: blue.id, quantity: 2 }],
+    });
+
+    const sellerPackages = await listSellerShipmentPackages(sellerA.id, order.id);
+
+    expect(replaced.marker).toBe("BOX-1");
+    expect(replaced.status).toBe("READY");
+    expect(replaced.weightGrams).toBe(9750);
+    expect(replaced.volumeCm3).toBe(40000);
+    expect(replaced.memo).toBe("재포장 완료");
+    expect(replaced.items).toHaveLength(1);
+    expect(replaced.items[0]).toMatchObject({ skuLineId: blue.id, quantity: 2 });
+    expect(sellerPackages).toHaveLength(1);
+    expect(sellerPackages[0].items).toHaveLength(1);
+    expect(sellerPackages[0].items[0]).toMatchObject({ skuLineId: blue.id, quantity: 2 });
+    expect(sellerPackages[0].items.some((item) => item.skuLineId === red.id)).toBe(false);
+  });
+
   it("SKU 출고 가능 수량보다 많이 박스에 배정하면 거부한다", async () => {
     const { order, blue } = await createShipmentRequestedSkuOrder(sellerA.id);
 
