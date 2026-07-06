@@ -115,6 +115,22 @@ describe("computeQuote — 00-customer-outcome QA 예시", () => {
     // ¥2,330 = 233000펀 × 19000 / 100 / 100 = ₩442,700
     expect(q.totalKrw).toBe(442700);
   });
+  it("SKU 합계 상품가가 총수량으로 나누어떨어지지 않아도 정확한 상품가 합계로 수수료를 계산한다", () => {
+    const q = computeQuote({
+      ...base,
+      quantity: 5,
+      unitPriceFen: 10002,
+      cnShippingFen: 350,
+      productTotalFen: 50008,
+      inspectionRequested: false,
+      weightGrams: 1000,
+      volumeCm3: 0,
+    });
+
+    expect(q.items.find(i => i.key === "product")!.amountFen).toBe(50008);
+    expect(q.items.find(i => i.key === "commission")!.amountFen).toBe(Math.round(50008 * RATES.commissionRate));
+    expect(q.totalFen).toBe(q.items.reduce((s, i) => s + i.amountFen, 0));
+  });
   it("항목 라벨의 요율 숫자는 RATES에서 파생된다", () => {
     const q = computeQuote(base);
     expect(q.items.find(i => i.key === "commission")!.label).toBe(`구매대행 수수료 (${RATES.commissionRate * 100}%)`);
@@ -198,6 +214,38 @@ describe("admin quote route", () => {
 
     expect(response.status).toBe(400);
     expect(body.error).toBe("주문에 속한 SKU만 견적을 입력할 수 있습니다");
+  });
+
+  it.each([
+    ["unitPriceYuan 누락", "unit", null],
+    ["unitPriceYuan 공백", "unit", ""],
+    ["cnShippingYuan 누락", "shipping", null],
+    ["cnShippingYuan 공백", "shipping", ""],
+  ])("SKU %s이면 400으로 거부한다", async (_label, missingField, value) => {
+    const order = await createReceivedSkuOrder(seller.id);
+    const [firstSku, secondSku] = order.productLines[0].skuLines;
+    const form = createBaseQuoteForm(order.id);
+    form.set("sku[0][id]", firstSku.id);
+    form.set("sku[1][id]", secondSku.id);
+    form.set("sku[0][unitPriceYuan]", "10");
+    form.set("sku[0][cnShippingYuan]", "2");
+    form.set("sku[1][unitPriceYuan]", "11");
+    form.set("sku[1][cnShippingYuan]", "3");
+    const target = missingField === "unit" ? "sku[1][unitPriceYuan]" : "sku[1][cnShippingYuan]";
+    if (value === null) form.delete(target);
+    else form.set(target, value);
+
+    const { POST } = await importAdminQuoteRoute();
+    const response = await POST(
+      new Request("http://localhost/api/admin/quote", {
+        method: "POST",
+        body: form,
+      }),
+    );
+    const body = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(body.error).toMatch(/SKU .*값이 올바르지 않습니다/);
   });
 
   it("주문 견적과 SKU 견적 저장을 같은 prisma.$transaction 경계에서 처리한다", async () => {

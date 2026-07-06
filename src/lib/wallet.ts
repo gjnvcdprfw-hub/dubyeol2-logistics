@@ -1,7 +1,9 @@
 import type { Order, WalletTransaction } from "@prisma/client";
 import { ValidationError } from "./auth";
 import { prisma } from "./db";
-import { computeQuote } from "./quote";
+import { computeQuote, type QuoteInput } from "./quote";
+import { orderWithLinesInclude } from "./order-lines";
+import { getCompleteSkuQuoteTotals, type ProductLineWithQuotedSkus } from "./sku-quote";
 
 export type WalletSummary = {
   balanceKrw: number;
@@ -22,7 +24,9 @@ type OrderLike = Pick<
   | "quoteExchangeRateX100"
   | "quoteShippingMethod"
   | "quotedAt"
->;
+> & {
+  productLines?: ProductLineWithQuotedSkus[];
+};
 
 export type ShipmentRequestResult = {
   order: Order;
@@ -30,22 +34,33 @@ export type ShipmentRequestResult = {
   balanceKrw: number;
 };
 
-export function getQuotedOrderTotalKrw(order: OrderLike) {
+export function getQuotedOrderQuoteInput(order: OrderLike): QuoteInput {
   if (!order.quotedAt || !order.quoteShippingMethod) {
     throw new ValidationError("견적 완료된 주문만 출고 요청할 수 있습니다");
   }
 
-  return computeQuote({
+  const skuTotals = getCompleteSkuQuoteTotals(order.productLines);
+
+  return {
     quantity: order.quantity,
     serviceType: order.serviceType as "PURCHASE" | "SHIPPING",
     inspectionRequested: order.inspectionRequested,
     unitPriceFen: order.quoteUnitPriceFen ?? 0,
-    cnShippingFen: order.quoteCnShippingFen ?? 0,
+    productTotalFen: skuTotals?.productFen,
+    cnShippingFen: skuTotals?.cnShippingFen ?? order.quoteCnShippingFen ?? 0,
     weightGrams: order.quoteWeightGrams ?? 0,
     volumeCm3: order.quoteVolumeCm3 ?? 0,
     exchangeRateX100: order.quoteExchangeRateX100 ?? 0,
     shippingMethod: order.quoteShippingMethod as "SEA" | "AIR",
-  }).totalKrw;
+  };
+}
+
+export function getQuotedOrderQuote(order: OrderLike) {
+  return computeQuote(getQuotedOrderQuoteInput(order));
+}
+
+export function getQuotedOrderTotalKrw(order: OrderLike) {
+  return getQuotedOrderQuote(order).totalKrw;
 }
 
 export async function getWalletSummary(sellerId: string): Promise<WalletSummary> {
@@ -92,7 +107,7 @@ export async function requestShipmentWithWallet(
   if (!orderId) throw new ValidationError("주문을 선택해 주세요");
 
   return prisma.$transaction(async (tx) => {
-    const order = await tx.order.findFirst({ where: { id: orderId, sellerId } });
+    const order = await tx.order.findFirst({ where: { id: orderId, sellerId }, include: orderWithLinesInclude });
     if (!order) throw new ValidationError("주문을 찾을 수 없습니다");
     if (order.status === "SHIPMENT_REQUESTED") {
       throw new ValidationError("이미 출고 요청된 주문입니다");

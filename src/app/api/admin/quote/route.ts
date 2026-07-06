@@ -4,6 +4,7 @@ import { ValidationError } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { orderWithLinesInclude } from "@/lib/order-lines";
 import { computeQuote } from "@/lib/quote";
+import { computeSkuQuoteTotals } from "@/lib/sku-quote";
 
 export async function POST(req: Request) {
   const user = await getSessionUser();
@@ -17,7 +18,10 @@ export async function POST(req: Request) {
     if (order.status !== "RECEIVED") throw new ValidationError("입고 완료된 주문만 견적을 입력할 수 있습니다");
 
     const toFen = (v: FormDataEntryValue | null, field: string) => {
-      const n = Math.round(Number(v) * 100);
+      if (typeof v !== "string" || v.trim() === "") {
+        throw new ValidationError(`${field} 값이 올바르지 않습니다`);
+      }
+      const n = Math.round(Number(v.trim()) * 100);
       if (!Number.isFinite(n) || n < 0) throw new ValidationError(`${field} 값이 올바르지 않습니다`);
       return n;
     };
@@ -53,16 +57,21 @@ export async function POST(req: Request) {
       }
     }
 
-    const totalProductFen = skuQuotes.reduce((sum, sku) => {
-      const source = orderSkuLines.find((row) => row.id === sku.id);
-      return sum + sku.unitPriceFen * (source?.quantity ?? 0);
-    }, 0);
-    const totalCnShippingFen = skuQuotes.reduce((sum, sku) => sum + sku.cnShippingFen, 0);
+    const skuTotals = useSkuQuotes
+      ? computeSkuQuoteTotals(skuQuotes.map((sku) => {
+          const source = orderSkuLines.find((row) => row.id === sku.id);
+          return {
+            quantity: source?.quantity ?? 0,
+            unitPriceFen: sku.unitPriceFen,
+            cnShippingFen: sku.cnShippingFen,
+          };
+        }))
+      : null;
     const unitPriceFen = useSkuQuotes
-      ? (order.quantity > 0 ? Math.round(totalProductFen / order.quantity) : 0)
+      ? (order.quantity > 0 ? Math.round((skuTotals?.productFen ?? 0) / order.quantity) : 0)
       : toFen(form.get("unitPriceYuan"), "상품 단가");
     const cnShippingFen = useSkuQuotes
-      ? totalCnShippingFen
+      ? skuTotals?.cnShippingFen ?? 0
       : toFen(form.get("cnShippingYuan"), "중국 내 배송비");
     const weightGrams = Math.round(Number(form.get("weightKg")) * 1000);
     const volumeCm3 = Math.round(Number(form.get("volumeCbm")) * 1_000_000);
@@ -75,7 +84,9 @@ export async function POST(req: Request) {
       quantity: order.quantity,
       serviceType: order.serviceType as "PURCHASE" | "SHIPPING",
       inspectionRequested: order.inspectionRequested,
-      unitPriceFen, cnShippingFen, weightGrams, volumeCm3, exchangeRateX100, shippingMethod,
+      unitPriceFen,
+      productTotalFen: skuTotals?.productFen,
+      cnShippingFen, weightGrams, volumeCm3, exchangeRateX100, shippingMethod,
     });
 
     await prisma.$transaction(async (tx) => {

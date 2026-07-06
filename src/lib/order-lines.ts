@@ -35,9 +35,11 @@ export function normalizeOrderLines(input: {
       },
     ];
 
+  if (!Array.isArray(items)) throw new ValidationError("상품 입력 형식이 올바르지 않습니다");
   if (items.length < 1) throw new ValidationError("상품을 1개 이상 입력해 주세요");
 
   return items.map((item, productIndex) => {
+    if (!Array.isArray(item.skus)) throw new ValidationError("SKU 입력 형식이 올바르지 않습니다");
     if (!/^https?:\/\/.+/.test(item.productUrl)) throw new ValidationError("상품 링크 형식이 올바르지 않습니다");
     if (!item.productName.trim()) throw new ValidationError("상품명을 입력해 주세요");
     if (!item.skus.length) throw new ValidationError("SKU를 1개 이상 입력해 주세요");

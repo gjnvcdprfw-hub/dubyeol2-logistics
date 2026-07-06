@@ -12,6 +12,61 @@ export type SkuSettlementInput = {
   }>;
 };
 
+export type SkuQuoteAmountInput = {
+  quantity: number;
+  unitPriceFen: number;
+  cnShippingFen: number;
+};
+
+export type ProductLineWithQuotedSkus = {
+  skuLines: Array<{
+    quantity: number;
+    quoteUnitPriceFen: number | null;
+    quoteCnShippingFen: number | null;
+  }>;
+};
+
+function validateSkuQuoteAmount(sku: SkuQuoteAmountInput) {
+  if (!Number.isInteger(sku.quantity) || sku.quantity < 1) {
+    throw new ValidationError("SKU 수량이 올바르지 않습니다");
+  }
+  if (
+    !Number.isInteger(sku.unitPriceFen) ||
+    !Number.isInteger(sku.cnShippingFen) ||
+    sku.unitPriceFen < 0 ||
+    sku.cnShippingFen < 0
+  ) {
+    throw new ValidationError("SKU 금액이 올바르지 않습니다");
+  }
+}
+
+export function computeSkuQuoteTotals(skus: SkuQuoteAmountInput[]) {
+  if (!Array.isArray(skus)) throw new ValidationError("SKU 견적 형식이 올바르지 않습니다");
+
+  return skus.reduce(
+    (sum, sku) => {
+      validateSkuQuoteAmount(sku);
+      return {
+        productFen: sum.productFen + sku.unitPriceFen * sku.quantity,
+        cnShippingFen: sum.cnShippingFen + sku.cnShippingFen,
+      };
+    },
+    { productFen: 0, cnShippingFen: 0 },
+  );
+}
+
+export function getCompleteSkuQuoteTotals(productLines: ProductLineWithQuotedSkus[] | undefined) {
+  const skuLines = productLines?.flatMap((line) => line.skuLines) ?? [];
+  if (skuLines.length === 0) return null;
+  if (skuLines.some((sku) => sku.quoteUnitPriceFen === null || sku.quoteCnShippingFen === null)) return null;
+
+  return computeSkuQuoteTotals(skuLines.map((sku) => ({
+    quantity: sku.quantity,
+    unitPriceFen: sku.quoteUnitPriceFen ?? 0,
+    cnShippingFen: sku.quoteCnShippingFen ?? 0,
+  })));
+}
+
 export function computeSkuSettlement(input: SkuSettlementInput) {
   if (!Number.isInteger(input.exchangeRateX100) || input.exchangeRateX100 <= 0) {
     throw new ValidationError("환율은 0보다 커야 합니다");
@@ -19,17 +74,7 @@ export function computeSkuSettlement(input: SkuSettlementInput) {
 
   const toKrw = (fen: number) => Math.round((fen * input.exchangeRateX100) / 10000);
   const lines = input.skus.map((sku) => {
-    if (!Number.isInteger(sku.quantity) || sku.quantity < 1) {
-      throw new ValidationError("SKU 수량이 올바르지 않습니다");
-    }
-    if (
-      !Number.isFinite(sku.unitPriceFen) ||
-      !Number.isFinite(sku.cnShippingFen) ||
-      sku.unitPriceFen < 0 ||
-      sku.cnShippingFen < 0
-    ) {
-      throw new ValidationError("SKU 금액이 올바르지 않습니다");
-    }
+    validateSkuQuoteAmount(sku);
 
     const productFen = sku.unitPriceFen * sku.quantity;
     const inspectionFen = input.inspectionRequested ? RATES.inspectionFeeFenPerUnit * sku.quantity : 0;

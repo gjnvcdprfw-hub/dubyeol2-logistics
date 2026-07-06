@@ -7,6 +7,7 @@ export type QuoteInput = {
   serviceType: "PURCHASE" | "SHIPPING";
   inspectionRequested: boolean;
   unitPriceFen: number;      // 배송대행 건 0 허용
+  productTotalFen?: number;  // SKU별 상품가 합계가 총수량으로 나누어떨어지지 않을 때 정확 합계
   cnShippingFen: number;
   weightGrams: number;
   volumeCm3: number;
@@ -17,18 +18,25 @@ export type QuoteInput = {
 export type QuoteItem = { key: string; label: string; amountFen: number };
 
 export function computeQuote(input: QuoteInput) {
-  const nums = [input.unitPriceFen, input.cnShippingFen, input.weightGrams, input.volumeCm3, input.exchangeRateX100];
+  const nums = [
+    input.unitPriceFen,
+    input.productTotalFen ?? 0,
+    input.cnShippingFen,
+    input.weightGrams,
+    input.volumeCm3,
+    input.exchangeRateX100,
+  ];
   if (!nums.every(Number.isFinite)) throw new ValidationError("입력값이 올바르지 않습니다");
   if (!Number.isInteger(input.quantity) || input.quantity < 1) throw new ValidationError("수량이 올바르지 않습니다");
   if (input.weightGrams <= 0) throw new ValidationError("무게는 0보다 커야 합니다");
   if (input.exchangeRateX100 <= 0) throw new ValidationError("환율은 0보다 커야 합니다");
-  if (input.volumeCm3 < 0 || input.cnShippingFen < 0 || input.unitPriceFen < 0)
+  if (input.volumeCm3 < 0 || input.cnShippingFen < 0 || input.unitPriceFen < 0 || (input.productTotalFen ?? 0) < 0)
     throw new ValidationError("입력값이 올바르지 않습니다");
 
   const items: QuoteItem[] = [];
 
   if (input.serviceType === "PURCHASE") {
-    const productFen = input.unitPriceFen * input.quantity;
+    const productFen = input.productTotalFen ?? input.unitPriceFen * input.quantity;
     const commissionFen = Math.round(productFen * RATES.commissionRate);
     const vatFen = Math.round(commissionFen * RATES.commissionVatRate);
     items.push({ key: "product", label: "상품가", amountFen: productFen });

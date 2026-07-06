@@ -66,6 +66,51 @@ describe("wallet shipment request", () => {
     expect(result.balanceKrw).toBe(300000 + result.transaction.amountKrw);
   });
 
+  it("SKU 상품가 합계가 총수량으로 나누어떨어지지 않아도 SKU 근거 합계로 출고 차감한다", async () => {
+    const order = await createOrder(sellerA.id, {
+      serviceType: "PURCHASE",
+      inspectionRequested: false,
+      items: [
+        {
+          productUrl: "https://detail.1688.com/offer/sku-wallet.html",
+          productName: "SKU 정산품",
+          skus: [
+            { optionText: "빨강", quantity: 2 },
+            { optionText: "파랑", quantity: 3 },
+          ],
+        },
+      ],
+    });
+    await recordInbound(order.id, { photoPaths: ["/uploads/a.jpg"], outerIssue: false });
+    const saved = await prisma.order.findUniqueOrThrow({
+      where: { id: order.id },
+      include: { productLines: { include: { skuLines: true }, orderBy: { sortOrder: "asc" } } },
+    });
+    const [red, blue] = saved.productLines[0].skuLines;
+    await prisma.order.update({
+      where: { id: order.id },
+      data: {
+        quoteUnitPriceFen: 81,
+        quoteCnShippingFen: 350,
+        quoteWeightGrams: 1000,
+        quoteVolumeCm3: 0,
+        quoteExchangeRateX100: 19000,
+        quoteShippingMethod: "SEA",
+        quotedAt: new Date("2026-07-06T00:00:00.000Z"),
+      },
+    });
+    await prisma.orderSkuLine.update({ where: { id: red.id }, data: { quoteUnitPriceFen: 101, quoteCnShippingFen: 100 } });
+    await prisma.orderSkuLine.update({ where: { id: blue.id }, data: { quoteUnitPriceFen: 67, quoteCnShippingFen: 250 } });
+    const exactSkuBasisKrw = 6223;
+    await recordWalletCredit(sellerA.id, exactSkuBasisKrw, "정확한 SKU 근거 예치금");
+
+    const result = await requestShipmentWithWallet(sellerA.id, order.id);
+
+    expect(result.transaction.amountKrw).toBe(-exactSkuBasisKrw);
+    expect(result.order.shipmentRequestedAmountKrw).toBe(exactSkuBasisKrw);
+    expect(result.balanceKrw).toBe(0);
+  });
+
   it("잔액 부족이면 돈도 상태도 바꾸지 않는다", async () => {
     const order = await createQuotedOrder(sellerA.id);
     await recordWalletCredit(sellerA.id, 1000, "부족한 예치금");

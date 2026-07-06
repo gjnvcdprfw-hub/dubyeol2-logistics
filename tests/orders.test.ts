@@ -1,9 +1,11 @@
 import { readFileSync } from "node:fs";
 import { describe, it, expect, beforeEach } from "vitest";
 import { afterEach, vi } from "vitest";
+import { renderToStaticMarkup } from "react-dom/server";
 import { prisma } from "../src/lib/db";
 import { registerSeller } from "../src/lib/auth";
 import { createOrder, listOrdersBySeller } from "../src/lib/orders";
+import { recordInbound } from "../src/lib/inbound";
 
 let sellerA: { id: string }, sellerB: { id: string };
 
@@ -193,6 +195,32 @@ describe("createOrder — SKU 라인 구조", () => {
     ).rejects.toThrow("상품을 1개 이상 입력해 주세요");
   });
 
+  it("items가 배열이 아니면 400 경계용 ValidationError로 거부한다", async () => {
+    await expect(
+      createOrder(sellerA.id, {
+        serviceType: "PURCHASE",
+        inspectionRequested: true,
+        items: { productUrl: "https://detail.1688.com/offer/300.html" } as never,
+      }),
+    ).rejects.toThrow("상품 입력 형식이 올바르지 않습니다");
+  });
+
+  it("item.skus가 배열이 아니면 400 경계용 ValidationError로 거부한다", async () => {
+    await expect(
+      createOrder(sellerA.id, {
+        serviceType: "PURCHASE",
+        inspectionRequested: true,
+        items: [
+          {
+            productUrl: "https://detail.1688.com/offer/300.html",
+            productName: "상품 C",
+            skus: { optionText: "빨강", quantity: 5 } as never,
+          },
+        ],
+      }),
+    ).rejects.toThrow("SKU 입력 형식이 올바르지 않습니다");
+  });
+
   it("SKU 옵션명이 공백뿐이면 기본값으로 저장한다", async () => {
     const order = await createOrder(sellerA.id, {
       serviceType: "PURCHASE",
@@ -354,5 +382,74 @@ describe("seller order UI", () => {
     expect(source).toContain("productLines.reduce");
     expect(source).toContain("SKU");
     expect(source).toContain("× ${order.quantity}");
+  });
+
+  it("주문 상세는 SKU별 검수 상태·메모와 SKU 근거 합계 문구를 보여준다", async () => {
+    const order = await createOrder(sellerA.id, {
+      serviceType: "PURCHASE",
+      inspectionRequested: true,
+      items: [
+        {
+          productUrl: "https://detail.1688.com/offer/900.html",
+          productName: "상세 상품",
+          skus: [
+            { optionText: "빨강", quantity: 2 },
+            { optionText: "파랑", quantity: 3 },
+          ],
+        },
+      ],
+    });
+    const saved = await prisma.order.findUniqueOrThrow({
+      where: { id: order.id },
+      include: { productLines: { include: { skuLines: true }, orderBy: { sortOrder: "asc" } } },
+    });
+    const [red, blue] = saved.productLines[0].skuLines;
+    await recordInbound(order.id, {
+      photoPaths: ["/uploads/a.jpg"],
+      outerIssue: false,
+      skuResults: [
+        { skuLineId: red.id, inboundQuantity: 2, defectCount: 0, inspectionPassed: true, inspectionNote: "정상 통과" },
+        { skuLineId: blue.id, inboundQuantity: 2, defectCount: 1, inspectionPassed: false, inspectionNote: "1개 하자" },
+      ],
+    });
+    await prisma.order.update({
+      where: { id: order.id },
+      data: {
+        quoteUnitPriceFen: 81,
+        quoteCnShippingFen: 350,
+        quoteWeightGrams: 1000,
+        quoteVolumeCm3: 0,
+        quoteExchangeRateX100: 19000,
+        quoteShippingMethod: "SEA",
+        quotedAt: new Date("2026-07-06T00:00:00.000Z"),
+      },
+    });
+    await prisma.orderSkuLine.update({ where: { id: red.id }, data: { quoteUnitPriceFen: 101, quoteCnShippingFen: 100 } });
+    await prisma.orderSkuLine.update({ where: { id: blue.id }, data: { quoteUnitPriceFen: 67, quoteCnShippingFen: 250 } });
+
+    vi.resetModules();
+    vi.doMock("next/navigation", () => ({
+      redirect: vi.fn((path: string) => {
+        throw new Error(`redirect:${path}`);
+      }),
+      notFound: vi.fn(() => {
+        throw new Error("notFound");
+      }),
+    }));
+    vi.doMock("@/lib/session", () => ({
+      getSession: vi.fn(async () => ({ userId: sellerA.id })),
+    }));
+
+    const { default: OrderDetailPage } = await import("../src/app/dashboard/orders/[id]/page");
+    const html = renderToStaticMarkup(await OrderDetailPage({
+      params: Promise.resolve({ id: order.id }),
+      searchParams: Promise.resolve({}),
+    }));
+
+    expect(html).toContain("검수 합격");
+    expect(html).toContain("검수 보류");
+    expect(html).toContain("정상 통과");
+    expect(html).toContain("1개 하자");
+    expect(html).toContain("SKU 근거 합계");
   });
 });

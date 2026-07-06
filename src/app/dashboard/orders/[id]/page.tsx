@@ -1,9 +1,8 @@
 import { notFound, redirect } from "next/navigation";
 import { getSession } from "@/lib/session";
 import { prisma } from "@/lib/db";
-import { computeQuote } from "@/lib/quote";
 import { computeSkuSettlement } from "@/lib/sku-quote";
-import { getQuotedOrderTotalKrw, getWalletSummary } from "@/lib/wallet";
+import { getQuotedOrderQuote, getQuotedOrderTotalKrw, getWalletSummary } from "@/lib/wallet";
 
 const STATUS_LABEL: Record<string, string> = {
   REQUESTED: "접수됨",
@@ -126,6 +125,8 @@ export default async function OrderDetailPage({
                         <span>입고 {sku.inboundQuantity ?? "-"}개</span>
                         <span>부족 {sku.missingQuantity ?? 0}개</span>
                         <span>하자 {sku.defectCount ?? 0}개</span>
+                        <span>검수 {sku.inspectionPassed === null ? "-" : sku.inspectionPassed ? "합격" : "보류"}</span>
+                        {sku.inspectionNote && <span className="sm:col-span-2">검수 메모 {sku.inspectionNote}</span>}
                       </div>
                     </div>
                   ))}
@@ -139,14 +140,7 @@ export default async function OrderDetailPage({
         <section className="bg-surface rounded-[27px] shadow-[0_7px_30px_rgba(90,114,123,0.11)] p-6 space-y-3">
           <h2 className="text-[14px] font-semibold text-heading">항목별 견적</h2>
           {(() => {
-            const q = computeQuote({
-              quantity: order.quantity,
-              serviceType: order.serviceType as "PURCHASE" | "SHIPPING",
-              inspectionRequested: order.inspectionRequested,
-              unitPriceFen: order.quoteUnitPriceFen!, cnShippingFen: order.quoteCnShippingFen!,
-              weightGrams: order.quoteWeightGrams!, volumeCm3: order.quoteVolumeCm3!,
-              exchangeRateX100: order.quoteExchangeRateX100!, shippingMethod: order.quoteShippingMethod as "SEA" | "AIR",
-            });
+            const q = getQuotedOrderQuote(order);
             const yuan = (fen: number) => `¥${(fen / 100).toLocaleString("ko-KR", { minimumFractionDigits: 2 })}`;
             const krw = (w: number) => `₩${w.toLocaleString("ko-KR")}`;
             return (
@@ -174,7 +168,7 @@ export default async function OrderDetailPage({
                       ))}
                     </div>
                     <div className="flex justify-between text-sm font-semibold">
-                      <span className="text-heading">SKU 합계</span>
+                      <span className="text-heading">SKU 근거 합계</span>
                       <span className="text-heading">{yuan(skuSettlement.totalFen)} <span className="text-brand">({krw(skuSettlement.totalKrw)})</span></span>
                     </div>
                   </div>
