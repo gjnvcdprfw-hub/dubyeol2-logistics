@@ -1,0 +1,193 @@
+{
+  "schema": "dubyeol2.external_audit.request.v0",
+  "project": {
+    "name": "물류 — 출고요청·포장단위 마커·패킹리스트 기초",
+    "root": "/Users/twostars/Documents/물류",
+    "dubyeol2_root": ".harness/dubyeol2"
+  },
+  "run": {
+    "id": "phase-011-shipment-packages-20260706",
+    "phase_id": "phase-011",
+    "phase_index": 11,
+    "phase_total": 11
+  },
+  "phase_goal": {
+    "customer_goal": "출고요청 이후 운영자가 SKU를 BOX-1/BOX-2 같은 포장단위로 나누고, 셀러가 같은 박스별 구성·무게·CBM·상태를 확인한다.",
+    "why_this_phase_matters": "출고는 SKU 단위 그대로 나가지 않고 박스 단위로 묶인다. 박스별 SKU 구성, 무게, CBM이 남아야 운임, 분실, 오배송, 패킹리스트 대응 근거가 맞는다.",
+    "done_when_customer_can": "운영자가 셀러 A 주문의 BOX-1/BOX-2 포장 구성을 저장하면 셀러 A 출고관리와 주문 상세에서 같은 박스별 SKU 구성과 포장완료 상태가 보이고, 셀러 B에게는 보이지 않는다."
+  },
+  "feature_contract": {
+    "feature_md": ".harness/dubyeol2/feature.md",
+    "customer_promise": "상품별·SKU별 수량, 입고, 검수, 견적, 정산 근거가 섞이지 않게 하고, 그 위에 예치금 충전과 출고 포장단위/패킹리스트 기초를 올린다.",
+    "must_not_happen_when_paid": [
+      "SKU 출고 가능 수량보다 더 많이 박스에 배정됨",
+      "박스별 SKU 구성은 DB에 있는데 셀러 화면에서 보이지 않음",
+      "셀러가 다른 셀러의 포장단위, SKU 구성, 출고 상태를 봄",
+      "운영자 화면 상태와 셀러 화면 상태가 서로 다름",
+      "정식 PDF 패킹리스트, 실제 송장, 실제 배송조회가 되는 것처럼 보임",
+      "외부 배송조회, 세관, 택배사 API 또는 실서비스가 호출됨"
+    ],
+    "in_scope": [
+      "ShipmentPackage 모델과 ShipmentPackageItem 모델",
+      "출고요청 주문만 포장단위 저장 가능",
+      "박스 마커, 상태, 무게, CBM, 메모 저장",
+      "박스별 OrderSkuLine 수량 저장",
+      "SKU 출고 가능 수량 초과 차단",
+      "운영자 출고 처리 목록과 상세 입력 화면",
+      "운영자 포장 저장 API와 form POST",
+      "셀러 출고관리 포장단위 요약",
+      "셀러 주문 상세 포장단위/패킹리스트 기초 표시",
+      "셀러 간 데이터 격리",
+      "로컬 브라우저 QA 스크린샷"
+    ],
+    "out_of_scope": [
+      "정식 PDF 패킹리스트 자동 발행",
+      "실제 송장 발급",
+      "외부 배송조회 API",
+      "세관 API",
+      "택배사 API",
+      "자동 송장 동기화",
+      "실제 배송 완료 확정",
+      "Phase 8 정식 운영 전환",
+      "실서비스 변경",
+      "deploy",
+      "git push",
+      "원격 머지"
+    ],
+    "acceptance_example": {
+      "name": "셀러 A 출고요청 주문의 BOX-1/BOX-2 포장단위 저장과 셀러 표시",
+      "customer_input": "운영자가 셀러 A 주문에 BOX-1은 빨강 2개와 파랑 1개, BOX-2는 파랑 1개와 L 3개를 넣고 각각 무게/CBM/포장완료 상태를 저장한다.",
+      "customer_visible_result": "셀러 A 출고관리와 주문 상세에서 BOX-1/BOX-2 구성, SKU 수량, 무게, CBM, 포장완료 상태가 보이고, 정식 PDF 패킹리스트와 실제 배송조회는 아직 연결되지 않았다는 안내가 보인다.",
+      "pass_criteria": "DB에서 BOX-1/BOX-2 총 2개 포장단위와 SKU 수량이 저장되고, 셀러 B 출고관리에는 셀러 A 박스가 보이지 않는다.",
+      "counterexample": "박스 마커만 있고 SKU별 수량이 없거나, 박스별 SKU 구성은 DB에 있는데 셀러가 확인할 수 없는 경우"
+    }
+  },
+  "phase_qa": {
+    "normal_flow": "운영자 로그인 -> 출고 요청 목록 -> 주문 상세 포장 입력 -> BOX-1 저장 -> BOX-2 저장 -> 셀러 A 로그인 -> 출고관리 확인 -> 주문 상세 확인 -> 셀러 B 로그인 -> 격리 상태 확인.",
+    "failure_flow": "출고 요청 상태가 아닌 주문, 주문에 속하지 않은 SKU, SKU 출고 가능 수량 초과, 운영자가 아닌 사용자 저장, 다른 셀러 조회는 거부되어야 한다.",
+    "customer_harm_guardrail": "SKU 초과 배정, 셀러 간 포장단위 노출, 운영자/셀러 상태 불일치, 실제 배송조회/PDF 발행 오인이 있으면 실패다.",
+    "next_phase_handoff_check": "외부감리 PASS 후 04-completion 작성과 로컬 main 반영 정리. 정식 패킹리스트 PDF, 송장, 외부 배송조회는 별도 정렬 전까지 열지 않는다."
+  },
+  "ui_qa": {
+    "has_ui": true,
+    "scenario_prepared": true,
+    "separate_live_ui_qa_required": false,
+    "summary": "Playwright/Chrome으로 http://localhost:5173에서 운영자 포장 저장, 셀러 A 출고관리/주문 상세 표시, 셀러 B 격리까지 확인. console error 0, warning 0, 스크린샷 6개 저장."
+  },
+  "design_system": {
+    "design_system_md": ".harness/dubyeol2/design-system.md",
+    "relevant_rules": [
+      "출고관리는 반복 업무용 정보 밀도로 표시",
+      "박스별 구성은 카드 안 반복 행으로 스캔 가능하게 표시",
+      "정식 PDF/실제 배송조회 미연결 상태를 화면에서 명확히 안내"
+    ],
+    "changed": false,
+    "change_summary": "디자인 시스템 파일 변경 없음. lint 결과 errors 0, warnings 26, infos 1."
+  },
+  "changes": {
+    "summary": "Phase 11은 출고요청 주문 아래 포장단위와 박스별 SKU 구성 저장을 추가하고, 운영자 출고 처리 화면과 셀러 출고관리/주문 상세에 같은 포장 근거를 표시했다.",
+    "commits": [
+      "2058ee7 docs: plan phase 11 shipment packages",
+      "65f8709 feat: add shipment package domain",
+      "cb8ef3b test: cover shipment package replacement",
+      "f109dae test: clear shipment package tables in db tests",
+      "356461c feat: add admin shipment packages",
+      "ba85575 fix: enforce admin shipment form route guard",
+      "df61da3 fix: keep admin shipment form redirects",
+      "e8ce019 docs: update phase 11 task 2 report",
+      "d12f413 feat: show shipment packages to sellers",
+      "81adcdf fix: narrow seller shipment package reads",
+      "78d6487 test: target seller package detail quantities",
+      "aa543a5 fix: type seller order package opt-in"
+    ],
+    "files_changed": [
+      "prisma/schema.prisma",
+      "prisma/migrations/20260706024316_shipment_packages/migration.sql",
+      "src/lib/order-lines.ts",
+      "src/lib/shipment-packages.ts",
+      "src/lib/orders.ts",
+      "src/app/api/admin/shipments/packages/route.ts",
+      "src/app/admin/shipments/page.tsx",
+      "src/app/admin/shipments/[id]/page.tsx",
+      "src/app/admin/layout.tsx",
+      "src/app/dashboard/shipment/page.tsx",
+      "src/app/dashboard/orders/[id]/page.tsx",
+      "tests/shipment-packages.test.ts",
+      "tests/orders.test.ts",
+      "tests/wallet.test.ts",
+      "tests/wallet-topups.test.ts",
+      "tests/quote.test.ts",
+      "tests/inbound.test.ts",
+      "tests/auth.test.ts",
+      ".harness/dubyeol2/phase-packets/phase-011/00-customer-outcome.md",
+      ".harness/dubyeol2/phase-packets/phase-011/01-teamleader-intake.md",
+      ".harness/dubyeol2/phase-packets/phase-011/02-plan.md",
+      ".harness/dubyeol2/phase-packets/phase-011/03-verification.md",
+      "docs/superpowers/plans/2026-07-06-phase-011-shipment-packages.md",
+      ".harness/dubyeol2/phase-packets/phase-011/screenshots/01-admin-shipment-queue.png",
+      ".harness/dubyeol2/phase-packets/phase-011/screenshots/02-admin-package-form.png",
+      ".harness/dubyeol2/phase-packets/phase-011/screenshots/03-admin-packages-saved.png",
+      ".harness/dubyeol2/phase-packets/phase-011/screenshots/04-seller-shipment-packages.png",
+      ".harness/dubyeol2/phase-packets/phase-011/screenshots/05-seller-order-package-detail.png",
+      ".harness/dubyeol2/phase-packets/phase-011/screenshots/06-seller-b-isolated.png"
+    ],
+    "risk_notes": [
+      "Mode B: Codex가 빌드 주체이므로 외부감리는 Claude가 수행해야 한다. Codex 자가감리 금지.",
+      "Codex 환경에는 /security-review 슬래시 명령 실행 도구가 없어 보안·권한 검토를 정적 검사, 회귀 테스트, live QA로 대체했다. Claude 감리에서 재확인 필요.",
+      "vitest 실행 시 dev DB가 비워지므로 live QA를 다시 하려면 QA seed를 다시 만들어야 한다.",
+      "QA seed의 입고 사진 경로 404는 seed 경로 문제로 보정했고, 실제 Phase 11 포장단위 기능과 코드는 영향 없음.",
+      "정식 PDF 패킹리스트, 실제 송장, 외부 배송조회, 세관/택배사 API는 후속 정렬 전까지 정식 운영 기능이 아니다.",
+      "Phase 8 정식 운영 전환은 대표님 지시대로 계속 보류다."
+    ]
+  },
+  "machine_check": {
+    "status": "PASS",
+    "commands_or_checks": [
+      "npx vitest run tests/shipment-packages.test.ts tests/wallet.test.ts tests/orders.test.ts -> PASS, 3 files, 47 tests passed",
+      "npx vitest run -> PASS, 8 files, 113 tests passed",
+      "npm run build -> PASS, Next build and TypeScript complete, static pages/routes 53",
+      "git diff --check -> PASS",
+      "npx -y @google/design.md lint .harness/dubyeol2/design-system.md -> PASS, errors 0, warnings 26, infos 1",
+      "Security/static search -> PASS, only expected '정식 패킹리스트 PDF와 실제 배송조회는 아직 연결하지 않았습니다.' copy and tests matched",
+      "Phase 11 live QA -> PASS, seller A package data BOX-1/BOX-2 visible, seller B isolated, console error 0, warning 0"
+    ],
+    "evidence_files": [
+      ".harness/dubyeol2/phase-packets/phase-011/03-verification.md",
+      ".harness/dubyeol2/phase-packets/phase-011/00-customer-outcome.md",
+      ".harness/dubyeol2/phase-packets/phase-011/01-teamleader-intake.md",
+      ".harness/dubyeol2/phase-packets/phase-011/02-plan.md",
+      "docs/superpowers/plans/2026-07-06-phase-011-shipment-packages.md",
+      "tests/shipment-packages.test.ts",
+      "src/lib/shipment-packages.ts",
+      "src/app/admin/shipments/[id]/page.tsx",
+      "src/app/dashboard/shipment/page.tsx",
+      "src/app/dashboard/orders/[id]/page.tsx",
+      ".harness/dubyeol2/phase-packets/phase-011/screenshots/01-admin-shipment-queue.png",
+      ".harness/dubyeol2/phase-packets/phase-011/screenshots/02-admin-package-form.png",
+      ".harness/dubyeol2/phase-packets/phase-011/screenshots/03-admin-packages-saved.png",
+      ".harness/dubyeol2/phase-packets/phase-011/screenshots/04-seller-shipment-packages.png",
+      ".harness/dubyeol2/phase-packets/phase-011/screenshots/05-seller-order-package-detail.png",
+      ".harness/dubyeol2/phase-packets/phase-011/screenshots/06-seller-b-isolated.png"
+    ],
+    "failures": []
+  },
+  "auditor_instruction": {
+    "auditor_engine": "claude",
+    "role": "external_auditor_only",
+    "do_not_modify_code": true,
+    "required_verdicts": [
+      "PASS",
+      "FAIL",
+      "BLOCKED"
+    ],
+    "judge_only": [
+      "whether_customer_promise_is_kept",
+      "whether_customer_harm_guardrails_are_preserved",
+      "whether_machine_check_evidence_supports_the_claim",
+      "whether_design_system_or_screen_flow_is_broken",
+      "whether_seller_isolation_and_admin_authorization_are_safe",
+      "whether_sku_package_quantity_cannot_exceed_shippable_quantity",
+      "whether_phase_11_correctly_excludes_real_pdf_waybill_tracking_customs_carrier_apis"
+    ]
+  }
+}
