@@ -10,23 +10,23 @@
 
 - 프로젝트: 물류 — 사업자(쿠팡·11번가·1688 셀러) 대상 중국→한국 통합 물류 플랫폼. 벤치마크: 두리무역(duly.co.kr)
 - 실행 엔진 모드: **B — 빌드=Codex** (2026-07-05 대표님 선언, engine.md 참조. Claude 복귀 시 "모드 A로 복귀" 선언 → 감리 대기 큐 일괄 처리)
-- 두별2 적용 상태: Feature 1 완료·머지 → Feature 2 완료·머지 → **Feature 3 Phase 6 완료·로컬 main 머지 완료** → **Feature 4 Phase 7 완료·로컬 main 머지 완료** → **Feature 5 Phase 9~10 완료**
+- 두별2 적용 상태: Feature 1 완료·머지 → Feature 2 완료·머지 → **Feature 3 Phase 6 완료·로컬 main 머지 완료** → **Feature 4 Phase 7 완료·로컬 main 머지 완료** → **Feature 5 Phase 9~11 완료·로컬 main 반영 완료**
 - 현재 Phase: **Phase 11 — 출고요청·포장단위 마커·패킹리스트 기초** (Phase 8 정식 운영 전환은 대표님 지시로 보류)
-- 현재 단계: 단계 12/16 — Claude 교차 외부감리 대기
-- 진행자: 외부감리 (Claude)
-- 진행상태: Mode B 교차감리 요청 준비 완료
+- 현재 단계: 단계 16/16 — Feature 5 완료 보고 준비
+- 진행자: PM (Codex)
+- 진행상태: Phase 11 Claude 교차감리 PASS·완료 기록 작성 완료
 - 연결된 기능 약속: Feature 5 — SKU 작업·정산 기초 + 예치금 충전 + 출고 포장/패킹리스트 기초
 - 연결된 고객 흐름: 상품/SKU별 작업·정산 / 예치금 충전·정산 / 출고 포장·패킹리스트 기초
 - 연결된 메뉴탭 / 화면 영역: 주문 접수 · 주문 상세 · 운영자 입고/검수 · 운영자 견적 · 예치금 관리 · 출고관리
-- 현재 packet: phase-001~007 완결, phase-008 보류, phase-009 `00-customer-outcome.md`~`04-completion.md` 완료, phase-010 `00-customer-outcome.md`~`04-completion.md` 완료, phase-011 `00-customer-outcome.md`~`03-verification.md` 완료
-- 다음에 필요한 파일: `external-audit/result-phase-011.json`
+- 현재 packet: phase-001~007 완결, phase-008 보류, phase-009 `00-customer-outcome.md`~`04-completion.md` 완료, phase-010 `00-customer-outcome.md`~`04-completion.md` 완료, phase-011 `00-customer-outcome.md`~`04-completion.md` 완료
+- 다음에 필요한 파일: 없음 — Feature 5 완료 보고
 - 막힌 것: 없음
 
 ## 2. 다음 행동
 
-1. Phase 11 Claude 교차 외부감리 실행
-2. 외부감리 PASS 시 `04-completion.md` 작성 후 로컬 main 머지
-3. Feature 5 완료 보고
+1. Feature 5 완료 보고
+2. Phase 8 정식 운영 전환은 대표님 지시 전까지 보류 유지
+3. 다음 기능/Phase는 대표님 재정렬 후 시작
 6. 대표님 확정 대기 값: Phase 8 보류값(창고 실주소, 요율 컷팅, 외관 추가 편집, 약관 본문, 실제 계좌/입금/결제 방식)은 이번 Feature 5에서 확정값으로 쓰지 않음
 7. 이월 개선 후보: Phase 10 `listAdminWalletTopUps()` 내부 관리자 권한 방어선, 로그아웃 JSON 착지, 이메일 미정규화, 재견적 무이력, 테스트 DB 격리, 그림자 토큰화(Phase 5), 배포 전 체크리스트
 
@@ -47,14 +47,15 @@
 | Phase 11 Team Leader 범위 판단 | `phase-packets/phase-011/01-teamleader-intake.md` | **완료** (`superpowers:brainstorming`, Phase 11 적정) | `superpowers:writing-plans` |
 | Phase 11 Team Leader plan | `phase-packets/phase-011/02-plan.md` | **완료** (`superpowers:writing-plans`) | Builder 실행 |
 | Phase 11 Machine Check | `phase-packets/phase-011/03-verification.md` | **완료** (Machine Check PASS, live QA PASS, Claude 교차감리 request 준비) | 외부감리 |
-| Phase 11 외부감리 | `external-audit/result-phase-011.json` | 대기 | PASS 시 완료 기록 |
+| Phase 11 외부감리 | `external-audit/result-phase-011.json` | **완료** (Claude 교차감리 PASS, findings 0) | 완료 기록 |
+| Phase 11 완료 기록 | `phase-packets/phase-011/04-completion.md` | **완료** | Feature 5 완료 보고 |
 
 ## 4. 실패 횟수
 
 | 구분 | 현재 횟수 | 최대 | 다음 행동 |
 |---|---:|---:|---|
 | Machine Check 게이트 실패 | 0 | 제한 없음 | 빌드 측 Team Leader가 분류하고 Builder가 수정 |
-| 외부감리 FAIL | Phase 2: 1회(해소) · Phase 3: 1회(해소) · Phase 4: 3회(해소) · Phase 5: 1회(해소 — r2 PASS) · Phase 6 현재 계약: 0회 (이전 문구 전용 r1은 PM 재정렬로 무효화) · Phase 9: 0회(PASS) · Phase 10: 0회(PASS, MINOR finding 1건) | 3/phase | 빌드 측 Team Leader가 분류하고 Builder가 수정 후 교차 재감리 |
+| 외부감리 FAIL | Phase 2: 1회(해소) · Phase 3: 1회(해소) · Phase 4: 3회(해소) · Phase 5: 1회(해소 — r2 PASS) · Phase 6 현재 계약: 0회 (이전 문구 전용 r1은 PM 재정렬로 무효화) · Phase 9: 0회(PASS) · Phase 10: 0회(PASS, MINOR finding 1건) · Phase 11: 0회(PASS, findings 0) | 3/phase | 빌드 측 Team Leader가 분류하고 Builder가 수정 후 교차 재감리 |
 | 외부감리 BLOCKED | 0 | 1 | PM이 대표님에게 고객 언어 질문 하나만 보고 |
 
 ## 5. 알림 상태

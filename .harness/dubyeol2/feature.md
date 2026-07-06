@@ -1,8 +1,8 @@
 # feature.md
 
-상태: 승인 (2026-07-06) — Feature 5 Phase 9~10 완료, Phase 11 준비
+상태: 완료 (2026-07-06) — Feature 5 Phase 9~11 완료, Phase 8 보류
 
-> 이전 완료: Feature 3(두리무역 1:1 비공개 기준판) Phase 6 감리 PASS·로컬 main 머지, Feature 4(견적 후 출고 요청·예치금 차감) Phase 7 감리 PASS·로컬 main 머지, Feature 5 Phase 9~10 감리 PASS·로컬 main 반영. 대표님 지시로 기존 Phase 8 후보(우리 회사용 정식 운영 전환)는 보류하고, 출고요청/포장단위/패킹리스트 기초를 다음으로 진행한다.
+> 이전 완료: Feature 3(두리무역 1:1 비공개 기준판) Phase 6 감리 PASS·로컬 main 머지, Feature 4(견적 후 출고 요청·예치금 차감) Phase 7 감리 PASS·로컬 main 머지, Feature 5 Phase 9~11 감리 PASS·로컬 main 반영. 대표님 지시로 기존 Phase 8 후보(우리 회사용 정식 운영 전환)는 보류한다.
 
 ## 1. 고객이 하려는 일 (L1)
 

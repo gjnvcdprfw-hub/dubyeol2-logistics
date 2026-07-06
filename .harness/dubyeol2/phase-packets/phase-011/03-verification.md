@@ -1,6 +1,6 @@
 # Phase 11 Verification
 
-상태: **Machine Check PASS — Claude 교차 외부감리 요청 준비** (2026-07-06)
+상태: **Machine Check PASS — Claude 교차 외부감리 PASS** (2026-07-06)
 
 ## 1. Builder 결과
 
@@ -97,14 +97,15 @@ BOX-2|PACKED|18200|130000|2차 포장|L|3|cmr8pcizu00006w691vj8gw2e
 
 - 현재 모드: **B — 빌드=Codex / 감리=Claude** (`engine.md`).
 - Codex 자가감리 금지.
-- Phase 11 Claude 교차감리 요청 파일: `external-audit/pending/request-phase-011.json`.
-- 결과: 대기 중.
-- Phase 11 감리 PASS 전 `04-completion.md` 작성과 로컬 main 반영 금지.
+- Phase 11 Claude 교차감리 요청 파일: `external-audit/request-phase-011.json`.
+- 결과: **PASS** — `external-audit/result-phase-011.json`.
+- findings: 0건.
+- summary: 박스별 SKU 수량은 출고 가능 수량을 넘지 못하게 트랜잭션으로 막혀 있고, sellerId 스코프 격리와 ADMIN 세션 가드가 구현되어 있다. 셀러/운영자 화면은 같은 DB 값을 표시하고, PDF 패킹리스트·실송장·배송조회·세관/택배사 API는 연결되어 있지 않다.
 
 ## 6. PM 완료 보고 판정
 
-- Phase 11은 Builder Task 1~3과 Machine Check, live QA까지 PASS했다.
-- 남은 단계: Claude 교차 외부감리 -> PASS 시 `04-completion.md` 작성 -> 로컬 main 반영 정리 -> Feature 5 완료 보고.
+- Phase 11은 Builder Task 1~3, Machine Check, live QA, Claude 교차 외부감리까지 PASS했다.
+- 남은 단계: `04-completion.md` 작성 -> 로컬 main 반영 정리 -> Feature 5 완료 보고.
 - 남은 위험:
   - 정식 패킹리스트 PDF, 실제 송장, 외부 배송조회, 세관/택배사 API는 아직 없다. Phase 11은 포장단위와 패킹리스트 기초 데이터까지만 닫는다.
   - vitest 실행 후 dev DB가 비워지므로, live QA를 다시 할 때는 QA seed를 다시 만들어야 한다.

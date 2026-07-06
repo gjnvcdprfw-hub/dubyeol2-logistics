@@ -1,6 +1,6 @@
 # phases.md
 
-상태: PM 작성 (2026-07-06, Phase 10 완료·Phase 11 준비)
+상태: PM 작성 (2026-07-06, Phase 11 완료·Feature 5 종료)
 
 이 문서는 `feature.md`의 고객 약속을 달성하기 위한 phase 계획이다. 대표님 승인 대상은 아니다. 한 기능에도 여러 phase가 나올 수 있다.
 
@@ -43,7 +43,7 @@ Team Leader는 Superpowers 공식 workflow를 따르고, 구현은 `superpowers:
 | 8 | (보류) 우리 회사용 수정·정식 운영 전환 | 전체 | 복사 기준판을 고객에게 보여도 되는 우리 회사 서비스로 바꾼다 | **보류** (대표님: "8은 일단 보류") | 보류 |
 | 9 | (Feature 5) 상품/SKU 라인 구조 | 주문 접수 · 운영자 입고/검수 · 견적 | 상품별·SKU별 작업과 정산이 섞이지 않게 한다 | **완료·로컬 main 반영** (Claude 감리 PASS) | 완결 |
 | 10 | (Feature 5) 예치금 충전 신청·운영자 입금 확인 | 예치금 관리 · 운영자 | 고객이 출고 전에 돈을 넣고, 운영자가 확인해 잔액을 맞춘다 | **완료·로컬 main 반영** (Claude 감리 PASS) | 완결 |
-| 11 | (Feature 5) 출고요청·포장단위 마커·패킹리스트 기초 | 출고관리 · 주문 상세 · 운영자 | 출고 때 박스별 SKU 구성과 패킹리스트 근거를 남긴다 | PM 초안 | `phase-packets/phase-011/00-customer-outcome.md` |
+| 11 | (Feature 5) 출고요청·포장단위 마커·패킹리스트 기초 | 출고관리 · 주문 상세 · 운영자 | 출고 때 박스별 SKU 구성과 패킹리스트 근거를 남긴다 | **완료·로컬 main 반영** (Claude 감리 PASS) | 완결 — Feature 5 종료 |
 
 ## 3. Phase 상세
 
@@ -83,6 +83,7 @@ Team Leader는 Superpowers 공식 workflow를 따르고, 구현은 `superpowers:
 - 이번 phase에서 되는 것: 출고요청, 포장단위 마커(예: BOX-1, BOX-2), 박스별 SKU 구성·수량, 박스별 무게/CBM, 운영자 수동 상태 입력, 셀러 화면 상태 반영, 패킹리스트 생성 기초 데이터.
 - 이번 phase에서 안 하는 것: 외부 배송조회 API, 세관 API, 택배사 API, 자동 송장 동기화, 실제 배송 완료 확정, 정식 패킹리스트 PDF 자동 발행.
 - 완료 기준: 운영자가 출고요청 주문의 SKU들을 BOX-1/BOX-2에 배정하고 박스별 무게/CBM을 입력하면, 셀러가 박스별 구성과 출고 상태를 확인할 수 있다.
+- 완료 결과: Machine Check PASS, Claude 교차 외부감리 PASS, `phase-packets/phase-011/04-completion.md` 작성 완료. Feature 5 종료.
 - Phase packet: `phase-packets/phase-011/`
 
 ### Phase 7
