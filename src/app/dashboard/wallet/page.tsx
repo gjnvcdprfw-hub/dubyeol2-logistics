@@ -41,7 +41,7 @@ export default async function WalletPage({
     <div className="space-y-6">
       <div>
         <h1 className="text-xl font-semibold text-heading">예치금 관리</h1>
-        <p className="mt-1 text-sm text-secondary">현재는 로컬 QA 예치금 원장으로 출고 요청 차감을 확인합니다.</p>
+        <p className="mt-1 text-sm text-secondary">충전 요청을 접수하고, 운영자 승인 후 잔액과 원장에 반영합니다.</p>
       </div>
 
       {topUpRequested && (
@@ -176,7 +176,7 @@ export default async function WalletPage({
 
       <PrepNotice
         feature="실계좌·실입금·실결제"
-        description="현재 화면은 로컬 테스트 원장만 보여줍니다."
+        description="충전 요청은 접수 가능하지만 잔액 반영은 운영자 승인 후 진행됩니다."
       />
     </div>
   );
